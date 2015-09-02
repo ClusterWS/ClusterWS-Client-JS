@@ -4,6 +4,11 @@ import { Channel } from './channel/channel'
 import { EventEmitter } from './utils/eventemitter'
 import { socketMessages } from './communication/messages'
 
+/* 
+Socket object
+
+Contains all available to the user socket functions 
+*/
 export class Socket {
 
     events: EventEmitter = new EventEmitter()
@@ -84,7 +89,6 @@ export class Socket {
     send(event: string, data: any, type?: string) {
         this.webSocket.send(socketMessages(event, data, type || 'emit'))
     }
-
 
     reconnection() {
         this.inReconnectionState = true
