@@ -8,6 +8,7 @@ import { socketMessages } from './communication/messages'
 Socket object
 
 Contains all available to the user socket functions 
+
 */
 export class Socket {
 
