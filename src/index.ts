@@ -3,8 +3,8 @@ import {Channel} from './lib/channel';
 import {MessageFactory} from './lib/messages/messages';
 
 interface Configurations {
-    port?: number,
-    url?: string
+    port: number,
+    url: string
 }
 
 export  class ClusterWS {
@@ -21,19 +21,19 @@ export  class ClusterWS {
         this.options = new Options(configurations.url, configurations.port);
         this.webSocket = new WebSocket('ws://' + this.options.url + ':' + this.options.port);
 
-        this.webSocket.onopen = (data) => {
+        this.webSocket.onopen = (data:any) => {
             this._execEvent('connect', data);
         };
 
-        this.webSocket.onclose = (data) => {
+        this.webSocket.onclose = (data:any) => {
             this._execEvent('close', data);
         };
 
-        this.webSocket.onerror = (data) => {
+        this.webSocket.onerror = (data:any) => {
             this._execEvent('error', data);
         };
 
-        this.webSocket.onmessage = (data) => {
+        this.webSocket.onmessage = (data:any) => {
             data = JSON.parse(data.data);
 
             if (data.action === 'emit') {
