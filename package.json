@@ -6,6 +6,7 @@
   "author": "Dmitrii Goriunov <goriunovd@gmail.com>",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run webpack:build",
     "build": "npm run webpack:prod && npm run webpack:build && npm run npm:package",
     "webpack:prod": "cross-env WEBPACK_ENV=production  webpack",
     "webpack:build": "cross-env WEBPACK_ENV=build  webpack",

@@ -1,21 +1,29 @@
 <html>
 <head>
 
-    <script src="../dist/ClusterWS.min.js"></script>
+    <script src="../dist/browser/ClusterWS.js"></script>
     <script>
         var webSocket = new ClusterWS({
             url: 'localhost',
             port:3000
         });
 
-        webSocket.subscribe('food').on(function(data){
-            console.log(data);
-        });
-
-
         webSocket.on('connect', function(){
             console.log('Socket connected');
             webSocket.send('hello', "i am hello");
+
+            webSocket.subscribe('food').on(function(data){
+                console.log(data);
+            });
+
+            var channel = webSocket.subscribe('home');
+            channel.on(function(data){
+                console.log(data);
+            });
+
+            console.log(webSocket.subscribe('here'));
+            console.log(channel);
+            channel.publish('I am here');
         });
 
         webSocket.on('hello', function(data){

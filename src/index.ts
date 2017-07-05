@@ -1,11 +1,29 @@
-import {Options} from './lib/options';
-import {Channel} from './lib/channel';
+import {Channel} from './lib/channel/channel';
 import {MessageFactory} from './lib/messages/messages';
 
 interface Configurations {
     port: number,
     url: string
 }
+
+class Options {
+    port: number;
+    url: string;
+    // Construct an option object
+    constructor(url: string, port: number) {
+        // Make sure that path and port are exist
+        if(!url){
+            throw new Error('Url must be provided');
+        }
+        if(!port){
+            throw new Error('Port must be provided');
+        }
+        // Set default params in case of no params
+        this.url = url;
+        this.port = port;
+    }
+}
+
 
 export  class ClusterWS {
     options: Options;
@@ -21,27 +39,48 @@ export  class ClusterWS {
         this.options = new Options(configurations.url, configurations.port);
         this.webSocket = new WebSocket('ws://' + this.options.url + ':' + this.options.port);
 
-        this.webSocket.onopen = (data:any) => {
-            this._execEvent('connect', data);
+        this.webSocket.onopen = (msg:any) => {
+            this._execEvent('connect', msg);
         };
 
-        this.webSocket.onclose = (data:any) => {
-            this._execEvent('close', data);
-        };
+        this.webSocket.onclose = (msg:any) => {
+            this._execEvent('disconnect', msg);
 
-        this.webSocket.onerror = (data:any) => {
-            this._execEvent('error', data);
-        };
-
-        this.webSocket.onmessage = (data:any) => {
-            data = JSON.parse(data.data);
-
-            if (data.action === 'emit') {
-                this._execEvent(data.event, data.data);
+            for (let key in this.channels) {
+                if (this.channels.hasOwnProperty(key)) {
+                    this.channels[key] = null;
+                    delete this.channels[key];
+                }
             }
 
-            if (data.action === 'publish') {
-                this._execChannel(data.channel, data.data);
+            for (let key in this.events) {
+                if (this.events.hasOwnProperty(key)) {
+                    this.events[key] = null;
+                    delete this.events[key];
+                }
+            }
+
+            for (let key in this) {
+                if (this.hasOwnProperty(key)) {
+                    this[key] = null;
+                    delete this[key];
+                }
+            }
+        };
+
+        this.webSocket.onerror = (msg:any) => {
+            this._execEvent('error', msg);
+        };
+
+        this.webSocket.onmessage = (msg:any) => {
+            msg = JSON.parse(msg.data);
+
+            if (msg.action === 'emit') {
+                this._execEvent(msg.event, msg.data);
+            }
+
+            if (msg.action === 'publish') {
+                this._execChannel(msg.channel, msg.data);
             }
         }
     }

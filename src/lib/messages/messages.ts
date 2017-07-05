@@ -14,6 +14,12 @@ class PublishMessage {
     }
 }
 
+class SystemMessage {
+    action: string = 'sys';
+
+    constructor(public event: string, public data?: any){}
+}
+
 export class MessageFactory {
     // Bind emitMessage event with Emit Messages class
     static emitMessage(event: string, data?: any) {
@@ -23,5 +29,9 @@ export class MessageFactory {
     // Bind publishMessage event with Publish Messages class
     static publishMessage(channel: string, data?: any) {
         return JSON.stringify(new PublishMessage(channel, data));
+    }
+
+    static systemMessage(event: string, data?: any){
+        return JSON.stringify(new SystemMessage(event, data));
     }
 }
