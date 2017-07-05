@@ -1,0 +1,43 @@
+{
+  "name": "clusterws-client-js",
+  "version": "0.0.1",
+  "description": "JavaScript client library for ClusterWS",
+  "main": "index.js",
+  "author": "Dmitrii Goriunov <goriunovd@gmail.com>",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run webpack:prod && npm run webpack:build && npm run npm:package",
+    "webpack:prod": "cross-env WEBPACK_ENV=production  webpack",
+    "webpack:build": "cross-env WEBPACK_ENV=build  webpack",
+    "npm:package" : "gulp && gulp clone"
+  },
+  "license": "MIT",
+  "keywords": [
+    "node",
+    "websocket",
+    "socket",
+    "cluster",
+    "nodejs",
+    "websocketcluster",
+    "clusterws",
+    "js",
+    "scale",
+    "library",
+    "javascript",
+    "client"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/goriunov/ClusterWS-Client-JS"
+  },
+  "devDependencies": {
+    "cross-env": "^5.0.1",
+    "gulp": "^3.9.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-typescript": "^3.1.7",
+    "ts-loader": "^2.2.2",
+    "typescript": "^2.4.1",
+    "webpack": "^3.0.0"
+  }
+}
+
