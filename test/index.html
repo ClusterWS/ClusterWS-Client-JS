@@ -12,12 +12,11 @@
             console.log('Socket connected');
             webSocket.send('hello', "i am hello");
 
-            webSocket.subscribe('food').on(function(data){
+            webSocket.subscribe('food').watch(function(data){
                 console.log(data);
             });
 
-            var channel = webSocket.subscribe('home');
-            channel.on(function(data){
+            var channel = webSocket.subscribe('home').watch(function(data){
                 console.log(data);
             });
 
