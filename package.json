@@ -10,7 +10,8 @@
     "build": "npm run webpack:prod && npm run webpack:build && npm run npm:package",
     "webpack:prod": "cross-env WEBPACK_ENV=production  webpack",
     "webpack:build": "cross-env WEBPACK_ENV=build  webpack",
-    "npm:package": "gulp && gulp clone"
+    "npm:package": "gulp && gulp clone",
+    "chnagelog": "gitchangelog"
   },
   "license": "MIT",
   "keywords": [

@@ -1,9 +1,11 @@
-# Change log.
+#### 0.0.3 (2017-07-08)
 
-## 0.0.3 - 7.9.2017
-
-* Gulp able to modify Package json file
-* Added [PLANS.md](./PLANS.md)
-* Added [CHANGELOG.md](./CHANGELOG.md).
-* Updated [README.md](../README.md).
+- Update work flow, modify README. [Dmitrii Goriunov]
+- Up version, clean up package, publish in npm. [Dmitrii Goriunov]
+- Make channels chaine functions, write read me. [Dmitrii Goriunov]
+- Particially fill up Read my. [Dmitrii Goriunov]
+- Add publish and subscribe events, make build available. [Dmitrii
+  Goriunov]
+- Fix typings. [Dmitrii Goriunov]
+- First push. [Dmitrii Goriunov]
 
