@@ -11,42 +11,48 @@ Library has been written in TypeScript and compile down to es5. You can find all
 
 Use npm :
 
-    npm i --save clusterws-client-js
+```js
+npm i --save clusterws-client-js
+```
 
 Or globally:
 
-    1. Find ClusterWS.(min).js  in dist/browser
-    2. Use standard script to import library <script src="path/to/ClusterWS.(min).js"></script>
-    3. Done you can use it 'ClusterWS' :)
+1. Find ClusterWS.(min).js  in dist/browser
+2. Use standard script to import library `<script src="path/to/ClusterWS.(min).js"></script>`
+3. Done you can use it 'ClusterWS' :)
 
 
 ### Connect to the server:
 
 When library is global you can connect like that:
 
-    var clusterWS = new ClusterWS({
-        url: 'url to the server with out http' ex: 'localhost',
-        port: 'port number' ex: 3000
-    });
+```js
+var clusterWS = new ClusterWS({
+    url: 'url to the server with out http' ex: 'localhost',
+    port: 'port number' ex: 3000
+});
+```
 
 If you installed library from npm then you have to use require or import:
 
+```js
+var ClusterWS = require('clusterws-client-js').ClusterWS
 
-    var ClusterWS = require('clusterws-client-js').ClusterWS
-
-    var clusterWS = new ClusterWS({
-        url: 'url to the server with out http' ex: 'localhost',
-        port: 'port number' ex: 3000
-    });
-
+var clusterWS = new ClusterWS({
+    url: 'url to the server with out http' ex: 'localhost',
+    port: 'port number' ex: 3000
+});
+```
 
 ### Listen on events from the server:
 
 To listen on event use `'on'` method which is provided by ClusterWS:
 
-    clusterWS.on('any event name', function(data){
-           console.log(data);
-    });
+```js
+clusterWS.on('any event name', function(data){
+       console.log(data);
+});
+```
 
 You can listen on any event which you emit from the server also you can listen on **Reserved event** which are emitting by the server automatically :)
 
@@ -58,7 +64,9 @@ Data which you get in `function(data)` it what you send with event, it can be an
 
 To emit and event on the server you should use `send` method which provided by ClusterWS:
 
-    clusterWS.send('event name', data);
+```js
+clusterWS.send('event name', data);
+```
 
 `data` can be any type you want.
 
@@ -68,19 +76,23 @@ To emit and event on the server you should use `send` method which provided by C
 
 After you subscribe to the channel you will be able to get all messages which are publishing on this channel. Also you will be able to publish your messages.
 
-    var channel = clusterWS.subscribe('channel name');
+```js
+var channel = clusterWS.subscribe('channel name');
 
-    channel.watch(function(data){
-        console.log(data);
-    });
+channel.watch(function(data){
+    console.log(data);
+});
+```
 
-    channel.publish('some data');
+channel.publish('some data');
 
 Or you can chain everything:
 
-    var channel = clusterWS.subscribe('channel name').watch(function(data){
-        console.log(data);
-    }).publish('some data');
+```js
+var channel = clusterWS.subscribe('channel name').watch(function(data){
+    console.log(data);
+}).publish('some data');
+```
 
 `data` can be any type you want.
 
