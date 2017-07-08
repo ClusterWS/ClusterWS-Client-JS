@@ -11,7 +11,7 @@
     "webpack:prod": "cross-env WEBPACK_ENV=production  webpack",
     "webpack:build": "cross-env WEBPACK_ENV=build  webpack",
     "npm:package": "gulp && gulp clone",
-    "chnagelog": "gitchangelog"
+    "changelog": "gitchangelog"
   },
   "license": "MIT",
   "keywords": [
