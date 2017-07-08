@@ -1,15 +1,15 @@
 # ClusterWS (Node Cluster WebSocket) Client Javascript
 
-### Under development. [Server](https://github.com/goriunov/ClusterWS)
+This is Beta version 0.0.3. You can see main changes in [CHANGELOG](./information/CHANGELOG.md).
 
-This is small official JavaScript library for [ClusterWS](https://github.com/goriunov/ClusterWS), this library is using standard browser WebSocket.
-Library has been written in TypeScript and compile down to es5. You can find all code in to `src/` and all compiled code in `dist/`.
+This is small official JavaScript library for [ClusterWS](https://github.com/goriunov/ClusterWS), which is using standard browser WebSocket.
+Library has been written in TypeScript and compile down to es5. You can find all development code in `src/` folder  and all compiled code in `dist/` folder.
 
 ### Installation:
 
 Use npm :
 
-`npm i --save clusterws-client-js`
+    npm i --save clusterws-client-js
 
 Use in script tag:
 
@@ -17,20 +17,36 @@ Use in script tag:
     2. Use standard script to import library <script src="path/to/ClusterWS.(min).js"></script>
     3. You can run it :)
 
-    * All the code must be written after installation
 
 ### Connect to the server:
+
+When you use global variable you can do like that:
 
     var clusterWS = new ClusterWS({
         url: 'url to the server with out http' ex: 'localhost',
         port: 'port number' ex: 3000
     });
 
-### Listen to events:
+If if you installed library from npm then use require or import:
+
+    var ClusterWS = require('clusterws-client-js').ClusterWS
+
+    var clusterWS = new ClusterWS({
+        url: 'url to the server with out http' ex: 'localhost',
+        port: 'port number' ex: 3000
+    });
+
+### Listen on events from the server:
+
+To listen on event use `'on'` method:
 
     clusterWS.on('any event name', function(data){
            console.log(data);
     });
+
+You can listen on any event which you emit from the server also you can listen on Reserve event which are emitting from the server when time comes:)
+
+Data which you get in function it what you send with event, it can be any type of data.
 
 Reserved events: `'connect'`, `'error'`, `'disconnect'`.
 

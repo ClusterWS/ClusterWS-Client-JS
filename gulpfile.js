@@ -1,7 +1,8 @@
 var gulp = require("gulp");
 var ts = require("gulp-typescript");
-var rename = require('gulp-rename');
+var jeditor = require("gulp-json-editor");
 var tsProject = ts.createProject("tsconfig.json");
+
 
 gulp.task("default", function () {
     return tsProject.src()
@@ -10,11 +11,14 @@ gulp.task("default", function () {
 });
 
 gulp.task("clone", function () {
-    gulp.src('./template.json')
-        .pipe(rename('package.json'))
+    gulp.src('./package.json')
+        .pipe(jeditor(function(json) {
+            delete json['devDependencies'];
+            delete json['scripts'];
+            return json;
+        }))
         .pipe(gulp.dest("dist/npm"));
     return gulp.src('./README.md')
-        .pipe(rename('README.md'))
         .pipe(gulp.dest("dist/npm"))
 });
 

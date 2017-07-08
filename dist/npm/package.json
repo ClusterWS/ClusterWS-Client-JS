@@ -16,10 +16,12 @@
     "js",
     "scale",
     "library",
+    "javascript",
+    "client",
     "javascript"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/goriunov/ClusterWS"
+    "url": "https://github.com/goriunov/ClusterWS-Client-JS"
   }
 }
