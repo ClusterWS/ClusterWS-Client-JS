@@ -153,10 +153,10 @@ var ClusterWS = (function () {
         this.options = new Options(configurations.url, configurations.port);
         this.webSocket = new WebSocket('ws://' + this.options.url + ':' + this.options.port);
         this.webSocket.onopen = function (msg) {
-            _this._execEvent('connect', msg);
+            _this._execEventFn('connect', msg);
         };
         this.webSocket.onclose = function (msg) {
-            _this._execEvent('disconnect', msg);
+            _this._execEventFn('disconnect', msg);
             for (var key in _this.channels) {
                 if (_this.channels.hasOwnProperty(key)) {
                     _this.channels[key] = null;
@@ -177,24 +177,24 @@ var ClusterWS = (function () {
             }
         };
         this.webSocket.onerror = function (msg) {
-            _this._execEvent('error', msg);
+            _this._execEventFn('error', msg);
         };
         this.webSocket.onmessage = function (msg) {
             msg = JSON.parse(msg.data);
             if (msg.action === 'emit') {
-                _this._execEvent(msg.event, msg.data);
+                _this._execEventFn(msg.event, msg.data);
             }
             if (msg.action === 'publish') {
-                _this._execChannel(msg.channel, msg.data);
+                _this._execChannelFn(msg.channel, msg.data);
             }
         };
     }
-    ClusterWS.prototype._execEvent = function (event, data) {
+    ClusterWS.prototype._execEventFn = function (event, data) {
         var exFn = this.events[event];
         if (exFn)
             exFn(data);
     };
-    ClusterWS.prototype._execChannel = function (channel, data) {
+    ClusterWS.prototype._execChannelFn = function (channel, data) {
         var exFn = this.channels[channel];
         if (exFn)
             exFn(data);

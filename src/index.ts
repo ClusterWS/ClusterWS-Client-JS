@@ -12,10 +12,10 @@ class Options {
     // Construct an option object
     constructor(url: string, port: number) {
         // Make sure that path and port are exist
-        if(!url){
+        if (!url) {
             throw new Error('Url must be provided');
         }
-        if(!port){
+        if (!port) {
             throw new Error('Port must be provided');
         }
         // Set default params in case of no params
@@ -25,7 +25,7 @@ class Options {
 }
 
 
-export  class ClusterWS {
+export class ClusterWS {
     options: Options;
     webSocket: any;
     channels: any;
@@ -39,12 +39,12 @@ export  class ClusterWS {
         this.options = new Options(configurations.url, configurations.port);
         this.webSocket = new WebSocket('ws://' + this.options.url + ':' + this.options.port);
 
-        this.webSocket.onopen = (msg:any) => {
-            this._execEvent('connect', msg);
+        this.webSocket.onopen = (msg: any) => {
+            this._execEventFn('connect', msg);
         };
 
-        this.webSocket.onclose = (msg:any) => {
-            this._execEvent('disconnect', msg);
+        this.webSocket.onclose = (msg: any) => {
+            this._execEventFn('disconnect', msg);
 
             for (let key in this.channels) {
                 if (this.channels.hasOwnProperty(key)) {
@@ -68,29 +68,29 @@ export  class ClusterWS {
             }
         };
 
-        this.webSocket.onerror = (msg:any) => {
-            this._execEvent('error', msg);
+        this.webSocket.onerror = (msg: any) => {
+            this._execEventFn('error', msg);
         };
 
-        this.webSocket.onmessage = (msg:any) => {
+        this.webSocket.onmessage = (msg: any) => {
             msg = JSON.parse(msg.data);
 
             if (msg.action === 'emit') {
-                this._execEvent(msg.event, msg.data);
+                this._execEventFn(msg.event, msg.data);
             }
 
             if (msg.action === 'publish') {
-                this._execChannel(msg.channel, msg.data);
+                this._execChannelFn(msg.channel, msg.data);
             }
         }
     }
 
-    _execEvent(event: string, data?: any) {
+    _execEventFn(event: string, data?: any) {
         let exFn = this.events[event];
         if (exFn) exFn(data);
     }
 
-    _execChannel(channel: string, data?: any) {
+    _execChannelFn(channel: string, data?: any) {
         let exFn = this.channels[channel];
         if (exFn) exFn(data);
     }

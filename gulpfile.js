@@ -9,8 +9,13 @@ gulp.task("default", function () {
         .pipe(gulp.dest("dist/npm"));
 });
 
-gulp.task("clone", function(){
-   return gulp.src('./template.json')
-       .pipe(rename('package.json'))
-       .pipe(gulp.dest("dist/npm"))
+gulp.task("clone", function () {
+    gulp.src('./template.json')
+        .pipe(rename('package.json'))
+        .pipe(gulp.dest("dist/npm"));
+    return gulp.src('./README.md')
+        .pipe(rename('README.md'))
+        .pipe(gulp.dest("dist/npm"))
 });
+
+

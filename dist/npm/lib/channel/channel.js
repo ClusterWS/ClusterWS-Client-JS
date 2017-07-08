@@ -7,11 +7,13 @@ var Channel = (function () {
         this.client = client;
         this.client.webSocket.send(messages_1.MessageFactory.systemMessage('subscribe', this.channel));
     }
-    Channel.prototype.on = function (fn) {
+    Channel.prototype.watch = function (fn) {
         this.client.channels[this.channel] = fn;
+        return this;
     };
     Channel.prototype.publish = function (data) {
         this.client.webSocket.send(messages_1.MessageFactory.publishMessage(this.channel, data));
+        return this;
     };
     return Channel;
 }());
