@@ -1,3 +1,9 @@
+# 0.0.9
+ 
+## Other 
+ 
+* Tidy up project
+ 
 # 0.0.8
  
 ## New features 

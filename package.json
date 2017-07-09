@@ -1,6 +1,6 @@
 {
   "name": "clusterws-client-js",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "JavaScript client library for ClusterWS",
   "main": "index.js",
   "author": "Dmitrii Goriunov <goriunovd@gmail.com>",
@@ -12,7 +12,7 @@
     "webpack:prod": "cross-env WEBPACK_ENV=production  webpack",
     "webpack:build": "cross-env WEBPACK_ENV=build  webpack",
     "npm:package": "gulp && gulp clone",
-    "changelog": "cross-env NODE_ENV=...0.0.9 node information/changelog.js"
+    "changelog": "cross-env NODE_ENV=...0.0.10 node information/changelog.js"
   },
   "license": "MIT",
   "keywords": [
