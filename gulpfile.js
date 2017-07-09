@@ -16,10 +16,7 @@ gulp.task("clone", function () {
             delete json['devDependencies'];
             delete json['scripts'];
             var execCommand = "git tag -a "+ json.version + " -m \"Update version\"";
-            exec(execCommand, function(err, stdout, stderr){
-                console.log(stdout);
-                console.log(stderr);
-            });
+            exec(execCommand, function(err, stdout, stderr){});
             return json;
         }))
         .pipe(gulp.dest("dist/npm"));

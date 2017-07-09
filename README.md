@@ -1,6 +1,6 @@
 # ClusterWS (Node Cluster WebSocket) Client Javascript
 
-This is a **Beta** that is why library lack some important feathers :) . You can see main changes in [HERE](./information/CHANGELOG.md). Possible next versions fetchers in [HERE](./information/PLANS.md).
+This is a **Beta Version** that is why library may lack some important feathers :) . You can see main changes in [HERE](./information/CHANGELOG.md). Possible next versions fetchers in [HERE](./information/PLANS.md).
 
 This is small official JavaScript library for [ClusterWS](https://github.com/goriunov/ClusterWS), which is using standard browser WebSocket.
 Library has been written in TypeScript and compile down to es5. You can find all development code in `src/` folder  and all compiled code in `dist/` folder.
