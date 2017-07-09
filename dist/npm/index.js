@@ -52,6 +52,10 @@ var ClusterWS = (function () {
             _this._execEventFn('error', msg);
         };
         this.webSocket.onmessage = function (msg) {
+            console.log(msg);
+            if (msg === '_0') {
+                return _this.webSocket.send('_1');
+            }
             msg = JSON.parse(msg.data);
             if (msg.action === 'emit') {
                 _this._execEventFn(msg.event, msg.data);

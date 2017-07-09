@@ -30,6 +30,8 @@ export class ClusterWS {
     webSocket: any;
     channels: any;
     events: any;
+    pingTimeOut: any;
+    pingPong: number = 0;
 
     constructor(public configurations: Configurations) {
         this.events = {};
@@ -40,11 +42,14 @@ export class ClusterWS {
         this.webSocket = new WebSocket('ws://' + this.options.url + ':' + this.options.port);
 
         this.webSocket.onopen = (msg: any) => {
-            this._execEventFn('connect', msg);
+            return this._execEventFn('connect', msg);
         };
 
-        this.webSocket.onclose = (msg: any) => {
-            this._execEventFn('disconnect', msg);
+        this.webSocket.onclose = (code:number, msg: any) => {
+            this._execEventFn('disconnect', code, msg);
+
+            console.log('In file', code, msg);
+            clearInterval(this.pingTimeOut);
 
             for (let key in this.channels) {
                 if (this.channels.hasOwnProperty(key)) {
@@ -66,42 +71,74 @@ export class ClusterWS {
                     delete this[key];
                 }
             }
+            return;
         };
 
         this.webSocket.onerror = (msg: any) => {
-            this._execEventFn('error', msg);
+           return this._execEventFn('error', msg);
         };
 
         this.webSocket.onmessage = (msg: any) => {
+            console.log(msg.data);
+            // Send pong message on ping
+            if (msg.data === '_0') {
+                // Mark that got ping
+                this.pingPong--;
+                // Send pong
+                return this.webSocket.send('_1');
+            }
             msg = JSON.parse(msg.data);
 
             if (msg.action === 'emit') {
-                this._execEventFn(msg.event, msg.data);
+                return this._execEventFn(msg.event, msg.data);
             }
 
             if (msg.action === 'publish') {
-                this._execChannelFn(msg.channel, msg.data);
+                return this._execChannelFn(msg.channel, msg.data);
             }
+            if(msg.action === 'internal'){
+                if(msg.event === 'config'){
+                    // Run ping pong after get configurations
+                    this.pingTimeOut = setInterval(()=>{
+                        if(this.pingPong >= 2){
+                            return this.disconnect(1000, 'Did not get ping');
+                        }
+                         // Mark new ping
+                         return this.pingPong++;
+                    }, msg.data.ping);
+                    return;
+                }
+            }
+            return;
         }
     }
 
-    _execEventFn(event: string, data?: any) {
+    _execEventFn(event: string, data?: any, msg?:any) {
         let exFn = this.events[event];
-        if (exFn) exFn(data);
+        if (exFn) {
+            if (event === 'disconnect') return exFn(data, msg);
+            return exFn(data);
+        }
+        return;
     }
 
     _execChannelFn(channel: string, data?: any) {
         let exFn = this.channels[channel];
         if (exFn) exFn(data);
+        return;
     }
 
     on(event: string, fn: any) {
         if (this.events[event]) this.events[event] = null;
-        this.events[event] = fn;
+        return this.events[event] = fn;
     }
 
     send(event: string, data?: any) {
-        this.webSocket.send(MessageFactory.emitMessage(event, data));
+        return this.webSocket.send(MessageFactory.emitMessage(event, data));
+    }
+
+    disconnect(code?: number, message?: any){
+        this.webSocket.close(code, message)
     }
 
     subscribe(channel: string) {

@@ -2,7 +2,7 @@ import {ClusterWS} from '../../index';
 import {MessageFactory} from '../messages/messages';
 export class Channel {
     constructor(public channel: string, public client: ClusterWS) {
-        this.client.webSocket.send(MessageFactory.systemMessage('subscribe', this.channel));
+        this.client.webSocket.send(MessageFactory.internalMessage('subscribe', this.channel));
     }
 
     watch(fn: any) {
