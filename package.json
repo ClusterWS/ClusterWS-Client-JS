@@ -11,7 +11,8 @@
     "build:publish": "npm run build && cd dist/npm && npm publish && cd ../..",
     "webpack:prod": "cross-env WEBPACK_ENV=production  webpack",
     "webpack:build": "cross-env WEBPACK_ENV=build  webpack",
-    "npm:package": "gulp && gulp clone"
+    "npm:package": "gulp && gulp clone",
+    "changelog": "cross-env NODE_ENV=...0.0.8 node information/changelog.js"
   },
   "license": "MIT",
   "keywords": [
@@ -37,7 +38,6 @@
     "url": "https://github.com/goriunov/ClusterWS-Client-JS"
   },
   "devDependencies": {
-    "changelog-maker": "^2.2.5",
     "cross-env": "^5.0.1",
     "gulp": "^3.9.1",
     "gulp-json-editor": "^2.2.1",
