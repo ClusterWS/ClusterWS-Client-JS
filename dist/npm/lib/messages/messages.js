@@ -16,13 +16,13 @@ var PublishMessage = (function () {
     }
     return PublishMessage;
 }());
-var SystemMessage = (function () {
-    function SystemMessage(event, data) {
+var InternalMessage = (function () {
+    function InternalMessage(event, data) {
         this.event = event;
         this.data = data;
-        this.action = 'sys';
+        this.action = 'internal';
     }
-    return SystemMessage;
+    return InternalMessage;
 }());
 var MessageFactory = (function () {
     function MessageFactory() {
@@ -33,8 +33,8 @@ var MessageFactory = (function () {
     MessageFactory.publishMessage = function (channel, data) {
         return JSON.stringify(new PublishMessage(channel, data));
     };
-    MessageFactory.systemMessage = function (event, data) {
-        return JSON.stringify(new SystemMessage(event, data));
+    MessageFactory.internalMessage = function (event, data) {
+        return JSON.stringify(new InternalMessage(event, data));
     };
     return MessageFactory;
 }());

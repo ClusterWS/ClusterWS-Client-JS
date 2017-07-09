@@ -48,7 +48,6 @@ export class ClusterWS {
         this.webSocket.onclose = (code:number, msg: any) => {
             this._execEventFn('disconnect', code, msg);
 
-            console.log('In file', code, msg);
             clearInterval(this.pingTimeOut);
 
             for (let key in this.channels) {
@@ -79,7 +78,6 @@ export class ClusterWS {
         };
 
         this.webSocket.onmessage = (msg: any) => {
-            console.log(msg.data);
             // Send pong message on ping
             if (msg.data === '_0') {
                 // Mark that got ping

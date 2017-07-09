@@ -1,5 +1,7 @@
 # ClusterWS (Node Cluster WebSocket) Client Javascript
 
+[![npm version](https://badge.fury.io/js/clusterws-client-js.svg)](https://badge.fury.io/js/clusterws-client-js)
+
 This is a **Beta Version** that is why library may lack some important features :) . You can see main changes in [HERE](./information/CHANGELOG.md). Possible next versions fetchers in [HERE](./information/PLANS.md).
 
 This is small official JavaScript library for [ClusterWS](https://github.com/goriunov/ClusterWS), which is using standard browser WebSocket.

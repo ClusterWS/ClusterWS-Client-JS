@@ -158,7 +158,6 @@ var ClusterWS = (function () {
         };
         this.webSocket.onclose = function (code, msg) {
             _this._execEventFn('disconnect', code, msg);
-            console.log('In file', code, msg);
             clearInterval(_this.pingTimeOut);
             for (var key in _this.channels) {
                 if (_this.channels.hasOwnProperty(key)) {
@@ -184,8 +183,8 @@ var ClusterWS = (function () {
             return _this._execEventFn('error', msg);
         };
         this.webSocket.onmessage = function (msg) {
-            console.log(msg.data);
             if (msg.data === '_0') {
+                _this.pingPong--;
                 return _this.webSocket.send('_1');
             }
             msg = JSON.parse(msg.data);

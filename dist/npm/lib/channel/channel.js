@@ -5,7 +5,7 @@ var Channel = (function () {
     function Channel(channel, client) {
         this.channel = channel;
         this.client = client;
-        this.client.webSocket.send(messages_1.MessageFactory.systemMessage('subscribe', this.channel));
+        this.client.webSocket.send(messages_1.MessageFactory.internalMessage('subscribe', this.channel));
     }
     Channel.prototype.watch = function (fn) {
         this.client.channels[this.channel] = fn;
