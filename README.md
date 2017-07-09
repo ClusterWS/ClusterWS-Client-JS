@@ -56,13 +56,13 @@ clusterWS.on('any event name', function(data){
 
 You can listen on any event which you emit from the server also you can listen on **Reserved event** which are emitting by the server automatically :)
 
-Data which you get in `function(data)` it what you send with event, it can be any type of data.
+Data which you get in `function(data)` it what you send with event, you can send any type of data.
 
 **Reserved events**: `'connect'`, `'error'`, `'disconnect'`.
 
 ### Emit an event:
 
-To emit and event on the server you should use `send` method which provided by ClusterWS:
+To emit and event to the server you should use `send` method which provided by ClusterWS:
 
 ```js
 clusterWS.send('event name', data);
