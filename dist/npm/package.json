@@ -1,6 +1,6 @@
 {
   "name": "clusterws-client-js",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "JavaScript client library for ClusterWS",
   "main": "index.js",
   "author": "Dmitrii Goriunov <goriunovd@gmail.com>",
