@@ -14,7 +14,7 @@ Library has been written in TypeScript and compile down to es5. You can find all
 Use npm :
 
 ```js
-npm i --save clusterws-client-js
+npm install --save clusterws-client-js
 ```
 
 Or globally:
