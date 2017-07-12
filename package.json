@@ -5,14 +5,13 @@
   "main": "index.js",
   "author": "Dmitrii Goriunov <goriunovd@gmail.com>",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run webpack:build",
-    "build": "npm run webpack:prod && npm run webpack:build && npm run npm:package",
+    "start": "npm run webpack:dev",
+    "build": "npm run webpack:prod && npm run webpack:dev",
     "build:publish": "npm run build && cd dist/npm && npm publish && cd ../..",
-    "webpack:prod": "cross-env WEBPACK_ENV=production  webpack",
-    "webpack:build": "cross-env WEBPACK_ENV=build  webpack",
-    "npm:package": "gulp && gulp clone",
-    "changelog": "cross-env NODE_ENV=...0.0.10 node information/changelog.js"
+    "webpack:prod": "cross-env WEBPACK_ENV=prod  webpack && npm run webpack:npm",
+    "webpack:dev": "cross-env WEBPACK_ENV=dev  webpack",
+    "webpack:npm": "cross-env WEBPACK_ENV=npm  webpack",
+    "build:changelog": "cross-env NODE_ENV=...0.0.10 node information/changelog.js"
   },
   "license": "MIT",
   "keywords": [
@@ -38,10 +37,9 @@
     "url": "https://github.com/goriunov/ClusterWS-Client-JS"
   },
   "devDependencies": {
+    "copy-pkg-json-webpack-plugin": "0.0.29",
+    "copy-webpack-plugin": "^4.0.1",
     "cross-env": "^5.0.1",
-    "gulp": "^3.9.1",
-    "gulp-json-editor": "^2.2.1",
-    "gulp-typescript": "^3.1.7",
     "ts-loader": "^2.2.2",
     "typescript": "^2.4.1",
     "webpack": "^3.0.0"

@@ -12,12 +12,10 @@ class Options {
     // Construct an option object
     constructor(url: string, port: number) {
         // Make sure that path and port are exist
-        if (!url) {
-            throw new Error('Url must be provided');
-        }
-        if (!port) {
-            throw new Error('Port must be provided');
-        }
+        if (!url) throw new Error('Url must be provided');
+
+        if (!port) throw new Error('Port must be provided');
+
         // Set default params in case of no params
         this.url = url;
         this.port = port;
@@ -45,7 +43,7 @@ export class ClusterWS {
             return this._execEventFn('connect', msg);
         };
 
-        this.webSocket.onclose = (code:number, msg: any) => {
+        this.webSocket.onclose = (code: number, msg: any) => {
             this._execEventFn('disconnect', code, msg);
 
             clearInterval(this.pingTimeOut);
@@ -74,14 +72,14 @@ export class ClusterWS {
         };
 
         this.webSocket.onerror = (msg: any) => {
-           return this._execEventFn('error', msg);
+            return this._execEventFn('error', msg);
         };
 
         this.webSocket.onmessage = (msg: any) => {
             // Send pong message on ping
             if (msg.data === '_0') {
                 // Mark that got ping
-                this.pingPong--;
+                this.pingPong = 0;
                 // Send pong
                 return this.webSocket.send('_1');
             }
@@ -94,16 +92,16 @@ export class ClusterWS {
             if (msg.action === 'publish') {
                 return this._execChannelFn(msg.channel, msg.data);
             }
-            if(msg.action === 'internal'){
-                if(msg.event === 'config'){
+            if (msg.action === 'internal') {
+                if (msg.event === 'config') {
                     // Run ping pong after get configurations
-                    this.pingTimeOut = setInterval(()=>{
-                        if(this.pingPong >= 2){
-                            return this.disconnect(1000, 'Did not get ping');
+                    this.pingTimeOut = setInterval(() => {
+                        if (this.pingPong >= 2) {
+                            return this.disconnect(3001, 'Did not get ping');
                         }
-                         // Mark new ping
-                         return this.pingPong++;
-                    }, msg.data.ping);
+                        // Mark new ping
+                        return this.pingPong++;
+                    }, msg.data.pingInterval);
                     return;
                 }
             }
@@ -111,7 +109,7 @@ export class ClusterWS {
         }
     }
 
-    _execEventFn(event: string, data?: any, msg?:any) {
+    _execEventFn(event: string, data?: any, msg?: any) {
         let exFn = this.events[event];
         if (exFn) {
             if (event === 'disconnect') return exFn(data, msg);
@@ -135,7 +133,7 @@ export class ClusterWS {
         return this.webSocket.send(MessageFactory.emitMessage(event, data));
     }
 
-    disconnect(code?: number, message?: any){
+    disconnect(code?: number, message?: any) {
         this.webSocket.close(code, message)
     }
 

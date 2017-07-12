@@ -1,30 +1,30 @@
 {
-  "name": "clusterws-client-js",
-  "version": "0.0.10",
-  "description": "JavaScript client library for ClusterWS",
-  "main": "index.js",
-  "author": "Dmitrii Goriunov <goriunovd@gmail.com>",
-  "license": "MIT",
-  "keywords": [
-    "node",
-    "websocket",
-    "socket",
-    "cluster",
-    "nodejs",
-    "websocketcluster",
-    "clusterws",
-    "js",
-    "scale",
-    "http",
-    "realtime",
-    "ws",
-    "uws",
-    "library",
-    "javascript",
-    "client"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/goriunov/ClusterWS-Client-JS"
-  }
+	"name": "clusterws-client-js",
+	"version": "0.0.10",
+	"description": "JavaScript client library for ClusterWS",
+	"main": "index.js",
+	"author": "Dmitrii Goriunov <goriunovd@gmail.com>",
+	"license": "MIT",
+	"keywords": [
+		"node",
+		"websocket",
+		"socket",
+		"cluster",
+		"nodejs",
+		"websocketcluster",
+		"clusterws",
+		"js",
+		"scale",
+		"http",
+		"realtime",
+		"ws",
+		"uws",
+		"library",
+		"javascript",
+		"client"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/goriunov/ClusterWS-Client-JS"
+	}
 }

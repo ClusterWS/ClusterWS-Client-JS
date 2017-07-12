@@ -1,7 +1,135 @@
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else {
+		var a = factory();
+		for(var i in a) (typeof exports === 'object' ? exports : root)[i] = a[i];
+	}
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
 "use strict";
+
 Object.defineProperty(exports, "__esModule", { value: true });
-var channel_1 = require("./lib/channel/channel");
-var messages_1 = require("./lib/messages/messages");
+var EmitMessage = (function () {
+    function EmitMessage(event, data) {
+        this.event = event;
+        this.data = data;
+        this.action = 'emit';
+    }
+    return EmitMessage;
+}());
+var PublishMessage = (function () {
+    function PublishMessage(channel, data) {
+        this.channel = channel;
+        this.data = data;
+        this.action = 'publish';
+    }
+    return PublishMessage;
+}());
+var InternalMessage = (function () {
+    function InternalMessage(event, data) {
+        this.event = event;
+        this.data = data;
+        this.action = 'internal';
+    }
+    return InternalMessage;
+}());
+var MessageFactory = (function () {
+    function MessageFactory() {
+    }
+    MessageFactory.emitMessage = function (event, data) {
+        return JSON.stringify(new EmitMessage(event, data));
+    };
+    MessageFactory.publishMessage = function (channel, data) {
+        return JSON.stringify(new PublishMessage(channel, data));
+    };
+    MessageFactory.internalMessage = function (event, data) {
+        return JSON.stringify(new InternalMessage(event, data));
+    };
+    return MessageFactory;
+}());
+exports.MessageFactory = MessageFactory;
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var channel_1 = __webpack_require__(2);
+var messages_1 = __webpack_require__(0);
 var Options = (function () {
     function Options(url, port) {
         if (!url) {
@@ -56,7 +184,7 @@ var ClusterWS = (function () {
         };
         this.webSocket.onmessage = function (msg) {
             if (msg.data === '_0') {
-                _this.pingPong--;
+                _this.pingPong = 0;
                 return _this.webSocket.send('_1');
             }
             msg = JSON.parse(msg.data);
@@ -70,10 +198,10 @@ var ClusterWS = (function () {
                 if (msg.event === 'config') {
                     _this.pingTimeOut = setInterval(function () {
                         if (_this.pingPong >= 2) {
-                            return _this.disconnect(1000, 'Did not get ping');
+                            return _this.disconnect(3001, 'Did not get ping');
                         }
                         return _this.pingPong++;
-                    }, msg.data.ping);
+                    }, msg.data.pingInterval);
                     return;
                 }
             }
@@ -112,3 +240,35 @@ var ClusterWS = (function () {
     return ClusterWS;
 }());
 exports.ClusterWS = ClusterWS;
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var messages_1 = __webpack_require__(0);
+var Channel = (function () {
+    function Channel(channel, client) {
+        this.channel = channel;
+        this.client = client;
+        this.client.webSocket.send(messages_1.MessageFactory.internalMessage('subscribe', this.channel));
+    }
+    Channel.prototype.watch = function (fn) {
+        this.client.channels[this.channel] = fn;
+        return this;
+    };
+    Channel.prototype.publish = function (data) {
+        this.client.webSocket.send(messages_1.MessageFactory.publishMessage(this.channel, data));
+        return this;
+    };
+    return Channel;
+}());
+exports.Channel = Channel;
+
+
+/***/ })
+/******/ ]);
+});
