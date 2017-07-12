@@ -5,7 +5,9 @@
     <script>
         var webSocket = new ClusterWS({
             url: 'localhost',
-            port:3000
+            port:3000,
+            autoReconnect: true,
+            reconnectInterval: 1000
         });
 
         webSocket.on('connect', function(){

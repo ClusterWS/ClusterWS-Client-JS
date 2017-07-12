@@ -130,103 +130,22 @@ exports.MessageFactory = MessageFactory;
 Object.defineProperty(exports, "__esModule", { value: true });
 var channel_1 = __webpack_require__(2);
 var messages_1 = __webpack_require__(0);
-var Options = (function () {
-    function Options(url, port) {
-        if (!url) {
-            throw new Error('Url must be provided');
-        }
-        if (!port) {
-            throw new Error('Port must be provided');
-        }
-        this.url = url;
-        this.port = port;
-    }
-    return Options;
-}());
+var eventEmitter_1 = __webpack_require__(3);
+var options_1 = __webpack_require__(4);
 var ClusterWS = (function () {
     function ClusterWS(configurations) {
-        var _this = this;
         this.configurations = configurations;
-        this.pingPong = 0;
-        this.events = {};
-        this.channels = {};
-        configurations = configurations || {};
-        this.options = new Options(configurations.url, configurations.port);
-        this.webSocket = new WebSocket('ws://' + this.options.url + ':' + this.options.port);
-        this.webSocket.onopen = function (msg) {
-            return _this._execEventFn('connect', msg);
-        };
-        this.webSocket.onclose = function (code, msg) {
-            _this._execEventFn('disconnect', code, msg);
-            clearInterval(_this.pingTimeOut);
-            for (var key in _this.channels) {
-                if (_this.channels.hasOwnProperty(key)) {
-                    _this.channels[key] = null;
-                    delete _this.channels[key];
-                }
-            }
-            for (var key in _this.events) {
-                if (_this.events.hasOwnProperty(key)) {
-                    _this.events[key] = null;
-                    delete _this.events[key];
-                }
-            }
-            for (var key in _this) {
-                if (_this.hasOwnProperty(key)) {
-                    _this[key] = null;
-                    delete _this[key];
-                }
-            }
-            return;
-        };
-        this.webSocket.onerror = function (msg) {
-            return _this._execEventFn('error', msg);
-        };
-        this.webSocket.onmessage = function (msg) {
-            if (msg.data === '_0') {
-                _this.pingPong = 0;
-                return _this.webSocket.send('_1');
-            }
-            msg = JSON.parse(msg.data);
-            if (msg.action === 'emit') {
-                return _this._execEventFn(msg.event, msg.data);
-            }
-            if (msg.action === 'publish') {
-                return _this._execChannelFn(msg.channel, msg.data);
-            }
-            if (msg.action === 'internal') {
-                if (msg.event === 'config') {
-                    _this.pingTimeOut = setInterval(function () {
-                        if (_this.pingPong >= 2) {
-                            return _this.disconnect(3001, 'Did not get ping');
-                        }
-                        return _this.pingPong++;
-                    }, msg.data.pingInterval);
-                    return;
-                }
-            }
-            return;
-        };
+        this.missedPing = 0;
+        this.configurations = this.configurations || {};
+        this.eventEmitter = new eventEmitter_1.EventEmitter();
+        this.channelsEmitter = new eventEmitter_1.EventEmitter();
+        this.options = new options_1.Options(this.configurations);
+        this._connect();
     }
-    ClusterWS.prototype._execEventFn = function (event, data, msg) {
-        var exFn = this.events[event];
-        if (exFn) {
-            if (event === 'disconnect')
-                return exFn(data, msg);
-            return exFn(data);
-        }
-        return;
-    };
-    ClusterWS.prototype._execChannelFn = function (channel, data) {
-        var exFn = this.channels[channel];
-        if (exFn)
-            exFn(data);
-        return;
-    };
     ClusterWS.prototype.on = function (event, fn) {
-        if (this.events[event])
-            this.events[event] = null;
-        return this.events[event] = fn;
+        if (this.eventEmitter.exist(event))
+            return;
+        this.eventEmitter.on(event, fn);
     };
     ClusterWS.prototype.send = function (event, data) {
         return this.webSocket.send(messages_1.MessageFactory.emitMessage(event, data));
@@ -236,6 +155,84 @@ var ClusterWS = (function () {
     };
     ClusterWS.prototype.subscribe = function (channel) {
         return new channel_1.Channel(channel, this);
+    };
+    ClusterWS.prototype._connect = function () {
+        var _this = this;
+        this.webSocket = new WebSocket('ws://' + this.options.url + ':' + this.options.port);
+        console.log(this.webSocket.OPEN);
+        console.log(this.webSocket.CLOSED);
+        console.log(this.webSocket.CONNECTING);
+        setTimeout(function () {
+            console.log(_this.webSocket.readyState);
+        }, 5000);
+        this._listenOnOpen();
+        this._lsitenOnMessage();
+        this._listenOnError();
+        this._listenOnClose();
+    };
+    ClusterWS.prototype._listenOnOpen = function () {
+        var _this = this;
+        this.webSocket.onopen = function (msg) {
+            console.log(_this.webSocket.readyState);
+            _this.eventEmitter.emit('connect', msg);
+        };
+    };
+    ClusterWS.prototype._lsitenOnMessage = function () {
+        var _this = this;
+        this.webSocket.onmessage = function (msg) {
+            if (msg.data === '_0') {
+                _this.missedPing = 0;
+                return _this.webSocket.send('_1');
+            }
+            try {
+                msg = JSON.parse(msg.data);
+            }
+            catch (e) {
+                return _this.disconnect(1007);
+            }
+            switch (msg.action) {
+                case 'emit':
+                    _this.eventEmitter.emit(msg.event, msg.data);
+                    break;
+                case 'publish':
+                    _this.channelsEmitter.emit(msg.channel, msg.data);
+                    break;
+                case 'internal':
+                    if (msg.event === 'config') {
+                        _this.pingTimeOut = setInterval(function () {
+                            if (_this.missedPing > 2) {
+                                return _this.disconnect(3001, 'Did not get ping');
+                            }
+                            return _this.missedPing++;
+                        }, msg.data.pingInterval);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        };
+    };
+    ClusterWS.prototype._listenOnClose = function () {
+        var _this = this;
+        this.webSocket.onclose = function (code, msg) {
+            _this.eventEmitter.emit('disconnect', code, msg);
+            clearInterval(_this.pingTimeOut);
+            _this.eventEmitter.emit('_destroyChannel');
+            _this.eventEmitter.removeAllEvents();
+            _this.channelsEmitter.removeAllEvents();
+            for (var key in _this) {
+                if (_this.hasOwnProperty(key)) {
+                    _this[key] = null;
+                    delete _this[key];
+                }
+            }
+        };
+    };
+    ClusterWS.prototype._listenOnError = function () {
+        var _this = this;
+        this.webSocket.onerror = function (msg) {
+            _this.eventEmitter.emit('error', msg);
+        };
     };
     return ClusterWS;
 }());
@@ -252,12 +249,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var messages_1 = __webpack_require__(0);
 var Channel = (function () {
     function Channel(channel, client) {
+        var _this = this;
         this.channel = channel;
         this.client = client;
         this.client.webSocket.send(messages_1.MessageFactory.internalMessage('subscribe', this.channel));
+        this.client.eventEmitter.on('_destroyChannel', function () {
+            for (var key in _this) {
+                if (_this.hasOwnProperty(key)) {
+                    _this[key] = null;
+                    delete _this[key];
+                }
+            }
+        });
     }
     Channel.prototype.watch = function (fn) {
-        this.client.channels[this.channel] = fn;
+        this.client.channelsEmitter.on(this.channel, fn);
         return this;
     };
     Channel.prototype.publish = function (data) {
@@ -267,6 +273,91 @@ var Channel = (function () {
     return Channel;
 }());
 exports.Channel = Channel;
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var EventEmitter = (function () {
+    function EventEmitter() {
+        this._events = {};
+    }
+    EventEmitter.prototype.on = function (event, listener) {
+        if (!listener)
+            throw 'Function must be provided';
+        if (!this._events[event]) {
+            this._events[event] = [];
+        }
+        return this._events[event].push(listener);
+    };
+    EventEmitter.prototype.emit = function (event, data, param2, param3) {
+        if (this._events[event]) {
+            for (var i = 0, len = this._events[event].length; i < len; i++) {
+                if (typeof this._events[event][i] === 'function') {
+                    this._events[event][i].call(this, data, param2, param3);
+                }
+            }
+        }
+    };
+    EventEmitter.prototype.removeListener = function (event, listener) {
+        if (this._events[event]) {
+            var len = this._events[event].length;
+            while (len--) {
+                if (this._events[event][len] === listener) {
+                    this._events[event].splice(len, 1);
+                }
+            }
+        }
+        return;
+    };
+    EventEmitter.prototype.removeEvent = function (event) {
+        if (this._events[event]) {
+            this._events[event] = null;
+            delete this._events[event];
+        }
+    };
+    EventEmitter.prototype.removeAllEvents = function () {
+        for (var key in this._events) {
+            if (this._events.hasOwnProperty(key)) {
+                this._events[key] = null;
+                delete this._events[key];
+            }
+        }
+    };
+    EventEmitter.prototype.exist = function (event) {
+        return this._events[event];
+    };
+    return EventEmitter;
+}());
+exports.EventEmitter = EventEmitter;
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Options = (function () {
+    function Options(configuration) {
+        if (!configuration.url)
+            throw new Error('Url must be provided');
+        if (!configuration.port)
+            throw new Error('Port must be provided');
+        this.url = configuration.url;
+        this.port = configuration.port;
+        this.autoReconnect = configuration.autoReconnect || false;
+        this.reconnectTime = configuration.reconnectAttempts || 0;
+        this.reconnectAttempts = configuration.reconnectAttempts || 0;
+    }
+    return Options;
+}());
+exports.Options = Options;
 
 
 /***/ })
