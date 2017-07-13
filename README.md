@@ -51,8 +51,8 @@ var clusterWS = new ClusterWS({
 {
     url: 'url to the server {string} without http or https',
     port: 'port on the server {number}',
-    autoReconnect: 'allow to auto-reconnect tot he server on loose connection {bool} default is false',
-    reconnectInterval: 'how often it is going to try reconnect {number} default is 10000 ms (10s)',
+    autoReconnect: 'allow to auto-reconnect to the server on lost connection {bool} default is false',
+    reconnectInterval: 'how often it will try to reconnect {number} default is 10000 ms (10s)',
     reconnectAttempts: 'how many times try to reconnect {number} default is 0 it means try to reconnect with out limit'
 }
 ```
