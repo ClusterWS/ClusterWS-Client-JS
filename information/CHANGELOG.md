@@ -1,3 +1,16 @@
+# 0.1.0
+ 
+## New features 
+ 
+* **new:**  Auto reconnect options are added
+* **new:**  Added auto ping pong
+ 
+## Other 
+ 
+* Remove gulp, rewrite webpack
+* Modify readme
+* Added npm badge to the README
+ 
 # 0.0.9
  
 ## Other 

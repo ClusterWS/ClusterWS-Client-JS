@@ -7,7 +7,7 @@ This is a **Beta Version** that is why library may lack some important features 
 This is small official JavaScript library for [ClusterWS](https://github.com/goriunov/ClusterWS), which is using standard browser WebSocket.
 Library has been written in TypeScript and compile down to es5. You can find all development code in `src/` folder  and all compiled code in `dist/` folder.
 
-**Current minified size is less then 5KB.**
+**Current only minified size is less then 6KB.**
 
 ### Installation:
 
@@ -22,7 +22,6 @@ Or globally:
 1. Find ClusterWS.(min).js  in dist/browser
 2. Use standard script to import library `<script src="path/to/ClusterWS.(min).js"></script>`
 3. Done you can use it 'ClusterWS' :)
-
 
 ### Connect to the server:
 
@@ -45,6 +44,19 @@ var clusterWS = new ClusterWS({
     port: 'port number' ex: 3000
 });
 ```
+
+### All available options
+
+```js
+{
+    url: 'url to the server {string} without http or https',
+    port: 'port on the server {number}',
+    autoReconnect: 'allow to auto-reconnect tot he server on loose connection {bool} default is false',
+    reconnectInterval: 'how often it is going to try reconnect {number} default is 10000 ms (10s)',
+    reconnectAttempts: 'how many times try to reconnect {number} default is 0 it means try to reconnect with out limit'
+}
+```
+
 
 ### Listen on events from the server:
 

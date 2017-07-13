@@ -7,15 +7,16 @@ import {Options, Configurations} from './lib/options';
 export class ClusterWS {
 
     options: Options;
+    channels: any = {};
     webSocket: any;
-    pingTimeOut: any;
     missedPing: number = 0;
+    pingTimeOut: any;
     eventEmitter: EventEmitter;
-    channelsEmitter: EventEmitter;
+
 
     // Reconnection options
     inReconnectState: boolean = false;
-    reconnectAttempts: number = 1;
+    reconnectAttempts: number = 0;
     reconnectInterval: any;
     autoReconnect: boolean;
 
@@ -23,16 +24,13 @@ export class ClusterWS {
     constructor(public configurations: Configurations) {
         this.configurations = this.configurations || {};
 
-        this.eventEmitter = new EventEmitter();
-        this.channelsEmitter = new EventEmitter();
         this.options = new Options(this.configurations);
+        this.eventEmitter = new EventEmitter();
         this.autoReconnect = this.options.autoReconnect;
         this._connect();
-
     }
 
     on(event: string, fn: any) {
-        if (this.eventEmitter.exist(event)) return;
         this.eventEmitter.on(event, fn);
     }
 
@@ -45,7 +43,9 @@ export class ClusterWS {
     }
 
     subscribe(channel: string) {
-        return new Channel(channel, this);
+        if (this.channels[channel]) return this.channels[channel];
+        this.channels[channel] = new Channel(channel, this);
+        return this.channels[channel];
     }
 
     _connect() {
@@ -68,6 +68,7 @@ export class ClusterWS {
             this.inReconnectState = false;
             clearInterval(this.reconnectInterval);
 
+            this._resubscribeChannels();
             this.eventEmitter.emit('connect', msg);
         };
     }
@@ -95,7 +96,7 @@ export class ClusterWS {
                     this.eventEmitter.emit(msg.event, msg.data);
                     break;
                 case 'publish':
-                    this.channelsEmitter.emit(msg.channel, msg.data);
+                    this.channels[msg.channel]._newMessage(msg.data);
                     break;
                 case 'internal':
                     if (msg.event === 'config') {
@@ -124,11 +125,17 @@ export class ClusterWS {
             this.eventEmitter.emit('disconnect', code, msg);
 
             clearInterval(this.pingTimeOut);
-            this.eventEmitter.emit('_destroyChannel');
-            this.eventEmitter.removeAllEvents();
-            this.channelsEmitter.removeAllEvents();
 
             if (!this.autoReconnect || code === 1000) {
+                this.eventEmitter.removeAllEvents();
+
+                for (let key in this.channels) {
+                    if (this.channels.hasOwnProperty(key)) {
+                        this.channels[key] = null;
+                        delete this.channels[key];
+                    }
+                }
+
                 for (let key in this) {
                     if (this.hasOwnProperty(key)) {
                         this[key] = null;
@@ -141,6 +148,14 @@ export class ClusterWS {
         };
     }
 
+    _resubscribeChannels(){
+        for (let key in this.channels) {
+            if (this.channels.hasOwnProperty(key)) {
+                this.channels[key]._subscribe();
+            }
+        }
+    }
+
     _reconnect() {
         this.inReconnectState = true;
         this.reconnectInterval = setInterval(() => {
@@ -148,7 +163,7 @@ export class ClusterWS {
                 this.reconnectAttempts++;
                 this._connect();
             }
-            if(this.options.reconnectAttempts !== 0) {
+            if (this.options.reconnectAttempts !== 0) {
                 if (this.reconnectAttempts >= this.options.reconnectAttempts) {
                     this.autoReconnect = false;
                     return clearInterval(this.reconnectInterval)
@@ -166,8 +181,4 @@ export class ClusterWS {
             this.eventEmitter.emit('error', msg);
         };
     }
-
-
 }
-
-
