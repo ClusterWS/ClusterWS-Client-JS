@@ -1,5 +1,5 @@
-import {ClusterWS} from '../../index';
-import {MessageFactory} from '../messages/messages';
+import { ClusterWS } from '../../../index';
+import { MessageFactory } from '../messages/messages';
 
 
 export class Channel {
@@ -16,15 +16,16 @@ export class Channel {
 
     publish(data: any) {
         console.log(data);
-        this.client.webSocket.send(MessageFactory.publishMessage(this.channel, data));
+        this.client.send(this.channel, data, 'publish');
         return this;
     }
 
-    _newMessage(data: any) {
+    _message(data: any) {
         if (this.event) this.event(data);
         return;
     }
+
     _subscribe() {
-        this.client.webSocket.send(MessageFactory.internalMessage('subscribe', this.channel));
+        this.client.send('subscribe', this.channel, 'internal');
     }
 }

@@ -5,18 +5,16 @@ export class EventEmitter {
 
     on(event: string, listener: any) {
         if (!listener) throw 'Function must be provided';
-        if(this._events[event]) return;
+        if(this.exist(event)) return;
         return this._events[event] = listener;
     }
 
-    emit(event: string, data?: any, param2?: any, param3?: any) {
-        if (this._events[event]) {
-            this._events[event](data, param2, param3);
-        }
+    emit(event: string, ...rest: any[]) {
+        if (this.exist(event)) this._events[event].apply(this, rest);
     }
 
     removeEvent(event: string) {
-        if (this._events[event]) {
+        if (this.exist(event)) {
             this._events[event] = null;
             delete this._events[event];
         }

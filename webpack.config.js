@@ -48,7 +48,8 @@ if (env === 'npm') {
     plugins.push(new CopyPkgJsonPlugin({
         remove: ['devDependencies', 'scripts']
     }));
-    plugins.push(new CopyWebpackPlugin([{from: 'README.md'}]))
+    plugins.push(new CopyWebpackPlugin([{ from: 'README.md' }]));
+    
 }
 
 if (env === 'npm' || env === 'prod') {
@@ -56,7 +57,6 @@ if (env === 'npm' || env === 'prod') {
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': '"production"'
         }));
-
 }
 
 module.exports = {
