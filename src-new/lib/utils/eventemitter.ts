@@ -1,5 +1,5 @@
 import { _ } from './fp'
-// import { logError } from './common'
+import { logError } from './common'
 
 /* Custom EventEmitter */
 
@@ -7,7 +7,7 @@ export class EventEmitter {
     _events: any = {}
 
     on(event: string, listener: any) {
-        // if (!listener || typeof listener !== 'function') logError('Listener must be a function')
+        if (!listener || typeof listener !== 'function') logError('Listener must be a function')
         this._events[event] ? this._events[event].push(listener) : this._events[event] = [listener]
     }
 

@@ -61,7 +61,7 @@ if (env === 'npm' || env === 'prod') {
 
 module.exports = {
     entry: {
-        'ClusterWS': './src/index.ts'
+        'ClusterWS': './src-new/index.ts'
     },
     resolve: {
         extensions: [".ts"]

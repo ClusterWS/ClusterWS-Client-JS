@@ -70,7 +70,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -80,34 +80,45 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-function socketReconnect(self) {
-    self.inReconnectState = true;
-    self.reconnectInterval = setInterval(function () {
-        if (self.webSocket.readyState === self.webSocket.CLOSED) {
-            self.reconnectAttempts++;
-            self.connect();
-            if (self.options.reconnectAttempts !== 0) {
-                if (self.reconnectAttempts >= self.options.reconnectAttempts) {
-                    self.autoReconnect = false;
-                    return clearInterval(self.reconnectInterval);
+var curry = function (fn) {
+    return function curring() {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        return args.length < fn.length ?
+            function () {
+                var newArgs = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    newArgs[_i] = arguments[_i];
                 }
-            }
-        }
-    }, self.options.reconnectInterval);
-}
-exports.socketReconnect = socketReconnect;
-;
-function socketSuccessfulReconnection(self) {
-    self.reconnectAttempts = 0;
-    self.inReconnectState = false;
-    clearInterval(self.reconnectInterval);
-    for (var key in self.channels) {
-        if (self.channels.hasOwnProperty(key)) {
-            self.channels[key]._subscribe();
-        }
-    }
-}
-exports.socketSuccessfulReconnection = socketSuccessfulReconnection;
+                return curring.call.apply(curring, [null].concat(args, newArgs));
+            } :
+            fn.length ? fn.call.apply(fn, [null].concat(args)) : fn;
+    };
+};
+var isFunction = function (f) { return f ? typeof f === 'function' ? f() : f : ''; };
+var switchcase = curry(function (cases, key) { return key in cases ? isFunction(cases[key]) : isFunction(cases['default']); });
+var mapArray = function (iteratee, array) {
+    var index = -1;
+    var length = array == null ? 0 : array.length;
+    var result = new Array(length);
+    while (++index < length)
+        result[index] = iteratee(array[index], index, array);
+    return result;
+};
+var mapObject = function (iteratee, object) {
+    var result = {};
+    object = Object(object);
+    Object.keys(object).forEach(function (key) { return result[key] = iteratee(object[key], key, object); });
+    return result;
+};
+var map = curry(function (fn, x) { return x instanceof Array ? mapArray(fn, x) : mapObject(fn, x); });
+exports._ = {
+    map: map,
+    curry: curry,
+    switchcase: switchcase
+};
 
 
 /***/ }),
@@ -117,66 +128,7 @@ exports.socketSuccessfulReconnection = socketSuccessfulReconnection;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var channel_1 = __webpack_require__(2);
-var messages_1 = __webpack_require__(3);
-var eventEmitter_1 = __webpack_require__(4);
-var options_1 = __webpack_require__(5);
-var socketOpen_1 = __webpack_require__(6);
-var socketMessage_1 = __webpack_require__(7);
-var socketClose_1 = __webpack_require__(8);
-var socketError_1 = __webpack_require__(9);
-var ClusterWS = (function () {
-    function ClusterWS(configurations) {
-        this.configurations = configurations;
-        this.channels = {};
-        this.missedPing = 0;
-        this.inReconnectState = false;
-        this.reconnectAttempts = 0;
-        this.configurations = this.configurations || {};
-        this.options = new options_1.Options(this.configurations);
-        this.autoReconnect = this.options.autoReconnect;
-        this.eventEmitter = new eventEmitter_1.EventEmitter();
-        this.connect();
-    }
-    ClusterWS.prototype.on = function (event, fn) {
-        this.eventEmitter.on(event, fn);
-    };
-    ClusterWS.prototype.send = function (event, data, type) {
-        switch (type) {
-            case 'pong':
-                this.webSocket.send(event);
-                break;
-            case 'internal':
-                this.webSocket.send(messages_1.MessageFactory.internalMessage(event, data));
-                break;
-            case 'publish':
-                this.webSocket.send(messages_1.MessageFactory.publishMessage(event, data));
-                break;
-            default:
-                this.webSocket.send(messages_1.MessageFactory.emitMessage(event, data));
-                break;
-        }
-    };
-    ClusterWS.prototype.disconnect = function (code, message) {
-        this.webSocket.close(code, message);
-    };
-    ClusterWS.prototype.subscribe = function (channel) {
-        if (this.channels[channel])
-            return this.channels[channel];
-        this.channels[channel] = new channel_1.Channel(channel, this);
-        return this.channels[channel];
-    };
-    ClusterWS.prototype.connect = function () {
-        this.webSocket = null;
-        this.webSocket = new WebSocket('ws://' + this.options.url + ':' + this.options.port);
-        socketOpen_1.socketOpen(this);
-        socketMessage_1.socketMessage(this);
-        socketClose_1.socketClose(this);
-        socketError_1.socketError(this);
-    };
-    return ClusterWS;
-}());
-exports.ClusterWS = ClusterWS;
+exports.logError = function (text) { return console.log('Error: ', text); };
 
 
 /***/ }),
@@ -185,33 +137,27 @@ exports.ClusterWS = ClusterWS;
 
 "use strict";
 
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
-var Channel = (function () {
-    function Channel(channel, client) {
-        this.channel = channel;
-        this.client = client;
-        this._subscribe();
+var socket_1 = __webpack_require__(3);
+var options_1 = __webpack_require__(6);
+var ClusterWS = (function (_super) {
+    __extends(ClusterWS, _super);
+    function ClusterWS(configurations) {
+        return _super.call(this, new options_1.Options(configurations || {})) || this;
     }
-    Channel.prototype.watch = function (fn) {
-        this.event = fn;
-        return this;
-    };
-    Channel.prototype.publish = function (data) {
-        console.log(data);
-        this.client.send(this.channel, data, 'publish');
-        return this;
-    };
-    Channel.prototype._message = function (data) {
-        if (this.event)
-            this.event(data);
-        return;
-    };
-    Channel.prototype._subscribe = function () {
-        this.client.send('subscribe', this.channel, 'internal');
-    };
-    return Channel;
-}());
-exports.Channel = Channel;
+    return ClusterWS;
+}(socket_1.Socket));
+exports.ClusterWS = ClusterWS;
 
 
 /***/ }),
@@ -221,45 +167,42 @@ exports.Channel = Channel;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var EmitMessage = (function () {
-    function EmitMessage(event, data) {
-        this.event = event;
-        this.data = data;
-        this.action = 'emit';
+var fp_1 = __webpack_require__(0);
+var eventemitter_1 = __webpack_require__(4);
+var messages_1 = __webpack_require__(5);
+var Socket = (function () {
+    function Socket(options) {
+        this.options = options;
+        this.events = new eventemitter_1.EventEmitter();
     }
-    return EmitMessage;
-}());
-var PublishMessage = (function () {
-    function PublishMessage(channel, data) {
-        this.channel = channel;
-        this.data = data;
-        this.action = 'publish';
-    }
-    return PublishMessage;
-}());
-var InternalMessage = (function () {
-    function InternalMessage(event, data) {
-        this.event = event;
-        this.data = data;
-        this.action = 'internal';
-    }
-    return InternalMessage;
-}());
-var MessageFactory = (function () {
-    function MessageFactory() {
-    }
-    MessageFactory.emitMessage = function (event, data) {
-        return JSON.stringify(new EmitMessage(event, data));
+    Socket.prototype.connect = function () {
+        var _this = this;
+        this.webSocket = null;
+        this.webSocket = new WebSocket('ws://' + this.options.url + ':' + this.options.port);
+        this.webSocket.onopen = function () { return _this.events.emit('connect'); };
+        this.webSocket.onerror = function (err) { return _this.events.emit('error', err); };
+        this.webSocket.onmessage = function (msg) {
+            msg === '#0' ? _this.send('#1', null, 'ping') : msg = JSON.parse(msg);
+            fp_1._.switchcase({
+                'p': function () { },
+                'e': function () { return _this.events.emit(msg.m[1], msg.m[2]); },
+                's': function () { return fp_1._.switchcase({
+                    'c': function () { }
+                })(msg.m[1]); }
+            })(msg.m[0]);
+        };
+        this.webSocket.onclose = function () {
+        };
     };
-    MessageFactory.publishMessage = function (channel, data) {
-        return JSON.stringify(new PublishMessage(channel, data));
+    Socket.prototype.on = function (event, fn) {
+        this.events.on(event, fn);
     };
-    MessageFactory.internalMessage = function (event, data) {
-        return JSON.stringify(new InternalMessage(event, data));
+    Socket.prototype.send = function (event, data, type) {
+        this.webSocket.send(messages_1.socketMessages(event, data, type || 'emit'));
     };
-    return MessageFactory;
+    return Socket;
 }());
-exports.MessageFactory = MessageFactory;
+exports.Socket = Socket;
 
 
 /***/ }),
@@ -269,38 +212,33 @@ exports.MessageFactory = MessageFactory;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var fp_1 = __webpack_require__(0);
+var common_1 = __webpack_require__(1);
 var EventEmitter = (function () {
     function EventEmitter() {
         this._events = {};
     }
     EventEmitter.prototype.on = function (event, listener) {
-        if (!listener)
-            throw 'Function must be provided';
-        if (this.exist(event))
-            return;
-        return this._events[event] = listener;
+        if (!listener || typeof listener !== 'function')
+            common_1.logError('Listener must be a function');
+        this._events[event] ? this._events[event].push(listener) : this._events[event] = [listener];
     };
     EventEmitter.prototype.emit = function (event) {
-        var rest = [];
+        var args = [];
         for (var _i = 1; _i < arguments.length; _i++) {
-            rest[_i - 1] = arguments[_i];
+            args[_i - 1] = arguments[_i];
         }
-        if (this.exist(event))
-            this._events[event].apply(this, rest);
+        fp_1._.map(function (listener) { return listener.call.apply(listener, [null].concat(args)); }, this._events[event]);
+    };
+    EventEmitter.prototype.removeListener = function (event, listener) {
+        var _this = this;
+        fp_1._.map(function (l, index) { return l === listener ? _this._events[event].splice(index, 1) : ''; }, this._events[event]);
     };
     EventEmitter.prototype.removeEvent = function (event) {
-        if (this.exist(event)) {
-            this._events[event] = null;
-            delete this._events[event];
-        }
+        this._events[event] = null;
     };
     EventEmitter.prototype.removeAllEvents = function () {
-        for (var key in this._events) {
-            if (this._events.hasOwnProperty(key)) {
-                this._events[key] = null;
-                delete this._events[key];
-            }
-        }
+        this._events = {};
     };
     EventEmitter.prototype.exist = function (event) {
         return this._events[event];
@@ -317,21 +255,16 @@ exports.EventEmitter = EventEmitter;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Options = (function () {
-    function Options(configuration) {
-        if (!configuration.url)
-            throw new Error('Url must be provided');
-        if (!configuration.port)
-            throw new Error('Port must be provided');
-        this.url = configuration.url;
-        this.port = configuration.port;
-        this.autoReconnect = configuration.autoReconnect || false;
-        this.reconnectInterval = configuration.reconnectInterval || 10000;
-        this.reconnectAttempts = configuration.reconnectAttempts || 0;
-    }
-    return Options;
-}());
-exports.Options = Options;
+var fp_1 = __webpack_require__(0);
+function socketMessages(event, data, type) {
+    return fp_1._.switchcase({
+        'publish': JSON.stringify({ 'm': ['p', event, data] }),
+        'system': JSON.stringify({ 'm': ['s', event, data] }),
+        'emit': JSON.stringify({ 'm': ['e', event, data] }),
+        'ping': event
+    })(type);
+}
+exports.socketMessages = socketMessages;
 
 
 /***/ }),
@@ -341,109 +274,22 @@ exports.Options = Options;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var socketReconnect_1 = __webpack_require__(0);
-function socketOpen(self) {
-    self.webSocket.onopen = function (msg) {
-        socketReconnect_1.socketSuccessfulReconnection(self);
-        self.eventEmitter.emit('connect', msg);
-    };
-}
-exports.socketOpen = socketOpen;
-;
-
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function socketMessage(self) {
-    self.webSocket.onmessage = function (msg) {
-        if (msg.data === '_0') {
-            self.missedPing = 0;
-            return self.send('_1', null, 'pong');
-        }
-        try {
-            msg = JSON.parse(msg.data);
-        }
-        catch (e) {
-            return self.disconnect(1007);
-        }
-        switch (msg.action) {
-            case 'emit':
-                self.eventEmitter.emit(msg.event, msg.data);
-                break;
-            case 'publish':
-                self.channels[msg.channel]._message(msg.data);
-                break;
-            case 'internal':
-                if (msg.event === 'config') {
-                    self.pingTimeOut = setInterval(function () {
-                        if (self.missedPing > 2) {
-                            return self.disconnect(3001, 'Did not get ping');
-                        }
-                        return self.missedPing++;
-                    }, msg.data.pingInterval);
-                }
-                break;
-            default:
-                break;
-        }
-    };
-}
-exports.socketMessage = socketMessage;
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var socketReconnect_1 = __webpack_require__(0);
-function socketClose(self) {
-    self.webSocket.onclose = function (code, msg) {
-        self.eventEmitter.emit('disconnect', code, msg);
-        clearInterval(self.pingTimeOut);
-        if (!self.autoReconnect || code === 1000) {
-            self.eventEmitter.removeAllEvents();
-            for (var key in self.channels) {
-                if (self.channels.hasOwnProperty(key)) {
-                    self.channels[key] = null;
-                    delete self.channels[key];
-                }
-            }
-            for (var key in self) {
-                if (self.hasOwnProperty(key)) {
-                    self[key] = null;
-                    delete self[key];
-                }
-            }
-        }
-        else if (!self.inReconnectState) {
-            socketReconnect_1.socketReconnect(self);
-        }
-    };
-}
-exports.socketClose = socketClose;
-
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function socketError(self) {
-    self.webSocket.onerror = function (msg) {
-        self.eventEmitter.emit('error', msg);
-    };
-}
-exports.socketError = socketError;
+var common_1 = __webpack_require__(1);
+var Options = (function () {
+    function Options(configurations) {
+        if (!configurations.url)
+            throw common_1.logError('Url must be provided');
+        if (!configurations.port)
+            throw common_1.logError('Port must be provided');
+        this.url = configurations.url;
+        this.port = configurations.port;
+        this.autoReconnect = configurations.autoReconnect || false;
+        this.reconnectionInterval = configurations.reconnectInterval || 10000;
+        this.reconnectionAttempts = configurations.reconnectAttempts || 0;
+    }
+    return Options;
+}());
+exports.Options = Options;
 
 
 /***/ })
