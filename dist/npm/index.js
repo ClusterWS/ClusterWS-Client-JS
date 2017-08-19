@@ -70,7 +70,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -128,11 +128,30 @@ exports._ = {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logError = function (text) { return console.log('Error: ', text); };
+var fp_1 = __webpack_require__(0);
+function socketMessages(event, data, type) {
+    return fp_1._.switchcase({
+        'publish': JSON.stringify({ 'm': ['p', event, data] }),
+        'system': JSON.stringify({ 'm': ['s', event, data] }),
+        'emit': JSON.stringify({ 'm': ['e', event, data] }),
+        'ping': event
+    })(type);
+}
+exports.socketMessages = socketMessages;
 
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.logError = function (text) { return console.log('Error: ', text); };
+
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -148,8 +167,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var socket_1 = __webpack_require__(3);
-var options_1 = __webpack_require__(6);
+var socket_1 = __webpack_require__(4);
+var options_1 = __webpack_require__(7);
 var ClusterWS = (function (_super) {
     __extends(ClusterWS, _super);
     function ClusterWS(configurations) {
@@ -161,19 +180,21 @@ exports.ClusterWS = ClusterWS;
 
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var fp_1 = __webpack_require__(0);
-var eventemitter_1 = __webpack_require__(4);
-var messages_1 = __webpack_require__(5);
+var channel_1 = __webpack_require__(5);
+var eventemitter_1 = __webpack_require__(6);
+var messages_1 = __webpack_require__(1);
 var Socket = (function () {
     function Socket(options) {
         this.options = options;
         this.events = new eventemitter_1.EventEmitter();
+        this.channels = {};
     }
     Socket.prototype.connect = function () {
         var _this = this;
@@ -194,6 +215,9 @@ var Socket = (function () {
         this.webSocket.onclose = function () {
         };
     };
+    Socket.prototype.subscribe = function (channel) {
+        return this.channels[channel] ? this.channels[channel] : this.channels[channel] = new channel_1.Channel(this.channels, this.send);
+    };
     Socket.prototype.on = function (event, fn) {
         this.events.on(event, fn);
     };
@@ -206,14 +230,47 @@ exports.Socket = Socket;
 
 
 /***/ }),
-/* 4 */
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var messages_1 = __webpack_require__(1);
+var Channel = (function () {
+    function Channel(channel, send) {
+        this.channel = channel;
+        this.send = send;
+        this.subscribe();
+    }
+    Channel.prototype.watch = function (fn) {
+        this.event = fn;
+        return this;
+    };
+    Channel.prototype.publish = function (data) {
+        this.send(messages_1.socketMessages(this.channel, data, 'publish'));
+        return this;
+    };
+    Channel.prototype.unsubscribe = function () {
+        this.send(messages_1.socketMessages('u', this.channel, 'system'));
+    };
+    Channel.prototype.subscribe = function () {
+        this.send(messages_1.socketMessages('s', this.channel, 'system'));
+    };
+    return Channel;
+}());
+exports.Channel = Channel;
+
+
+/***/ }),
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var fp_1 = __webpack_require__(0);
-var common_1 = __webpack_require__(1);
+var common_1 = __webpack_require__(2);
 var EventEmitter = (function () {
     function EventEmitter() {
         this._events = {};
@@ -249,32 +306,13 @@ exports.EventEmitter = EventEmitter;
 
 
 /***/ }),
-/* 5 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var fp_1 = __webpack_require__(0);
-function socketMessages(event, data, type) {
-    return fp_1._.switchcase({
-        'publish': JSON.stringify({ 'm': ['p', event, data] }),
-        'system': JSON.stringify({ 'm': ['s', event, data] }),
-        'emit': JSON.stringify({ 'm': ['e', event, data] }),
-        'ping': event
-    })(type);
-}
-exports.socketMessages = socketMessages;
-
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var common_1 = __webpack_require__(1);
+var common_1 = __webpack_require__(2);
 var Options = (function () {
     function Options(configurations) {
         if (!configurations.url)

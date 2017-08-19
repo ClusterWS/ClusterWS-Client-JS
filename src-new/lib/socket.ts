@@ -1,11 +1,15 @@
 import { _ } from './utils/fp'
 import { Options } from './options'
+import { Channel } from './channel/channel'
 import { EventEmitter } from './utils/eventemitter'
 import { socketMessages } from './communication/messages'
 
 
+
 export class Socket {
+
     events: EventEmitter = new EventEmitter()
+    channels: any = {}
     webSocket: any
 
     constructor(public options: Options) { }
@@ -29,7 +33,10 @@ export class Socket {
         this.webSocket.onclose = () => {
 
         }
+    }
 
+    subscribe(channel: string) {
+        return this.channels[channel] ? this.channels[channel] : this.channels[channel] = new Channel(this.channels, this.send)
     }
 
     on(event: string, fn: any) {
