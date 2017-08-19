@@ -1,5 +1,8 @@
 import { socketMessages } from '../communication/messages'
 
+// u = unsubscribe
+// s = subsrcibe
+
 export class Channel {
     event: any
 
@@ -18,10 +21,10 @@ export class Channel {
     }
 
     unsubscribe() {
-        this.send(socketMessages('u', this.channel, 'system'))
+        this.send(socketMessages('unsubscribe', this.channel, 'system'))
     }
 
     subscribe() {
-        this.send(socketMessages('s', this.channel, 'system'))
+        this.send(socketMessages('subscribe', this.channel, 'system'))
     }
 }
