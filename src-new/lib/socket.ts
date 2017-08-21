@@ -4,39 +4,72 @@ import { Channel } from './channel/channel'
 import { EventEmitter } from './utils/eventemitter'
 import { socketMessages } from './communication/messages'
 
-
-
 export class Socket {
 
     events: EventEmitter = new EventEmitter()
     channels: any = {}
     webSocket: any
 
-    constructor(public options: Options) { }
+    // Reconection variables
+    autoReconnect: boolean = false
+    inReconnectionState: boolean = false
+    reconnectionAttempted: number = 0
 
-    connect() {
+    constructor(public options: Options) {
+        this.autoReconnect = this.options.autoReconnect
+
+        this.connect()
+    }
+
+    connect(interval?: any) {
         this.webSocket = null
         this.webSocket = new WebSocket('ws://' + this.options.url + ':' + this.options.port)
 
-        this.webSocket.onopen = () => this.events.emit('connect')
         this.webSocket.onerror = (err: any) => this.events.emit('error', err)
+
+        this.webSocket.onopen = () => {
+            clearInterval(interval)
+            this.inReconnectionState = false
+            this.reconnectionAttempted = 0
+
+            _.map((channel: any) => channel.subscribe() ,this.channels)
+
+            this.events.emit('connect')
+        }
+
         this.webSocket.onmessage = (msg: any) => {
-            msg === '#0' ? this.send('#1', null, 'ping') : msg = JSON.parse(msg)
+            if (msg.data === '#0') return this.send('#1', null, 'ping')
+
+            msg = JSON.parse(msg.data)
+
             _.switchcase({
-                'p': () => { },
+                'p': () => this.channels[msg.m[1]] ? this.channels[msg.m[1]].message(msg.m[2]) : '',
                 'e': () => this.events.emit(msg.m[1], msg.m[2]),
                 's': () => _.switchcase({
                     'c': () => { }
                 })(msg.m[1])
             })(msg.m[0])
         }
-        this.webSocket.onclose = () => {
 
+        this.webSocket.onclose = (code?: number, msg?: any) => {
+            this.events.emit('disconnect', code, msg)
+
+            if (this.autoReconnect && code !== 1000) return this.inReconnectionState ? '' : this.reconnection()
+
+            this.events.removeAllEvents()
+            for (let key in this) if (this.hasOwnProperty(key)) {
+                this[key] = null
+                delete this[key]
+            }
         }
     }
 
     subscribe(channel: string) {
-        return this.channels[channel] ? this.channels[channel] : this.channels[channel] = new Channel(this.channels, this.send)
+        return this.channels[channel] ? this.channels[channel] : this.channels[channel] = new Channel(channel, this)
+    }
+
+    disconnect(code?: number, msg?: any) {
+        this.webSocket.close(code || 1000, msg)
     }
 
     on(event: string, fn: any) {
@@ -47,4 +80,21 @@ export class Socket {
         this.webSocket.send(socketMessages(event, data, type || 'emit'))
     }
 
+
+    reconnection() {
+        this.inReconnectionState = true
+
+        let interval = setInterval(() => {
+            if (this.webSocket.state === this.webSocket.CLOSED) {
+                this.reconnectionAttempted++
+                this.connect(interval)
+                if (this.options.reconnectionAttempts !== 0 && this.reconnectionAttempted >= this.options.reconnectionAttempts) {
+                    clearInterval(interval)
+
+                    this.autoReconnect = false
+                    this.inReconnectionState = false
+                }
+            }
+        }, this.options.reconnectionInterval)
+    }
 }
