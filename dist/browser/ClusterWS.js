@@ -206,9 +206,9 @@ var Socket = (function () {
                 })(msg.m[1]); }
             })(msg.m[0]);
         };
-        this.webSocket.onclose = function (code, msg) {
-            _this.events.emit('disconnect', code, msg);
-            if (_this.autoReconnect && code !== 1000)
+        this.webSocket.onclose = function (event) {
+            _this.events.emit('disconnect', event.code, event.reason);
+            if (_this.autoReconnect && event.code !== 1000)
                 return _this.inReconnectionState ? '' : _this.reconnection();
             _this.events.removeAllEvents();
             for (var key in _this)
@@ -234,7 +234,7 @@ var Socket = (function () {
         var _this = this;
         this.inReconnectionState = true;
         var interval = setInterval(function () {
-            if (_this.webSocket.state === _this.webSocket.CLOSED) {
+            if (_this.webSocket.readyState === _this.webSocket.CLOSED) {
                 _this.reconnectionAttempted++;
                 _this.connect(interval);
                 if (_this.options.reconnectionAttempts !== 0 && _this.reconnectionAttempted >= _this.options.reconnectionAttempts) {
@@ -368,8 +368,8 @@ var Options = (function () {
         this.url = configurations.url;
         this.port = configurations.port;
         this.autoReconnect = configurations.autoReconnect || false;
-        this.reconnectionInterval = configurations.reconnectInterval || 10000;
-        this.reconnectionAttempts = configurations.reconnectAttempts || 0;
+        this.reconnectionInterval = configurations.reconnectionInterval || 10000;
+        this.reconnectionAttempts = configurations.reconnectionAttempts || 0;
     }
     return Options;
 }());

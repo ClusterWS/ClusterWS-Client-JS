@@ -15,7 +15,7 @@ export class Options {
         this.url = configurations.url
         this.port = configurations.port
         this.autoReconnect = configurations.autoReconnect || false
-        this.reconnectionInterval = configurations.reconnectInterval || 10000
-        this.reconnectionAttempts = configurations.reconnectAttempts || 0
+        this.reconnectionInterval = configurations.reconnectionInterval || 10000
+        this.reconnectionAttempts = configurations.reconnectionAttempts || 0
     }
 }

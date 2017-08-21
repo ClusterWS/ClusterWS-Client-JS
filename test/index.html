@@ -5,8 +5,9 @@
     <script>
         var webSocket = new ClusterWS({
             url: 'localhost',
-            port:3000,
-            autoReconnect: true
+            port:80,
+            autoReconnect: true,
+            reconnectionInterval: 2000
         });
 
         webSocket.on('connect', function(){
@@ -28,6 +29,9 @@
             console.log(data);
         });
 
+        webSocket.on('disconnect', function(data){
+            console.log(data);
+        });
 
     </script>
 </head>

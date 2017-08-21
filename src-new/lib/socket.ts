@@ -17,7 +17,6 @@ export class Socket {
 
     constructor(public options: Options) {
         this.autoReconnect = this.options.autoReconnect
-
         this.connect()
     }
 
@@ -51,10 +50,10 @@ export class Socket {
             })(msg.m[0])
         }
 
-        this.webSocket.onclose = (code?: number, msg?: any) => {
-            this.events.emit('disconnect', code, msg)
-
-            if (this.autoReconnect && code !== 1000) return this.inReconnectionState ? '' : this.reconnection()
+        this.webSocket.onclose = (event: any) => {
+            this.events.emit('disconnect', event.code, event.reason)
+            
+            if (this.autoReconnect && event.code !== 1000) return this.inReconnectionState ? '' : this.reconnection()
 
             this.events.removeAllEvents()
             for (let key in this) if (this.hasOwnProperty(key)) {
@@ -85,7 +84,7 @@ export class Socket {
         this.inReconnectionState = true
 
         let interval = setInterval(() => {
-            if (this.webSocket.state === this.webSocket.CLOSED) {
+            if (this.webSocket.readyState === this.webSocket.CLOSED) {
                 this.reconnectionAttempted++
                 this.connect(interval)
                 if (this.options.reconnectionAttempts !== 0 && this.reconnectionAttempted >= this.options.reconnectionAttempts) {
