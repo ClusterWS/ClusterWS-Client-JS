@@ -1,27 +1,21 @@
-export interface Configurations {
-    url: string,
-    port: number,
-    autoReconnect?: boolean,
-    reconnectInterval?: number;
-    reconnectAttempts?: number;
-}
+import { logError } from './utils/common'
 
 export class Options {
-    url: string;
-    port: number;
-    autoReconnect: boolean;
-    reconnectInterval: number;
-    reconnectAttempts: number;
+    url: string
+    port: number
+    autoReconnect: boolean
+    reconnectionInterval: number
+    reconnectionAttempts: number
 
-    constructor(configuration: Configurations) {
+    constructor(configurations: any) {
 
-        if (!configuration.url) throw new Error('Url must be provided');
-        if (!configuration.port) throw new Error('Port must be provided');
+        if (!configurations.url) throw logError('Url must be provided')
+        if (!configurations.port) throw logError('Port must be provided')
 
-        this.url = configuration.url;
-        this.port = configuration.port;
-        this.autoReconnect = configuration.autoReconnect || false;
-        this.reconnectInterval = configuration.reconnectInterval || 10000;
-        this.reconnectAttempts = configuration.reconnectAttempts || 0;
+        this.url = configurations.url
+        this.port = configurations.port
+        this.autoReconnect = configurations.autoReconnect || false
+        this.reconnectionInterval = configurations.reconnectionInterval || 1000
+        this.reconnectionAttempts = configurations.reconnectionAttempts || 0
     }
 }

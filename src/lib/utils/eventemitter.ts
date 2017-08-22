@@ -15,20 +15,8 @@ export class EventEmitter {
         _.map((listener: any) => listener.call(null, ...args), this._events[event])
     }
 
-    removeListener(event: string, listener: any) {
-        _.map((l: any, index: number) => l === listener ? this._events[event].splice(index, 1) : '', this._events[event])
-    }
-
-    removeEvent(event: string) {
-        this._events[event] = null
-    }
-
     removeAllEvents() {
         this._events = {}
-    }
-
-    exist(event: string) {
-        return this._events[event]
     }
 }
 

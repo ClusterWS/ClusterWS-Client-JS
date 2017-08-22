@@ -184,9 +184,8 @@ var Socket = (function () {
     }
     Socket.prototype.connect = function (interval) {
         var _this = this;
-        var pingInterval;
         var pings = 0;
-        this.webSocket = null;
+        var pingInterval;
         this.webSocket = new WebSocket('ws://' + this.options.url + ':' + this.options.port);
         this.webSocket.onerror = function (err) { return _this.events.emit('error', err); };
         this.webSocket.onopen = function () {
@@ -206,13 +205,7 @@ var Socket = (function () {
                 'p': function () { return _this.channels[msg.m[1]] ? _this.channels[msg.m[1]].message(msg.m[2]) : ''; },
                 'e': function () { return _this.events.emit(msg.m[1], msg.m[2]); },
                 's': function () { return fp_1._.switchcase({
-                    'c': function () {
-                        pingInterval = setInterval(function () {
-                            if (pings < 3)
-                                return pings++;
-                            _this.webSocket.disconnect(3001, 'No pings from server');
-                        }, msg.m[2].ping);
-                    }
+                    'c': function () { return pingInterval = setInterval(function () { return pings < 3 ? pings++ : _this.webSocket.disconnect(3001, 'No pings from server'); }, msg.m[2].ping); }
                 })(msg.m[1]); }
             })(msg.m[0]);
         };
@@ -279,7 +272,7 @@ var Channel = (function () {
         return this;
     };
     Channel.prototype.publish = function (data) {
-        this.socket.send(this.channel, data, 'publish');
+        this.channel ? this.socket.send(this.channel, data, 'publish') : '';
         return this;
     };
     Channel.prototype.message = function (data) {
@@ -288,6 +281,12 @@ var Channel = (function () {
     };
     Channel.prototype.unsubscribe = function () {
         this.socket.send('unsubscribe', this.channel, 'system');
+        this.socket.channels[this.channel] = null;
+        for (var key in this)
+            if (this.hasOwnProperty(key)) {
+                this[key] = null;
+                delete this[key];
+            }
     };
     Channel.prototype.subscribe = function () {
         this.socket.send('subscribe', this.channel, 'system');
@@ -322,18 +321,8 @@ var EventEmitter = (function () {
         }
         fp_1._.map(function (listener) { return listener.call.apply(listener, [null].concat(args)); }, this._events[event]);
     };
-    EventEmitter.prototype.removeListener = function (event, listener) {
-        var _this = this;
-        fp_1._.map(function (l, index) { return l === listener ? _this._events[event].splice(index, 1) : ''; }, this._events[event]);
-    };
-    EventEmitter.prototype.removeEvent = function (event) {
-        this._events[event] = null;
-    };
     EventEmitter.prototype.removeAllEvents = function () {
         this._events = {};
-    };
-    EventEmitter.prototype.exist = function (event) {
-        return this._events[event];
     };
     return EventEmitter;
 }());

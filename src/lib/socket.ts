@@ -15,17 +15,15 @@ export class Socket {
     inReconnectionState: boolean = false
     reconnectionAttempted: number = 0
 
-
     constructor(public options: Options) {
         this.autoReconnect = this.options.autoReconnect
         this.connect()
     }
 
     connect(interval?: any) {
-        let pingInterval: any
         let pings: number = 0
+        let pingInterval: any
 
-        this.webSocket = null
         this.webSocket = new WebSocket('ws://' + this.options.url + ':' + this.options.port)
 
         this.webSocket.onerror = (err: any) => this.events.emit('error', err)
@@ -52,12 +50,7 @@ export class Socket {
                 'p': () => this.channels[msg.m[1]] ? this.channels[msg.m[1]].message(msg.m[2]) : '',
                 'e': () => this.events.emit(msg.m[1], msg.m[2]),
                 's': () => _.switchcase({
-                    'c': () => {
-                        pingInterval = setInterval(() => {
-                            if (pings < 3) return pings++
-                            this.webSocket.disconnect(3001, 'No pings from server')
-                        }, msg.m[2].ping)
-                    }
+                    'c': () => pingInterval = setInterval(() => pings < 3 ? pings++ : this.webSocket.disconnect(3001, 'No pings from server'), msg.m[2].ping)
                 })(msg.m[1])
             })(msg.m[0])
         }

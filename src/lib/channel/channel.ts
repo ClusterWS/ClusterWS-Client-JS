@@ -1,10 +1,11 @@
+import { Socket } from '../socket'
 // u = unsubscribe
 // s = subsrcibe
 
 export class Channel {
     event: any
 
-    constructor(public channel: string, public socket: any) {
+    constructor(public channel: string, public socket: Socket) {
         this.subscribe()
     }
 
@@ -14,7 +15,7 @@ export class Channel {
     }
 
     publish(data: any) {
-        this.socket.send(this.channel, data, 'publish')
+        this.channel ? this.socket.send(this.channel, data, 'publish') : ''
         return this
     }
 
@@ -24,6 +25,11 @@ export class Channel {
 
     unsubscribe() {
         this.socket.send('unsubscribe', this.channel, 'system')
+        this.socket.channels[this.channel] = null
+        for (let key in this) if (this.hasOwnProperty(key)) {
+            this[key] = null
+            delete this[key]
+        }
     }
 
     subscribe() {

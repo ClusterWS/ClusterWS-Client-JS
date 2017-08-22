@@ -31,6 +31,7 @@
         });
 
         webSocket.on('disconnect', function(data){
+            webSocket = null
             console.log(data);
         });
     </script>
