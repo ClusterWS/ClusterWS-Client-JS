@@ -7,7 +7,8 @@
             url: 'localhost',
             port:80,
             autoReconnect: true,
-            reconnectionInterval: 2000
+            reconnectionInterval: 1000,
+            // reconnectionAttempts: 5
         });
 
         webSocket.on('connect', function(){
@@ -32,7 +33,6 @@
         webSocket.on('disconnect', function(data){
             console.log(data);
         });
-
     </script>
 </head>
 </html>

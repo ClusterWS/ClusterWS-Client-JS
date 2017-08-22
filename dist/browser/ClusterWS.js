@@ -184,6 +184,8 @@ var Socket = (function () {
     }
     Socket.prototype.connect = function (interval) {
         var _this = this;
+        var pingInterval;
+        var pings = 0;
         this.webSocket = null;
         this.webSocket = new WebSocket('ws://' + this.options.url + ':' + this.options.port);
         this.webSocket.onerror = function (err) { return _this.events.emit('error', err); };
@@ -195,18 +197,27 @@ var Socket = (function () {
             _this.events.emit('connect');
         };
         this.webSocket.onmessage = function (msg) {
-            if (msg.data === '#0')
+            if (msg.data === '#0') {
+                pings = 0;
                 return _this.send('#1', null, 'ping');
+            }
             msg = JSON.parse(msg.data);
             fp_1._.switchcase({
                 'p': function () { return _this.channels[msg.m[1]] ? _this.channels[msg.m[1]].message(msg.m[2]) : ''; },
                 'e': function () { return _this.events.emit(msg.m[1], msg.m[2]); },
                 's': function () { return fp_1._.switchcase({
-                    'c': function () { }
+                    'c': function () {
+                        pingInterval = setInterval(function () {
+                            if (pings < 3)
+                                return pings++;
+                            _this.webSocket.disconnect(3001, 'No pings from server');
+                        }, msg.m[2].ping);
+                    }
                 })(msg.m[1]); }
             })(msg.m[0]);
         };
         this.webSocket.onclose = function (event) {
+            clearInterval(pingInterval);
             _this.events.emit('disconnect', event.code, event.reason);
             if (_this.autoReconnect && event.code !== 1000)
                 return _this.inReconnectionState ? '' : _this.reconnection();
@@ -236,12 +247,12 @@ var Socket = (function () {
         var interval = setInterval(function () {
             if (_this.webSocket.readyState === _this.webSocket.CLOSED) {
                 _this.reconnectionAttempted++;
-                _this.connect(interval);
                 if (_this.options.reconnectionAttempts !== 0 && _this.reconnectionAttempted >= _this.options.reconnectionAttempts) {
                     clearInterval(interval);
                     _this.autoReconnect = false;
                     _this.inReconnectionState = false;
                 }
+                _this.connect(interval);
             }
         }, this.options.reconnectionInterval);
     };
@@ -368,7 +379,7 @@ var Options = (function () {
         this.url = configurations.url;
         this.port = configurations.port;
         this.autoReconnect = configurations.autoReconnect || false;
-        this.reconnectionInterval = configurations.reconnectionInterval || 10000;
+        this.reconnectionInterval = configurations.reconnectionInterval || 1000;
         this.reconnectionAttempts = configurations.reconnectionAttempts || 0;
     }
     return Options;
