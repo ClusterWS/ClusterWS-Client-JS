@@ -5,13 +5,11 @@
   "main": "index.js",
   "author": "Dmitrii Goriunov <goriunovd@gmail.com>",
   "scripts": {
-    "start": "npm run webpack:dev",
-    "build": "npm run webpack:prod && npm run webpack:dev",
-    "build:publish": "npm run build && cd dist/npm && npm publish && cd ../..",
-    "webpack:prod": "cross-env WEBPACK_ENV=prod  webpack && npm run webpack:npm",
-    "webpack:dev": "cross-env WEBPACK_ENV=dev  webpack",
-    "webpack:npm": "cross-env WEBPACK_ENV=npm  webpack",
-    "build:changelog": "cross-env NODE_ENV=...0.1.0 node information/changelog.js"
+    "start": "npm run debug",
+    "debug": "cross-env WEBPACK_ENV=dev  webpack",
+    "build": "npm run webpack:prod && npm run debug",
+    "publish": "npm run build && cd dist/npm && npm publish && cd ../..",
+    "webpack:prod": "cross-env WEBPACK_ENV=prod webpack && cross-env WEBPACK_ENV=npm webpack"
   },
   "license": "MIT",
   "keywords": [
