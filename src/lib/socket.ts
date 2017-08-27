@@ -85,7 +85,6 @@ export class Socket {
         this.webSocket.send(socketMessages(event, data, type || 'emit'))
     }
 
-
     reconnection() {
         this.inReconnectionState = true
 
