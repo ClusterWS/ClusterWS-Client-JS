@@ -6,11 +6,9 @@ let curry = (fn: any) =>
             fn.length ? fn.call(null, ...args) : fn
     }
 
-
 /* Switch Module */
 let isFunction = (f: any) => f ? typeof f === 'function' ? f() : f : ''
 let switchcase = curry((cases: any, key: any) => key in cases ? isFunction(cases[key]) : isFunction(cases['default']))
-
 
 /* Map Module */
 let mapArray = (iteratee: any, array: any) => {
@@ -27,7 +25,6 @@ let mapObject = (iteratee: any, object: any) => {
     return result
 }
 let map = curry((fn: any, x: any) => x instanceof Array ? mapArray(fn, x) : mapObject(fn, x))
-
 
 /* Export all modules */
 export let _ = {

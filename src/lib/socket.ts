@@ -8,7 +8,6 @@ import { socketMessages } from './communication/messages'
 Socket object
 
 Contains all available to the user socket functions 
-
 */
 export class Socket {
 
@@ -89,6 +88,10 @@ export class Socket {
 
     send(event: string, data: any, type?: string) {
         this.webSocket.send(socketMessages(event, data, type || 'emit'))
+    }
+
+    getState() {
+        return this.webSocket.readyState
     }
 
     reconnection() {

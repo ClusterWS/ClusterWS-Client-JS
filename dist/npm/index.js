@@ -151,6 +151,8 @@
                 this.events.on(t, e);
             }, t.prototype.send = function(t, e, n) {
                 this.webSocket.send(c.socketMessages(t, e, n || "emit"));
+            }, t.prototype.getState = function() {
+                return this.webSocket.readyState;
             }, t.prototype.reconnection = function() {
                 var t = this;
                 this.inReconnectionState = !0;
