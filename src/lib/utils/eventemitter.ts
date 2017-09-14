@@ -2,7 +2,6 @@ import { _ } from './fp'
 import { logError } from './common'
 
 /* Custom EventEmitter */
-
 export class EventEmitter {
     _events: any = {}
 

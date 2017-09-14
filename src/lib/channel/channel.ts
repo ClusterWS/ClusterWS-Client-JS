@@ -6,7 +6,7 @@ export class Channel {
     event: any
 
     constructor(public channel: string, public socket: Socket) {
-        this.subscribe()
+        this._subscribe()
     }
 
     watch(fn: any) {
@@ -19,10 +19,6 @@ export class Channel {
         return this
     }
 
-    message(data: any) {
-        if (this.event) this.event(data)
-    }
-
     unsubscribe() {
         this.socket.send('unsubscribe', this.channel, 'system')
         this.socket.channels[this.channel] = null
@@ -32,7 +28,11 @@ export class Channel {
         }
     }
 
-    subscribe() {
+    _message(data: any) {
+        if (this.event) this.event(data)
+    }
+    
+    _subscribe() {
         this.socket.send('subscribe', this.channel, 'system')
     }
 }

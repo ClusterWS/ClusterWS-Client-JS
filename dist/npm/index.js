@@ -117,13 +117,13 @@
                     return n.events.emit("error", t);
                 }, this.webSocket.onopen = function() {
                     clearInterval(t), n.inReconnectionState = !1, n.reconnectionAttempted = 0, o._.map(function(t) {
-                        return t.subscribe();
+                        return t._subscribe();
                     }, n.channels), n.events.emit("connect");
                 }, this.webSocket.onmessage = function(t) {
                     if ("#0" === t.data) return r = 0, n.send("#1", null, "ping");
                     t = JSON.parse(t.data), o._.switchcase({
                         p: function() {
-                            return n.channels[t.m[1]] ? n.channels[t.m[1]].message(t.m[2]) : "";
+                            return n.channels[t.m[1]] ? n.channels[t.m[1]]._message(t.m[2]) : "";
                         },
                         e: function() {
                             return n.events.emit(t.m[1], t.m[2]);
@@ -139,7 +139,7 @@
                         }
                     })(t.m[0]);
                 }, this.webSocket.onclose = function(t) {
-                    if (clearInterval(e), n.events.emit("disconnect", t.code, t.reason), n.autoReconnect && 1e3 !== t.code) return n.inReconnectionState ? "" : n.reconnection();
+                    if (clearInterval(e), n.events.emit("disconnect", t.code, t.reason), n.autoReconnect && 1e3 !== t.code) return n.inReconnectionState ? "" : n._reconnection();
                     n.events.removeAllEvents();
                     for (var o in n) n.hasOwnProperty(o) && (n[o] = null, delete n[o]);
                 };
@@ -153,7 +153,7 @@
                 this.webSocket.send(c.socketMessages(t, e, n || "emit"));
             }, t.prototype.getState = function() {
                 return this.webSocket.readyState;
-            }, t.prototype.reconnection = function() {
+            }, t.prototype._reconnection = function() {
                 var t = this;
                 this.inReconnectionState = !0;
                 var e = setInterval(function() {
@@ -170,18 +170,18 @@
         });
         var o = function() {
             function t(t, e) {
-                this.channel = t, this.socket = e, this.subscribe();
+                this.channel = t, this.socket = e, this._subscribe();
             }
             return t.prototype.watch = function(t) {
                 return this.event = t, this;
             }, t.prototype.publish = function(t) {
                 return this.channel && this.socket.send(this.channel, t, "publish"), this;
-            }, t.prototype.message = function(t) {
-                this.event && this.event(t);
             }, t.prototype.unsubscribe = function() {
                 this.socket.send("unsubscribe", this.channel, "system"), this.socket.channels[this.channel] = null;
                 for (var t in this) this.hasOwnProperty(t) && (this[t] = null, delete this[t]);
-            }, t.prototype.subscribe = function() {
+            }, t.prototype._message = function(t) {
+                this.event && this.event(t);
+            }, t.prototype._subscribe = function() {
                 this.socket.send("subscribe", this.channel, "system");
             }, t;
         }();
@@ -243,7 +243,7 @@
                 if (!t.url) throw o.logError("Url must be provided");
                 if (!t.port) throw o.logError("Port must be provided");
                 this.url = t.url, this.port = t.port, this.autoReconnect = t.autoReconnect || !1, 
-                this.reconnectionInterval = t.reconnectionInterval || 1e3, this.reconnectionAttempts = t.reconnectionAttempts || 0;
+                this.reconnectionInterval = t.reconnectionInterval || 5e3, this.reconnectionAttempts = t.reconnectionAttempts || 0;
             }
             return t;
         }();

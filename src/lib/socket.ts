@@ -38,7 +38,7 @@ export class Socket {
             this.inReconnectionState = false
             this.reconnectionAttempted = 0
 
-            _.map((channel: any) => channel.subscribe(), this.channels)
+            _.map((channel: any) => channel._subscribe(), this.channels)
 
             this.events.emit('connect')
         }
@@ -52,7 +52,7 @@ export class Socket {
             msg = JSON.parse(msg.data)
 
             _.switchcase({
-                'p': () => this.channels[msg.m[1]] ? this.channels[msg.m[1]].message(msg.m[2]) : '',
+                'p': () => this.channels[msg.m[1]] ? this.channels[msg.m[1]]._message(msg.m[2]) : '',
                 'e': () => this.events.emit(msg.m[1], msg.m[2]),
                 's': () => _.switchcase({
                     'c': () => pingInterval = setInterval(() => pings < 3 ? pings++ : this.webSocket.disconnect(3001, 'No pings from server'), msg.m[2].ping)
@@ -64,7 +64,7 @@ export class Socket {
             clearInterval(pingInterval)
             this.events.emit('disconnect', event.code, event.reason)
 
-            if (this.autoReconnect && event.code !== 1000) return this.inReconnectionState ? '' : this.reconnection()
+            if (this.autoReconnect && event.code !== 1000) return this.inReconnectionState ? '' : this._reconnection()
 
             this.events.removeAllEvents()
             for (let key in this) if (this.hasOwnProperty(key)) {
@@ -94,7 +94,7 @@ export class Socket {
         return this.webSocket.readyState
     }
 
-    reconnection() {
+    _reconnection() {
         this.inReconnectionState = true
 
         let interval = setInterval(() => {
