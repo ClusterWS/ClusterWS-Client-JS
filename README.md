@@ -38,7 +38,7 @@ When library is global you can connect it like following:
 var clusterWS = new ClusterWS({
     url: 'localhost',
     port: 3000
-});
+})
 ```
 
 If you have installed library from `npm` then you have to use `require` or `import`:
@@ -51,7 +51,7 @@ var ClusterWS = require('clusterws-client-js').ClusterWS
 var clusterws = new ClusterWS({
     url: 'localhost',
     port: 3000
-});
+})
 ```
 
 *ClusterWS all options:*
@@ -74,8 +74,8 @@ To listen on event use `'on'` method which is provided by ClusterWS:
 
 ```js
 clusterws.on('any event name', function(data){
-       console.log(data);
-});
+       console.log(data)
+})
 ```
 
 *You can listen on any event which you emit from the server, also you can listen on **Reserved events** which are emitted by the server automatically.*
@@ -89,7 +89,7 @@ clusterws.on('any event name', function(data){
 To emit an event to the server you should use `send` method which is provided by ClusterWS:
 
 ```js
-clusterws.send('event name', data);
+clusterws.send('event name', data)
 ```
 
 *`'data'` can be any type you want such as `array`, `string`, `object`, `...`*
@@ -107,7 +107,7 @@ You can subscribe to `any channels`:
 
 ```js
 // Subscribe to channel
-var channel = clusterws.subscribe('channel name');
+var channel = clusterws.subscribe('channel name')
 ```
 
 After you subscribe to the `channel` you will be able to get all messages which are published to this `channel` and you will also be able to publish your messages there:
@@ -117,11 +117,11 @@ After you subscribe to the `channel` you will be able to get all messages which 
 ```js
 // Listen on the data from channel
 channel.watch(function(data){
-    console.log(data);
-});
+    console.log(data)
+})
 
 // Publish data to channel
-channel.publish('some data');
+channel.publish('some data')
 ```
 
 Or you can chain everything:
@@ -130,8 +130,8 @@ Or you can chain everything:
 
 ```js
 var channel = clusterws.subscribe('channel name').watch(function(data){
-    console.log(data);
-}).publish('some data');
+    console.log(data)
+}).publish('some data')
 ```
 
 *`'data'` can be any type you want such as `array`, `string`, `object`, `...`*
