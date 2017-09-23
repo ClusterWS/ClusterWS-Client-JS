@@ -92,7 +92,7 @@ To emit an event to the server you should use `send` method which is provided by
 clusterws.send('event name', data);
 ```
 
-*`'data'` can be any type you want such as array, string, object, ...*
+*`'data'` can be any type you want such as `array`, `string`, `object`, `...`*
 
 ***Try to avoid emitting reserved events:** `'connect'`, `'error'`, `'disconnect'`, or any events which start with `'#'`*
 
@@ -134,7 +134,7 @@ var channel = clusterws.subscribe('channel name').watch(function(data){
 }).publish('some data');
 ```
 
-*`'data'` can be any type you want such as array, string, object, ...*
+*`'data'` can be any type you want such as `array`, `string`, `object`, `...`*
 
 **To make sure that user is connected to the server before subscribing, do it on `connect` event or on any other events which you emit from the server, otherwise subscription will not work properly**
 
