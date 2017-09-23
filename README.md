@@ -28,7 +28,7 @@ Or globally without npm:
 
 ## Socket
 
-### Connect to the server:
+### 1. Connect to the server
 
 When library is global you can connect it like following:
 
@@ -66,7 +66,7 @@ var clusterws = new ClusterWS({
 }
 ```
 
-### Listen on events from the server:
+### 2. Listen on events from the server
 
 To listen on event use `'on'` method which is provided by ClusterWS:
 
@@ -84,7 +84,7 @@ clusterws.on('any event name', function(data){
 
 ***Reserved events**: `'connect'`, `'error'`, `'disconnect'`*
 
-### Emit an event:
+### 3. Emit an event
 
 To emit an event to the server you should use `send` method which is provided by ClusterWS:
 
@@ -98,7 +98,7 @@ clusterws.send('event name', data);
 
 ## Pub/Sub
 
-### Subscribe and publish to the channels:
+### 1. Subscribe watch and publish to the channels
 
 You can subscribe to `any channels`:
 
