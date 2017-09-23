@@ -2,12 +2,13 @@
 
 [![npm version](https://badge.fury.io/js/clusterws-client-js.svg)](https://badge.fury.io/js/clusterws-client-js)
 
-This is a **Beta Version** that is why library may lack some important features :) . You can see main changes in [HERE](./information/CHANGELOG.md). Possible next versions fetchers in [HERE](./information/PLANS.md).
+ClusterWS - is a minimal **Node JS http & real-time** framework which allows easily scale WebSocket ([uWS](https://github.com/uNetworking/uWebSockets) - one of the fastest WebSocket libraries) between node js clusters and utilize all available CPU.
 
-This is small official JavaScript library for [ClusterWS](https://github.com/goriunov/ClusterWS), which is using standard browser WebSocket.
-Library has been written in TypeScript and compile down to es5. You can find all development code in `src/` folder  and all compiled code in `dist/` folder.
+This is official Client JavaScript library for [ClusterWS](https://github.com/goriunov/ClusterWS), which is written in TypeScript and compiling down to es5 modules. All development code you can find in `src/` folder and compiled code in `dist/`.
 
-**Current only minified size is less then 6KB.**
+[ClusterWS CHANGELOG.](./information/CHANGELOG.md)
+
+**Current minified version is less then 7KB.**
 
 ### Installation:
 
@@ -17,43 +18,50 @@ Use npm :
 npm install --save clusterws-client-js
 ```
 
-Or globally:
+Or globally with out npm:
 
-1. Find ClusterWS.(min).js  in dist/browser
-2. Use standard script to import library `<script src="path/to/ClusterWS.(min).js"></script>`
-3. Done you can use it 'ClusterWS' :)
+1. Find ClusterWS.(min).js  in `dist/browser` folder
+2. Use standard script tag to import library `<script src="path/to/ClusterWS.[min].js"></script>`
+3. Done you can use it as `ClusterWS` :)
 
 ### Connect to the server:
 
-When library is global you can connect like that:
+**You must use [ClusterWS](https://github.com/goriunov/ClusterWS) on the server**
+
+
+When library is global you can connect it like that:
+
+**Code:**
 
 ```js
 var clusterWS = new ClusterWS({
-    url: 'url to the server with out http' ex: 'localhost',
+    url: 'url to the server without http' ex: 'localhost',
     port: 'port number' ex: 3000
 });
 ```
 
-If you installed library from npm then you have to use require or import:
+If you installed library from npm then you have to use `require` or `import`:
+
+**Code:**
 
 ```js
 var ClusterWS = require('clusterws-client-js').ClusterWS
 
 var clusterWS = new ClusterWS({
-    url: 'url to the server with out http' ex: 'localhost',
+    url: 'url to the server without http' ex: 'localhost',
     port: 'port number' ex: 3000
 });
 ```
 
-### All available options
+*ClusterWS all options:*
 
 ```js
 {
-    url: 'url to the server {string} without http or https',
-    port: 'port on the server {number}',
-    autoReconnect: 'allow to auto-reconnect to the server on lost connection {bool} default is false',
-    reconnectInterval: 'how often it will try to reconnect {number} default is 10000 ms (10s)',
-    reconnectAttempts: 'how many times try to reconnect {number} default is 0 it means try to reconnect with out limit'
+    url: '{string} url of the server without http or https',
+    port: '{number} port of the server',
+    autoReconnect: '{boolean} allow to auto-reconnect to the server on lost connection (default false)',
+    reconnectionInterval: '{number} how often it will try to reconnect in ms (default 10000)',
+    reconnectionAttempts: '{number} how many times try to reconnect 0 means without limit (default 0)'
 }
 ```
 

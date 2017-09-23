@@ -31,7 +31,7 @@ export class Channel {
     _message(data: any) {
         if (this.event) this.event(data)
     }
-    
+
     _subscribe() {
         this.socket.send('subscribe', this.channel, 'system')
     }

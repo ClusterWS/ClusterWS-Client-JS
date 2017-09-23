@@ -2,12 +2,13 @@
 
 [![npm version](https://badge.fury.io/js/clusterws-client-js.svg)](https://badge.fury.io/js/clusterws-client-js)
 
-This is a **Beta Version** that is why library may lack some important features :) . You can see main changes in [HERE](./information/CHANGELOG.md). Possible next versions fetchers in [HERE](./information/PLANS.md).
+ClusterWS - is a minimal **Node JS http & real-time** framework which allows easily scale WebSocket ([uWS](https://github.com/uNetworking/uWebSockets) - one of the fastest WebSocket libraries) between node js clusters and utilize all available CPU.
 
-This is small official JavaScript library for [ClusterWS](https://github.com/goriunov/ClusterWS), which is using standard browser WebSocket.
-Library has been written in TypeScript and compile down to es5. You can find all development code in `src/` folder  and all compiled code in `dist/` folder.
+This is official Client JavaScript library for [ClusterWS](https://github.com/goriunov/ClusterWS), which is written in TypeScript and compiling down to es5 modules. All development code you can find in `src/` folder and compiled code in `dist/`.
 
-**Current only minified size is less then 6KB.**
+[ClusterWS CHANGELOG.](./information/CHANGELOG.md)
+
+**Current minified version is less then 7KB.**
 
 ### Installation:
 
@@ -20,27 +21,30 @@ npm install --save clusterws-client-js
 Or globally:
 
 1. Find ClusterWS.(min).js  in dist/browser
-2. Use standard script to import library `<script src="path/to/ClusterWS.(min).js"></script>`
-3. Done you can use it 'ClusterWS' :)
+2. Use standard script to import library `<script src="path/to/ClusterWS.[min].js"></script>`
+3. Done you can use it as `ClusterWS` :)
 
 ### Connect to the server:
+
+**You must use [ClusterWS](https://github.com/goriunov/ClusterWS) on the server**
+
 
 When library is global you can connect like that:
 
 ```js
 var clusterWS = new ClusterWS({
-    url: 'url to the server with out http' ex: 'localhost',
+    url: 'url to the server without http' ex: 'localhost',
     port: 'port number' ex: 3000
 });
 ```
 
-If you installed library from npm then you have to use require or import:
+If you installed library from npm then you have to use `require` or `import`:
 
 ```js
 var ClusterWS = require('clusterws-client-js').ClusterWS
 
 var clusterWS = new ClusterWS({
-    url: 'url to the server with out http' ex: 'localhost',
+    url: 'url to the server without http' ex: 'localhost',
     port: 'port number' ex: 3000
 });
 ```

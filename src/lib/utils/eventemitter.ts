@@ -18,4 +18,3 @@ export class EventEmitter {
         this._events = {}
     }
 }
-

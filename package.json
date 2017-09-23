@@ -5,7 +5,6 @@
   "main": "index.js",
   "author": "Dmitrii Goriunov <goriunovd@gmail.com>",
   "scripts": {
-    "start": "npm run debug",
     "debug": "cross-env WEBPACK_ENV=dev  webpack",
     "build": "npm run webpack:prod && npm run debug",
     "publish": "npm run build && cd dist/npm && npm publish && cd ../..",

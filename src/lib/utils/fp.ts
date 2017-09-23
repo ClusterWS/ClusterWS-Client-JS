@@ -32,5 +32,3 @@ export let _ = {
     curry: curry,
     switchcase: switchcase
 }
-
-
