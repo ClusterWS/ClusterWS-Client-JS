@@ -1,3 +1,7 @@
+# Proper changelog is still in dev
+
+
+
 # 1.0.0
 
 ## New features 
