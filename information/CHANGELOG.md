@@ -1,3 +1,15 @@
+# 1.0.0
+
+## New features 
+
+* **new:**  Complete library rewriting.
+
+## Changes
+
+* **chg:**  Improve performance.
+* **chg:**  Added separate test library.
+* **chg:**  Ranamed params.
+
 # 0.1.0
  
 ## New features 
