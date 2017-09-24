@@ -4,17 +4,17 @@
 
 ClusterWS - is a minimal **Node JS http & real-time** framework which allows to scale WebSocket ([uWS](https://github.com/uNetworking/uWebSockets) - one of the fastest WebSocket libraries) between node js clusters and utilize all available CPU.
 
-This is official Client JavaScript library for [ClusterWS](https://github.com/goriunov/ClusterWS), which is written in TypeScript and compiling down to es5 modules. All development code can be found in `src/` folder and compiled code in `dist/`.
+This is official JavaScript (client) library for [ClusterWS](https://github.com/goriunov/ClusterWS), which is written in TypeScript and compiling down to es5 modules. All development code can be found in `src/` folder and compiled code in `dist/`.
 
 [ClusterWS CHANGELOG.](./information/CHANGELOG.md)
 
 **Current minified version is less then 7KB.**
 
-**You must use [ClusterWS](https://github.com/goriunov/ClusterWS) on the server with this library**
+**To be able to use this library you must use [ClusterWS](https://github.com/goriunov/ClusterWS) on the server**
 
 ## Installation
 
-Use npm :
+Use `npm` :
 
 ```js
 npm install --save clusterws-client-js
