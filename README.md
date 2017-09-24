@@ -30,6 +30,8 @@ Or globally without npm:
 
 ### 1. Connect to the server
 
+<div style="text-align:center"><img  src ="https://u.cubeupload.com/goriunovd/client1.gif"></div>
+
 When library is global you can connect it like following:
 
 #### **Code:**
@@ -37,7 +39,7 @@ When library is global you can connect it like following:
 ```js
 var clusterWS = new ClusterWS({
     url: 'localhost',
-    port: 3000
+    port: 80
 })
 ```
 
@@ -50,7 +52,7 @@ var ClusterWS = require('clusterws-client-js').ClusterWS
 
 var clusterws = new ClusterWS({
     url: 'localhost',
-    port: 3000
+    port: 80
 })
 ```
 
@@ -70,10 +72,12 @@ var clusterws = new ClusterWS({
 
 To listen on event use `'on'` method which is provided by ClusterWS:
 
+<div style="text-align:center"><img  src ="https://u.cubeupload.com/goriunovd/client2.gif"></div>
+
 #### **Code:**
 
 ```js
-clusterws.on('any event name', function(data){
+clusterws.on('myevent', function(data){
        console.log(data)
 })
 ```
@@ -88,6 +92,8 @@ clusterws.on('any event name', function(data){
 
 To emit an event to the server you should use `send` method which is provided by ClusterWS:
 
+<div style="text-align:center"><img  src ="https://u.cubeupload.com/goriunovd/client3.gif"></div>
+
 ```js
 clusterws.send('event name', data)
 ```
@@ -99,6 +105,8 @@ clusterws.send('event name', data)
 ## Pub/Sub
 
 ### 1. Subscribe watch and publish to the channels
+
+<div style="text-align:center"><img  src ="https://u.cubeupload.com/goriunovd/client4.gif"></div>
 
 You can subscribe to `any channels`:
 
@@ -136,6 +144,6 @@ var channel = clusterws.subscribe('channel name').watch(function(data){
 
 *`'data'` can be any type you want such as `array`, `string`, `object`, `...`*
 
-**To make sure that user is connected to the server before subscribing, do it on `connect` event or on any other events which you emit from the server, otherwise subscription will not work properly**
+**To make sure that user is connected to the server before subscribing, do it on `connect` event or on any other events which you emit from the server, otherwise subscription may not work properly**
 
 # Happy codding !!! :sunglasses:
