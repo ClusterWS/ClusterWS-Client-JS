@@ -1,118 +1,149 @@
-# ClusterWS (Node Cluster WebSocket) Client Javascript
+# ClusterWS (Node Cluster WebSocket) Client JavaScript
 
 [![npm version](https://badge.fury.io/js/clusterws-client-js.svg)](https://badge.fury.io/js/clusterws-client-js)
 
-ClusterWS - is a minimal **Node JS http & real-time** framework which allows easily scale WebSocket ([uWS](https://github.com/uNetworking/uWebSockets) - one of the fastest WebSocket libraries) between node js clusters and utilize all available CPU.
+ClusterWS - is a minimal **Node JS http & real-time** framework which allows to scale WebSocket ([uWS](https://github.com/uNetworking/uWebSockets) - one of the fastest WebSocket libraries) between node js clusters and utilize all available CPU.
 
-This is official Client JavaScript library for [ClusterWS](https://github.com/goriunov/ClusterWS), which is written in TypeScript and compiling down to es5 modules. All development code you can find in `src/` folder and compiled code in `dist/`.
+This is official JavaScript (client) library for [ClusterWS](https://github.com/goriunov/ClusterWS), which is written in TypeScript and compiling down to es5 modules. All development code can be found in `src/` folder and compiled code in `dist/`.
 
 [ClusterWS CHANGELOG.](./information/CHANGELOG.md)
 
 **Current minified version is less then 7KB.**
 
-### Installation:
+**To be able to use this library you must use [ClusterWS](https://github.com/goriunov/ClusterWS) on the server**
 
-Use npm :
+## Installation
+
+Use `npm` :
 
 ```js
 npm install --save clusterws-client-js
 ```
 
-Or globally:
+Or globally without npm:
 
-1. Find ClusterWS.(min).js  in dist/browser
-2. Use standard script to import library `<script src="path/to/ClusterWS.[min].js"></script>`
-3. Done you can use it as `ClusterWS` :)
+1. Find ClusterWS.(min).js  in `dist/browser` folder
+2. Use standard script tag to import library `<script src="path/to/ClusterWS.[min].js"></script>`
+3. Done, now you can use it as `ClusterWS` :)
 
-### Connect to the server:
+## Socket
 
-**You must use [ClusterWS](https://github.com/goriunov/ClusterWS) on the server**
+### 1. Connect to the server
 
+<div style="text-align:center"><img  src ="https://u.cubeupload.com/goriunovd/client1.gif"></div>
 
-When library is global you can connect like that:
+When library is global you can connect it like following:
+
+#### **Code:**
 
 ```js
 var clusterWS = new ClusterWS({
-    url: 'url to the server without http' ex: 'localhost',
-    port: 'port number' ex: 3000
-});
+    url: 'localhost',
+    port: 80
+})
 ```
 
-If you installed library from npm then you have to use `require` or `import`:
+If you have installed library from `npm` then you have to use `require` or `import`:
+
+#### **Code:**
 
 ```js
 var ClusterWS = require('clusterws-client-js').ClusterWS
 
-var clusterWS = new ClusterWS({
-    url: 'url to the server without http' ex: 'localhost',
-    port: 'port number' ex: 3000
-});
+var clusterws = new ClusterWS({
+    url: 'localhost',
+    port: 80
+})
 ```
 
-### All available options
+*ClusterWS all options:*
 
 ```js
 {
-    url: 'url to the server {string} without http or https',
-    port: 'port on the server {number}',
-    autoReconnect: 'allow to auto-reconnect to the server on lost connection {bool} default is false',
-    reconnectInterval: 'how often it will try to reconnect {number} default is 10000 ms (10s)',
-    reconnectAttempts: 'how many times try to reconnect {number} default is 0 it means try to reconnect with out limit'
+    url: '{string} url of the server without http or https',
+    port: '{number} port of the server',
+    autoReconnect: '{boolean} allow to auto-reconnect to the server on lost connection (default false)',
+    reconnectionInterval: '{number} how often it will try to reconnect in ms (default 10000)',
+    reconnectionAttempts: '{number} how many attempts, 0 means without limit (default 0)'
 }
 ```
 
-
-### Listen on events from the server:
+### 2. Listen on events from the server
 
 To listen on event use `'on'` method which is provided by ClusterWS:
 
+<div style="text-align:center"><img  src ="https://u.cubeupload.com/goriunovd/client2.gif"></div>
+
+#### **Code:**
+
 ```js
-clusterWS.on('any event name', function(data){
-       console.log(data);
-});
+clusterws.on('myevent', function(data){
+       console.log(data)
+})
 ```
 
-You can listen on any event which you emit from the server also you can listen on **Reserved event** which are emitting by the server automatically :)
+*You can listen on any event which you emit from the server, also you can listen on **Reserved events** which are emitted by the server automatically.*
 
-Data which you get in `function(data)` it what you send with event, you can send any type of data.
+*Data which you get in `function(data){}` is what you send with event, you can send `any type of data`.*
 
-**Reserved events**: `'connect'`, `'error'`, `'disconnect'`.
+***Reserved events**: `'connect'`, `'error'`, `'disconnect'`*
 
-### Emit an event:
+### 3. Emit an event
 
-To emit and event to the server you should use `send` method which provided by ClusterWS:
+To emit an event to the server you should use `send` method which is provided by ClusterWS:
+
+<div style="text-align:center"><img  src ="https://u.cubeupload.com/goriunovd/client3.gif"></div>
 
 ```js
-clusterWS.send('event name', data);
+clusterws.send('event name', data)
 ```
 
-`data` can be any type you want.
+*`'data'` can be any type you want such as `array`, `string`, `object`, `...`*
 
-**Never emit reserved events**: `'connect'`, `'error'`, `'disconnect'`.
+***Try to avoid emitting reserved events:** `'connect'`, `'error'`, `'disconnect'`, or any events which start with `'#'`*
 
-### Subscribe and publish to the channels:
+## Pub/Sub
 
-After you subscribe to the channel you will be able to get all messages which are publishing on this channel. Also you will be able to publish your messages.
+### 1. Subscribe watch and publish to the channels
+
+<div style="text-align:center"><img  src ="https://u.cubeupload.com/goriunovd/client4.gif"></div>
+
+You can subscribe to `any channels`:
+
+#### **Code:**
+
 
 ```js
-var channel = clusterWS.subscribe('channel name');
+// Subscribe to channel
+var channel = clusterws.subscribe('channel name')
+```
 
+After you subscribe to the `channel` you will be able to get all messages which are published to this `channel` and you will also be able to publish your messages there:
+
+#### **Code:**
+
+```js
+// Listen on the data from channel
 channel.watch(function(data){
-    console.log(data);
-});
-```
+    console.log(data)
+})
 
-channel.publish('some data');
+// Publish data to channel
+channel.publish('some data')
+```
 
 Or you can chain everything:
 
+#### **Code:**
+
 ```js
-var channel = clusterWS.subscribe('channel name').watch(function(data){
-    console.log(data);
-}).publish('some data');
+var channel = clusterws.subscribe('channel name').watch(function(data){
+    console.log(data)
+}).publish('some data')
 ```
 
-`data` can be any type you want.
+*`'data'` can be any type you want such as `array`, `string`, `object`, `...`*
 
+**To make sure that user is connected to the server before subscribing, do it on `connect` event or on any other events which you emit from the server, otherwise subscription may not work properly**
 
 # Happy codding !!! :sunglasses:
