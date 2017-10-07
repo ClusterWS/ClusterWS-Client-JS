@@ -17,6 +17,8 @@
   },
   "devDependencies": {
     "awesome-typescript-loader": "^3.2.3",
+    "copy-pkg-json-webpack-plugin": "0.0.29",
+    "copy-webpack-plugin": "^4.1.1",
     "cross-env": "^5.0.5",
     "tslint": "^5.7.0",
     "tslint-loader": "^3.5.3",

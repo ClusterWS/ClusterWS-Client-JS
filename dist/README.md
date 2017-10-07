@@ -19,4 +19,3 @@ or use globally:
 1. Find ClusterWS.(min).js  in `dist/browser` folder.
 2. Use standard script tag to import library `<script src="path/to/ClusterWS.[min].js"></script>`.
 3. Done, now you can use it as `ClusterWS`.
-

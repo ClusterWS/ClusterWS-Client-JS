@@ -2,6 +2,8 @@ const fs = require('fs')
 const path = require('path')
 const webpack = require('webpack')
 const nodeExternals = require('webpack-node-externals')
+const CopyPkgJsonPlugin = require("copy-pkg-json-webpack-plugin")
+const CopyWebpackPlugin = require("copy-webpack-plugin")
 
 const env = process.env.WEBPACK_ENV
 
@@ -37,6 +39,10 @@ if (env === 'min') {
         comments: false,
         beautify: true
     }))
+    plugins.push(new CopyPkgJsonPlugin({
+        remove: ['devDependencies', 'scripts']
+    }));
+    plugins.push(new CopyWebpackPlugin([{ from: 'README.md' }]))
 }
 
 const configs = {
