@@ -78,6 +78,8 @@
                 this.websocket.close(e || 1e3, t);
             }, e.prototype.subscribe = function(e) {
                 return this.channels[e] ? this.channels[e] : this.channels[e] = new i.Channel(e, this);
+            }, e.prototype.getState = function() {
+                return this.websocket.readyState;
             }, e;
         }();
         t.ClusterWS = u;

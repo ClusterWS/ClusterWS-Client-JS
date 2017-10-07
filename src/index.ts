@@ -93,4 +93,8 @@ export class ClusterWS {
     subscribe(channel: string): void {
         return this.channels[channel] ? this.channels[channel] : this.channels[channel] = new Channel(channel, this)
     }
+
+    getState(): any {
+        return this.websocket.readyState
+    }
 }
