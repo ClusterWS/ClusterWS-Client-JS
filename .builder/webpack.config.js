@@ -9,6 +9,9 @@ let folder = ''
 let fileName = '[name]'
 let plugins = [new webpack.DefinePlugin({ 'process.env.NODE_ENV': '"production"' })]
 
+
+let time = Math.floor(Math.random() * (1000 + 1))
+
 if (env === 'min') {
     folder = "/browser"
     fileName = 'ClusterWS.min'
