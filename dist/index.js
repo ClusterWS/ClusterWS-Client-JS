@@ -159,7 +159,7 @@
                 switch (t["#"][1]) {
                   case "c":
                     e.pingInterval = setInterval(function() {
-                        return e.lost < 3 ? e.lost++ : e.disconnect(3001, "Did not get pings");
+                        return e.lost < 3 ? e.lost++ : e.disconnect(4001, "Did not get pings");
                     }, t["#"][2].ping);
                 }
             }
