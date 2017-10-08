@@ -53,7 +53,7 @@
                 this.websocket.onopen = function() {
                     e.reconnection.isConnected(), e.events.emit("connect");
                 }, this.websocket.onmessage = function(t) {
-                    if ("#0" === t.data) return e.lost = 0;
+                    if ("#0" === t.data) return e.send("#1", null, "ping"), e.lost = 0;
                     try {
                         t = JSON.parse(t.data);
                     } catch (e) {

@@ -51,7 +51,10 @@ export class ClusterWS {
         }
 
         this.websocket.onmessage = (message: any): any => {
-            if (message.data === '#0') return this.lost = 0
+            if (message.data === '#0') {
+                this.send('#1', null, 'ping')
+                return this.lost = 0
+            }
 
             try {
                 message = JSON.parse(message.data)
