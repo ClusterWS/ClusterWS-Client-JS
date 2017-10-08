@@ -15,7 +15,6 @@ export class Reconnect {
     }
 
     isConnected(): void {
-        console.log('here')
         clearTimeout(this.timer)
         clearInterval(this.interval)
         this.inReconnectionState = false
@@ -29,8 +28,6 @@ export class Reconnect {
     reconnect(): void {
         this.inReconnectionState = true
         this.interval = setInterval(() => {
-            console.log('reconnect')
-
             if (this.socket.websocket.readyState === this.socket.websocket.CLOSED) {
                 this.reconnectionAttempted++
                 if (this.socket.options.reconnectionAttempts !== 0 && this.reconnectionAttempted >= this.socket.options.reconnectionAttempts) {

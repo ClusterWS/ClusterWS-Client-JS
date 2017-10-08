@@ -8,7 +8,7 @@ This is official JavaScript client for [ClusterWS](https://github.com/goriunov/C
 
 **Current minified version is under 6KB.**
 
-**This library require [ClusterWS](https://github.com/goriunov/ClusterWS) on the server**
+**This library requires [ClusterWS](https://github.com/goriunov/ClusterWS) on the server**
 
 ### Installation
 To install ClusterWS Client JS run:
@@ -43,7 +43,7 @@ var ClusterWS = require('clusterws-client-js').ClusterWS
     url: '{string} url of the server without http or https. (must be provided)',
     port: '{number} port of the server. (must be provided)',
     autoReconnect: '{boolean} allow to auto-reconnect to the server on lost connection. (default false)',
-    reconnectionInterval: '{number} how often it will try to reconnect. (default 5000) in ms',
+    reconnectionInterval: '{number} how often it will try to reconnect. (default 5000) in ms', // Dont set it less then 1000ms (still working on it)
     reconnectionAttempts: '{number} how many times to try, 0 means without limit. (default 0)'
 }
 ```
@@ -95,7 +95,7 @@ cws.send('event name', data)
 *Avoid emitting **Reserved Events** such as `'connect'`, `'connection'`, `'disconnect'` and `'error'`. Also avoid emitting  event and events with `'#'` at the start.*
 
 ## Pub/Sub
-You can subscribe, watch, unsubscribe and publish to the channels
+You can `subscribe`, `watch`, `unsubscribe` and `publish` to/from the channels
 ```js
 /**
     channel name: string - can be any string you wish
