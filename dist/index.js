@@ -200,13 +200,13 @@
                 this.reconnectionAttempted = 0;
             }
             return e.prototype.isConnected = function() {
-                console.log("here"), clearTimeout(this.timer), clearInterval(this.interval), this.inReconnectionState = !1, 
+                clearTimeout(this.timer), clearInterval(this.interval), this.inReconnectionState = !1, 
                 this.reconnectionAttempted = 0;
                 for (var e = 0, t = this.socket.channels.lenght; e < t; e++) this.socket.channels[e].subscribe();
             }, e.prototype.reconnect = function() {
                 var e = this;
                 this.inReconnectionState = !0, this.interval = setInterval(function() {
-                    console.log("reconnect"), e.socket.websocket.readyState === e.socket.websocket.CLOSED && (e.reconnectionAttempted++, 
+                    e.socket.websocket.readyState === e.socket.websocket.CLOSED && (e.reconnectionAttempted++, 
                     0 !== e.socket.options.reconnectionAttempts && e.reconnectionAttempted >= e.socket.options.reconnectionAttempts && (clearInterval(e.interval), 
                     e.autoReconnect = !1, e.inReconnectionState = !1), clearTimeout(e.timer), e.timer = setTimeout(function() {
                         e.socket.create();
