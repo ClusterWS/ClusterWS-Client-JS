@@ -27,12 +27,19 @@ export class ClusterWS {
             return
         }
 
+
         this.options = {
             url: configurations.url,
             port: configurations.port,
             autoReconnect: configurations.autoReconnect || false,
-            reconnectionInterval: configurations.reconnectionInterval || 5000,
+            reconnectionIntervalMin: configurations.reconnectionIntervalMin || 1000,
+            reconnectionIntervalMax: configurations.reconnectionIntervalMax || 5000,
             reconnectionAttempts: configurations.reconnectionAttempts || 0
+        }
+
+        if (this.options.reconnectionIntervalMin > this.options.reconnectionIntervalMax) {
+            logError('Min reconnection interval can not be more then Max reconnection interval')
+            return
         }
 
         this.lost = 0
@@ -64,6 +71,7 @@ export class ClusterWS {
         }
 
         this.websocket.onclose = (event: any): void => {
+            this.lost = 0
             clearInterval(this.pingInterval)
             this.events.emit('disconnect', event.code, event.reason)
 

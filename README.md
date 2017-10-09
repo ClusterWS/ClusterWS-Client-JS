@@ -43,10 +43,13 @@ var ClusterWS = require('clusterws-client-js').ClusterWS
     url: '{string} url of the server without http or https. (must be provided)',
     port: '{number} port of the server. (must be provided)',
     autoReconnect: '{boolean} allow to auto-reconnect to the server on lost connection. (default false)',
-    reconnectionInterval: '{number} how often it will try to reconnect. (default 5000) in ms', // Dont set it less then 1000ms (still working on it)
+    reconnectionIntervalMin: '{number} how long min time waut. (default 1000) in ms', 
+    reconnectionIntervalMax: '{number} how long max time wait. (default 5000) in ms', 
     reconnectionAttempts: '{number} how many times to try, 0 means without limit. (default 0)'
 }
 ```
+
+*Auto reconnect count random time between Max and Min interval value this will reduce amount of users which are connection at the same time on reconnection and reduce server load on restart of the server*
 
 ### 2. Listen on events
 To listen on events from the server you should use `on` method witch is provided by `cws`

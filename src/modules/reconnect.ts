@@ -35,12 +35,12 @@ export class Reconnect {
                     this.autoReconnect = false
                     this.inReconnectionState = false
                 }
-                
+
                 clearTimeout(this.timer)
                 this.timer = setTimeout(() => {
                     this.socket.create()
-                }, Math.floor(Math.random() * (1000 + 1)))
+                }, Math.floor(Math.random() * (this.socket.options.reconnectionIntervalMax - this.socket.options.reconnectionIntervalMin + 1)))
             }
-        }, this.socket.options.reconnectionInterval)
+        }, this.socket.options.reconnectionIntervalMin)
     }
 }
