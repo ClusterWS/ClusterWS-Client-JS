@@ -36,16 +36,18 @@
         Object.defineProperty(t, "__esModule", {
             value: !0
         });
-        var o = n(1), s = n(2), c = n(3), i = n(4), r = n(5), u = function() {
+        var o = n(1), s = n(2), i = n(3), c = n(4), r = n(5), u = function() {
             function e(e) {
                 return e.url ? e.port ? (this.options = {
                     url: e.url,
                     port: e.port,
                     autoReconnect: e.autoReconnect || !1,
-                    reconnectionInterval: e.reconnectionInterval || 5e3,
+                    reconnectionIntervalMin: e.reconnectionIntervalMin || 1e3,
+                    reconnectionIntervalMax: e.reconnectionIntervalMax || 5e3,
                     reconnectionAttempts: e.reconnectionAttempts || 0
-                }, this.lost = 0, this.events = new s.EventEmitter(), this.channels = {}, this.reconnection = new r.Reconnect(this), 
-                void this.create()) : void o.logError("Port must be provided") : void o.logError("Url must be provided");
+                }, this.options.reconnectionIntervalMin > this.options.reconnectionIntervalMax ? void o.logError("Min reconnection interval can not be more then Max reconnection interval") : (this.lost = 0, 
+                this.events = new s.EventEmitter(), this.channels = {}, this.reconnection = new r.Reconnect(this), 
+                void this.create())) : void o.logError("Port must be provided") : void o.logError("Url must be provided");
             }
             return e.prototype.create = function() {
                 var e = this;
@@ -59,9 +61,9 @@
                     } catch (e) {
                         return o.logError(e);
                     }
-                    c.socketDecodeMessages(e, t);
+                    i.socketDecodeMessages(e, t);
                 }, this.websocket.onclose = function(t) {
-                    if (clearInterval(e.pingInterval), e.events.emit("disconnect", t.code, t.reason), 
+                    if (e.lost = 0, clearInterval(e.pingInterval), e.events.emit("disconnect", t.code, t.reason), 
                     !e.reconnection.inReconnectionState) {
                         if (e.options.autoReconnect && 1e3 !== t.code) return e.reconnection.reconnect();
                         e.events.removeAllEvents();
@@ -73,11 +75,11 @@
             }, e.prototype.on = function(e, t) {
                 this.events.on(e, t);
             }, e.prototype.send = function(e, t, n) {
-                this.websocket.send(c.socketEncodeMessages(e, t, n || "emit"));
+                this.websocket.send(i.socketEncodeMessages(e, t, n || "emit"));
             }, e.prototype.disconnect = function(e, t) {
                 this.websocket.close(e || 1e3, t);
             }, e.prototype.subscribe = function(e) {
-                return this.channels[e] ? this.channels[e] : this.channels[e] = new i.Channel(e, this);
+                return this.channels[e] ? this.channels[e] : this.channels[e] = new c.Channel(e, this);
             }, e.prototype.getState = function() {
                 return this.websocket.readyState;
             }, e;
@@ -210,8 +212,8 @@
                     0 !== e.socket.options.reconnectionAttempts && e.reconnectionAttempted >= e.socket.options.reconnectionAttempts && (clearInterval(e.interval), 
                     e.autoReconnect = !1, e.inReconnectionState = !1), clearTimeout(e.timer), e.timer = setTimeout(function() {
                         e.socket.create();
-                    }, Math.floor(1001 * Math.random())));
-                }, this.socket.options.reconnectionInterval);
+                    }, Math.floor(Math.random() * (e.socket.options.reconnectionIntervalMax - e.socket.options.reconnectionIntervalMin + 1))));
+                }, this.socket.options.reconnectionIntervalMin);
             }, e;
         }();
         t.Reconnect = o;
