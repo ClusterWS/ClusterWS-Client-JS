@@ -82,6 +82,8 @@
                 return this.channels[e] ? this.channels[e] : this.channels[e] = new r.Channel(e, this);
             }, e.prototype.getState = function() {
                 return this.websocket.readyState;
+            }, e.prototype.getChannelByName = function(e) {
+                return this.channels[e];
             }, e;
         }();
         t.ClusterWS = u;

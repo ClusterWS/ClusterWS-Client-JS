@@ -98,7 +98,7 @@ cws.send('event name', data)
 *Avoid emitting **Reserved Events** such as `'connect'`, `'connection'`, `'disconnect'` and `'error'`. Also avoid emitting  event and events with `'#'` at the start.*
 
 ## Pub/Sub
-You can `subscribe`, `watch`, `unsubscribe` and `publish` to/from the channels
+You can `subscribe`, `watch`, `unsubscribe` and `publish`, `getChannelByName` to/from the channels
 ```js
 /**
     channel name: string - can be any string you wish
@@ -128,6 +128,14 @@ channel.unsubscribe()
 var channel = cws.subscribe('channel name').watch(function(data){
  // in here you can write any logic
 }).publish(data)
+
+
+/**
+    You can get channel by channel name only if you were subscribed before
+*/
+
+cws.getChannelByName('channel name').publish(data)
+cws.getChannelByName('channel name').unsubscribe()
 ```
 
 **To make sure that user is connected to the server before subscribing, do it on `connect` event or on any other events which you emit from the server, otherwise subscription may not work properly**

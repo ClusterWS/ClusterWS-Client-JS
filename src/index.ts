@@ -108,4 +108,8 @@ export class ClusterWS {
     getState(): any {
         return this.websocket.readyState
     }
+
+    getChannelByName(channelName: string): Channel {
+        return this.channels[channelName]
+    }
 }
