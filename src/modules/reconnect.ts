@@ -20,8 +20,11 @@ export class Reconnect {
         this.inReconnectionState = false
         this.reconnectionAttempted = 0
 
-        for (let i: number = 0, len: number = this.socket.channels.lenght; i < len; i++) {
-            this.socket.channels[i].subscribe()
+        const channels: any = this.socket.channels
+        for (const k in channels) {
+            if (channels.hasOwnProperty(k)) {
+                channels[k].subscribe()
+            }
         }
     }
 

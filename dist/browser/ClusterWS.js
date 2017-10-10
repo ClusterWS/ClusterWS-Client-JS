@@ -36,7 +36,7 @@
         Object.defineProperty(t, "__esModule", {
             value: !0
         });
-        var o = n(1), s = n(2), i = n(3), c = n(4), r = n(5), u = function() {
+        var o = n(1), s = n(2), i = n(3), r = n(4), c = n(5), u = function() {
             function e(e) {
                 return e.url ? e.port ? (this.options = {
                     url: e.url,
@@ -46,7 +46,7 @@
                     reconnectionIntervalMax: e.reconnectionIntervalMax || 5e3,
                     reconnectionAttempts: e.reconnectionAttempts || 0
                 }, this.options.reconnectionIntervalMin > this.options.reconnectionIntervalMax ? void o.logError("Min reconnection interval can not be more then Max reconnection interval") : (this.lost = 0, 
-                this.events = new s.EventEmitter(), this.channels = {}, this.reconnection = new r.Reconnect(this), 
+                this.events = new s.EventEmitter(), this.channels = {}, this.reconnection = new c.Reconnect(this), 
                 void this.create())) : void o.logError("Port must be provided") : void o.logError("Url must be provided");
             }
             return e.prototype.create = function() {
@@ -79,7 +79,7 @@
             }, e.prototype.disconnect = function(e, t) {
                 this.websocket.close(e || 1e3, t);
             }, e.prototype.subscribe = function(e) {
-                return this.channels[e] ? this.channels[e] : this.channels[e] = new c.Channel(e, this);
+                return this.channels[e] ? this.channels[e] : this.channels[e] = new r.Channel(e, this);
             }, e.prototype.getState = function() {
                 return this.websocket.readyState;
             }, e;
@@ -204,7 +204,8 @@
             return e.prototype.isConnected = function() {
                 clearTimeout(this.timer), clearInterval(this.interval), this.inReconnectionState = !1, 
                 this.reconnectionAttempted = 0;
-                for (var e = 0, t = this.socket.channels.lenght; e < t; e++) this.socket.channels[e].subscribe();
+                var e = this.socket.channels;
+                for (var t in e) e.hasOwnProperty(t) && e[t].subscribe();
             }, e.prototype.reconnect = function() {
                 var e = this;
                 this.inReconnectionState = !0, this.interval = setInterval(function() {
