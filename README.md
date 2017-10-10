@@ -131,7 +131,7 @@ var channel = cws.subscribe('channel name').watch(function(data){
 
 
 /**
-    You can get channel by channel name only if you were subscribed in another place and can not pass channel variable
+    You can get channel by channel name only if you were subscribed before
 */
 
 cws.getChannelByName('channel name').publish(data)
