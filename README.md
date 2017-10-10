@@ -10,6 +10,11 @@ This is official JavaScript client for [ClusterWS](https://github.com/goriunov/C
 
 **This library requires [ClusterWS](https://github.com/goriunov/ClusterWS) on the server**
 
+Additional info:
+* [Medium ClusterWS](https://medium.com/clusterws)
+* [ClusterWS Tests](https://github.com/goriunov/ClusterWS-Tests)
+* [ClusterWS Example Chat](https://github.com/goriunov/ClusterWS-Chat-Example)
+
 ### Installation
 To install ClusterWS Client JS run:
 ```js
@@ -133,7 +138,6 @@ var channel = cws.subscribe('channel name').watch(function(data){
 /**
     You can get channel by channel name only if you were subscribed before
 */
-
 cws.getChannelByName('channel name').publish(data)
 cws.getChannelByName('channel name').unsubscribe()
 ```
