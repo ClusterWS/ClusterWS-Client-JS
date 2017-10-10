@@ -134,4 +134,4 @@ var channel = cws.subscribe('channel name').watch(function(data){
 
 *Docs is still under development.*
 
-## Happy codding !!! :sunglasses:
+## Happy coding !!! :sunglasses:
