@@ -13,7 +13,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/goriunov/ClusterWS-Client-JS"
+    "url": "hhttps://github.com/ClusterWS/ClusterWS-Client-JS"
   },
   "devDependencies": {
     "awesome-typescript-loader": "^3.2.3",
