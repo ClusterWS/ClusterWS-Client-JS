@@ -21,9 +21,9 @@ export class Reconnect {
         this.reconnectionAttempted = 0
 
         const channels: any = this.socket.channels
-        for (const k in channels) {
-            if (channels.hasOwnProperty(k)) {
-                channels[k].subscribe()
+        for (const key in channels) {
+            if (channels.hasOwnProperty(key)) {
+                channels[key].subscribe()
             }
         }
     }

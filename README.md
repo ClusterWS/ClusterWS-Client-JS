@@ -133,9 +133,10 @@ var channel = cws.subscribe('channel name').watch(function(data){
 
 /**
     You can get channel by channel name only if you were subscribed before
+    You can use any methods as with usual channel
 */
-cws.getChannelByName('channel name').publish(data)
-cws.getChannelByName('channel name').unsubscribe()
+cws.getChannelByName('channel name')
+
 ```
 
 **To make sure that user is connected to the server before subscribing, do it on `connect` event or on any other events which you emit from the server, otherwise subscription may not work properly**
@@ -145,6 +146,6 @@ cws.getChannelByName('channel name').unsubscribe()
 * [ClusterWS Tests](https://github.com/ClusterWS/ClusterWS-Tests)
 * [ClusterWS Example Chat](https://github.com/goriunov/ClusterWS-Chat-Example)
 
-*Docs is still under development.*
+*Docs are still under development. If you have found any errors please submit pull request or leave issue*
 
 ## Happy coding !!! :sunglasses:
