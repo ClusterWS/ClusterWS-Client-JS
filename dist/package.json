@@ -1,12 +1,12 @@
 {
 	"name": "clusterws-client-js",
-	"version": "1.2.3",
-	"description": "JavaScript Client for ClusterWS - is a minimal Node JS http & real-time framework which allows to scale WebSocket (uWS - one of the fastest WebSocket libraries) between Node JS Clusters and utilize all available CPU.",
+	"version": "1.2.4",
+	"description": "JavaScript Client for ClusterWS - is a minimal Node JS http & real-time framework which allows to scale WebSocket between Workers in Node JS Cluster and utilize all available CPU.",
 	"main": "index.js",
 	"author": "Dmitrii Goriunov <goriunovd@gmail.com>",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/goriunov/ClusterWS-Client-JS"
+		"url": "hhttps://github.com/ClusterWS/ClusterWS-Client-JS"
 	}
 }

@@ -145,6 +145,6 @@ cws.getChannelByName('channel name').unsubscribe()
 * [ClusterWS Tests](https://github.com/ClusterWS/ClusterWS-Tests)
 * [ClusterWS Example Chat](https://github.com/goriunov/ClusterWS-Chat-Example)
 
-*Docs is still under development.*
+*Docs are still under development. If you have found any errors please submit pull request or leave issue*
 
 ## Happy coding !!! :sunglasses:

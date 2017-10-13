@@ -2,15 +2,16 @@
 [![npm version](https://badge.fury.io/js/clusterws-client-js.svg)](https://badge.fury.io/js/clusterws-client-js)
 [![GitHub version](https://badge.fury.io/gh/goriunov%2FClusterWS-Client-JS.svg)](https://badge.fury.io/gh/goriunov%2FClusterWS-Client-JS)
 
-This is official JavaScript client for [ClusterWS](https://github.com/goriunov/ClusterWS).
+## Overview
+This is official JavaScript client for [ClusterWS](https://github.com/ClusterWS/ClusterWS).
 
-[ClusterWS](https://github.com/goriunov/ClusterWS) - is a minimal **Node JS http & real-time** framework which allows to scale WebSocket ([uWS](https://github.com/uNetworking/uWebSockets) - one of the fastest WebSocket libraries) between [Node JS Clusters](https://nodejs.org/api/cluster.html) and utilize all available CPU.
+[ClusterWS](https://github.com/ClusterWS/ClusterWS) - is a minimal **Node JS http & real-time** framework which allows to scale WebSocket ([uWS](https://github.com/uNetworking/uWebSockets) - one of the fastest WebSocket libraries) between **Workers** in [Node JS Cluster](https://nodejs.org/api/cluster.html) and utilize all available CPU.
 
 **Current minified version is under 6KB.**
 
-**This library requires [ClusterWS](https://github.com/goriunov/ClusterWS) on the server**
+**This library requires [ClusterWS](https://github.com/ClusterWS/ClusterWS) on the server**
 
-### Installation
+## Installation
 To install ClusterWS Client JS run:
 ```js
 npm install --save clusterws-client-js
@@ -131,15 +132,19 @@ var channel = cws.subscribe('channel name').watch(function(data){
 
 
 /**
-    You can get channel by channel name only if you were subscribed in another place and can not pass channel variable
+    You can get channel by channel name only if you were subscribed before
 */
-
 cws.getChannelByName('channel name').publish(data)
 cws.getChannelByName('channel name').unsubscribe()
 ```
 
 **To make sure that user is connected to the server before subscribing, do it on `connect` event or on any other events which you emit from the server, otherwise subscription may not work properly**
 
-*Docs is still under development.*
+## See Also
+* [Medium ClusterWS](https://medium.com/clusterws)
+* [ClusterWS Tests](https://github.com/ClusterWS/ClusterWS-Tests)
+* [ClusterWS Example Chat](https://github.com/goriunov/ClusterWS-Chat-Example)
+
+*Docs are still under development. If you have found any errors please submit pull request or leave issue*
 
 ## Happy coding !!! :sunglasses:
