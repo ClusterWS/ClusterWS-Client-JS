@@ -5,7 +5,6 @@ import { socketEncodeMessages, socketDecodeMessages } from './common/message'
 import { Channel } from './modules/channel'
 import { Reconnect } from './modules/reconnect'
 
-
 export class ClusterWS {
     events: EventEmitter
     options: Options
