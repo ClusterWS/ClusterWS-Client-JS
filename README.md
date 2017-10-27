@@ -1,11 +1,9 @@
 <h1 align="center">ClusterWS JavaScript Client</h1> 
 <h6 align="center">WebSocket & Node JS Cluster</h6>
 
-
 <p align="center">
     <img alt="Node.js" src="http://u.cubeupload.com/goriunovd/clusterWS.png" width="560"/>
 </p>
-<!-- ![](https://u.cubeupload.com/goriunovd/clusterWS.png) -->
 
 <p align="center">
  <a title="NPM Version" href="https://badge.fury.io/js/clusterws-client-js"><img src="https://badge.fury.io/js/clusterws-client-js.svg"></a>
