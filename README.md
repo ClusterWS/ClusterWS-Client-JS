@@ -1,6 +1,14 @@
-# ClusterWS Client JavaScript
-[![npm version](https://badge.fury.io/js/clusterws-client-js.svg)](https://badge.fury.io/js/clusterws-client-js)
-[![GitHub version](https://badge.fury.io/gh/goriunov%2FClusterWS-Client-JS.svg)](https://badge.fury.io/gh/goriunov%2FClusterWS-Client-JS)
+<h1 align="center">ClusterWS JavaScript Client</h1> 
+<h6 align="center">WebSocket & Node JS Cluster</h6>
+
+<p align="center">
+    <img alt="Node.js" src="http://u.cubeupload.com/goriunovd/clusterWS.png" width="560"/>
+</p>
+
+<p align="center">
+ <a title="NPM Version" href="https://badge.fury.io/js/clusterws-client-js"><img src="https://badge.fury.io/js/clusterws-client-js.svg"></a>
+ <a title="GitHub version" href="https://badge.fury.io/gh/goriunov%2FClusterWS-Client-JS"><img src="https://badge.fury.io/gh/goriunov%2FClusterWS-Client-JS.svg"></a>
+</p>
 
 ## Overview
 This is official JavaScript client for [ClusterWS](https://github.com/ClusterWS/ClusterWS).
