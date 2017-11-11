@@ -5,9 +5,10 @@
   "main": "index.js",
   "author": "Dmitrii Goriunov <goriunovd@gmail.com>",
   "scripts": {
-    "build": "cross-env WEBPACK_ENV=notmin webpack --config ./.builder/webpack.config.js",
-    "build:watch": "cross-env WEBPACK_ENV=notmin webpack --config ./.builder/webpack.config.js --watch",
-    "build:prod": "cross-env WEBPACK_ENV=min webpack  --config ./.builder/webpack.config.js && cross-env WEBPACK_ENV=notmin webpack --config ./.builder/webpack.config.js && webpack  --config ./.builder/webpack.config.js",
+    "webpack": "webpack",
+    "build": "ts-builder --client",
+    "build:watch": "ts-builder --client --watch",
+    "build:prod": "ts-builder --client --prod",
     "publish": "npm run build:prod && cd dist && npm publish && cd .."
   },
   "license": "MIT",
@@ -16,14 +17,6 @@
     "url": "hhttps://github.com/ClusterWS/ClusterWS-Client-JS"
   },
   "devDependencies": {
-    "awesome-typescript-loader": "^3.2.3",
-    "copy-pkg-json-webpack-plugin": "0.0.29",
-    "copy-webpack-plugin": "^4.1.1",
-    "cross-env": "^5.0.5",
-    "tslint": "^5.7.0",
-    "tslint-loader": "^3.5.3",
-    "typescript": "^2.5.3",
-    "webpack": "^3.6.0",
-    "webpack-node-externals": "^1.6.0"
+    "ts-builder": "^0.1.0"
   }
 }
