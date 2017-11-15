@@ -5,7 +5,6 @@
   "main": "index.js",
   "author": "Dmitrii Goriunov <goriunovd@gmail.com>",
   "scripts": {
-    "webpack": "webpack",
     "build": "ts-builder --client",
     "build:watch": "ts-builder --client --watch",
     "build:prod": "ts-builder --client --prod",
@@ -14,9 +13,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "hhttps://github.com/ClusterWS/ClusterWS-Client-JS"
+    "url": "https://github.com/ClusterWS/ClusterWS-Client-JS"
   },
   "devDependencies": {
-    "ts-builder": "^0.1.0"
+    "ts-builder": "^0.2.0"
   }
 }
