@@ -1,15 +1,15 @@
 export class EventEmitter {
-    events: any = {}
+    private events: any = {}
 
-    on(event: string, listener: any): void {
+    public on(event: string, listener: any): void {
         if (!this.events[event]) this.events[event] = listener
     }
 
-    emit(event: string, ...args: any[]): void {
+    public emit(event: string, ...args: any[]): void {
         if (this.events[event]) this.events[event].call(null, ...args)
     }
 
-    removeAllEvents(): void {
+    public removeAllEvents(): void {
         this.events = {}
     }
 }

@@ -1,36 +1,29 @@
-import { Options } from '../common/interfaces'
 import { ClusterWS } from '../index'
 
-export class Reconnect {
-    autoReconnect: boolean
-    inReconnectionState: boolean
-    reconnectionAttempted: number
-    interval: any
-    timer: any
+export class Reconnection {
+    public inReconnectionState: boolean = false
+    private reconnectionAttempted: number = 0
+    private autoReconnect: boolean
+    private interval: any
+    private timer: any
 
     constructor(public socket: ClusterWS) {
         this.autoReconnect = this.socket.options.autoReconnect
-        this.inReconnectionState = false
-        this.reconnectionAttempted = 0
     }
 
-    isConnected(): void {
+    public isConnected(): void {
         clearTimeout(this.timer)
         clearInterval(this.interval)
+
         this.inReconnectionState = false
         this.reconnectionAttempted = 0
 
-        const channels: any = this.socket.channels
-        for (const key in channels) {
-            if (channels.hasOwnProperty(key)) {
-                channels[key].subscribe()
-            }
-        }
+        for (const key in this.socket.channels) this.socket.channels.hasOwnProperty(key) ? this.socket.channels[key].subscribe() : ''
     }
 
-    reconnect(): void {
+    public reconnect(): void {
         this.inReconnectionState = true
-        this.interval = setInterval(() => {
+        this.interval = setInterval((): void => {
             if (this.socket.websocket.readyState === this.socket.websocket.CLOSED) {
                 this.reconnectionAttempted++
                 if (this.socket.options.reconnectionAttempts !== 0 && this.reconnectionAttempted >= this.socket.options.reconnectionAttempts) {
@@ -38,11 +31,8 @@ export class Reconnect {
                     this.autoReconnect = false
                     this.inReconnectionState = false
                 }
-
                 clearTimeout(this.timer)
-                this.timer = setTimeout(() => {
-                    this.socket.create()
-                }, Math.floor(Math.random() * (this.socket.options.reconnectionIntervalMax - this.socket.options.reconnectionIntervalMin + 1)))
+                this.timer = setTimeout((): void => this.socket.create(), Math.floor(Math.random() * (this.socket.options.reconnectionIntervalMax - this.socket.options.reconnectionIntervalMin + 1)))
             }
         }, this.socket.options.reconnectionIntervalMin)
     }

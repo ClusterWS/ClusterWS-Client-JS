@@ -1,4 +1,4 @@
-export interface Options {
+export interface IOptions {
     url: string
     port: number
     autoReconnect: boolean
@@ -7,7 +7,7 @@ export interface Options {
     reconnectionAttempts: number
 }
 
-export interface UserOptions {
+export interface IPassedOptions {
     url: string
     port: number
     autoReconnect?: boolean
