@@ -38,7 +38,7 @@
         });
         var o = n(1), s = n(2), r = n(3), i = n(4), c = n(5), u = function() {
             function e(e) {
-                return this.channels = {}, this.events = new r.EventEmitter(), this.missedPing = 0, 
+                return this.channels = {}, this.events = new s.EventEmitter(), this.missedPing = 0, 
                 this.useBinary = !1, e.url && "string" == typeof e.url ? e.port && "number" == typeof e.port ? (this.options = {
                     url: e.url,
                     port: e.port,
@@ -46,8 +46,8 @@
                     reconnectionIntervalMin: e.reconnectionIntervalMin || 1e3,
                     reconnectionIntervalMax: e.reconnectionIntervalMax || 5e3,
                     reconnectionAttempts: e.reconnectionAttempts || 0
-                }, this.options.reconnectionIntervalMin > this.options.reconnectionIntervalMax ? s.logError("reconnectionIntervalMin can not be more then reconnectionIntervalMax") : (this.reconnection = new i.Reconnection(this), 
-                void this.create())) : s.logError("Port must be provided and it must be number") : s.logError("Url must be provided and it must be string");
+                }, this.options.reconnectionIntervalMin > this.options.reconnectionIntervalMax ? i.logError("reconnectionIntervalMin can not be more then reconnectionIntervalMax") : (this.reconnection = new r.Reconnection(this), 
+                void this.create())) : i.logError("Port must be provided and it must be number") : i.logError("Url must be provided and it must be string");
             }
             return e.getBuffer = function(e) {
                 for (var t = new Uint8Array(e.length), n = 0, o = e.length; n < o; n++) t[n] = e.charCodeAt(n);
@@ -65,7 +65,7 @@
                     try {
                         t = JSON.parse(t);
                     } catch (e) {
-                        return s.logError(e);
+                        return i.logError(e);
                     }
                     c.socketDecodeMessages(e, t);
                 }, this.websocket.onclose = function(t) {
@@ -116,14 +116,6 @@
         t.Channel = o;
     }, function(e, t, n) {
         "use strict";
-        function o(e) {
-            return console.log(e);
-        }
-        Object.defineProperty(t, "__esModule", {
-            value: !0
-        }), t.logError = o;
-    }, function(e, t, n) {
-        "use strict";
         Object.defineProperty(t, "__esModule", {
             value: !0
         });
@@ -168,6 +160,14 @@
             }, e;
         }();
         t.Reconnection = o;
+    }, function(e, t, n) {
+        "use strict";
+        function o(e) {
+            return console.log(e);
+        }
+        Object.defineProperty(t, "__esModule", {
+            value: !0
+        }), t.logError = o;
     }, function(e, t, n) {
         "use strict";
         function o(e, t, n) {

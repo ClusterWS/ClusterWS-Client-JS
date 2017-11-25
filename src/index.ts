@@ -1,8 +1,7 @@
 import { Channel } from './modules/channel'
-import { logError } from './utils/logs'
 import { EventEmitter } from './utils/emitter'
 import { Reconnection } from './modules/reconnection'
-import { IOptions, IPassedOptions } from './utils/interfaces'
+import { IOptions, IPassedOptions, logError } from './utils/utils'
 import { socketDecodeMessages, socketEncodeMessages } from './modules/messages'
 
 export class ClusterWS {
