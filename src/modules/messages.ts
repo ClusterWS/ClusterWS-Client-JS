@@ -20,7 +20,10 @@ export function socketDecodeMessages(socket: ClusterWS, message: any): any {
         case 'e': return socket.events.emit(message['#'][1], message['#'][2])
         case 'p': return socket.channels[message['#'][1]] ? socket.channels[message['#'][1]].onMessage(message['#'][2]) : ''
         case 's': switch (message['#'][1]) {
-            case 'c': socket.pingInterval = setInterval(() => socket.lost < 3 ? socket.lost++ : socket.disconnect(4001, 'Did not get pings'), message['#'][2].ping)
+            case 'c':
+                socket.pingInterval = setInterval(() => socket.missedPing < 3 ? socket.missedPing++ : socket.disconnect(4001, 'Did not get pings'), message['#'][2].ping)
+                socket.useBinary = message['#'][2].binary
+                socket.events.emit('connect')
             default: break
         }
         default: break
