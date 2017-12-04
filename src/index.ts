@@ -82,13 +82,14 @@ export class ClusterWS {
         this.websocket.onopen = (): void => this.reconnection.isConnected()
         this.websocket.onerror = (err: TSocketMessage): void => this.events.emit('error', err.message)
         this.websocket.onmessage = (message: TSocketMessage): void => {
-            if (this.useBinary && typeof message.data !== 'string') message = String.fromCharCode.apply(null, new Uint8Array(message.data))
-            if (message === '#0') {
+            let data: string = message.data
+            if (this.useBinary && typeof data !== 'string') data = String.fromCharCode.apply(null, new Uint8Array(data))
+            if (data === '#0') {
                 this.missedPing = 0
-                this.send('#1', null, 'ping')
+                return this.send('#1', null, 'ping')
             }
-            try { message = JSON.parse(message) } catch (e) { return logError(e) }
-            ClusterWS.decode(this, message)
+            try { data = JSON.parse(data) } catch (e) { return logError(e) }
+            ClusterWS.decode(this, data)
         }
         this.websocket.onclose = (event: CloseEvent): void => {
             this.missedPing = 0
