@@ -4,8 +4,8 @@ export class Reconnection {
     public inReconnectionState: boolean = false
     private reconnectionAttempted: number = 0
     private autoReconnect: boolean
-    private interval: any
-    private timer: any
+    private interval: NodeJS.Timer
+    private timer: NodeJS.Timer
 
     constructor(public socket: ClusterWS) {
         this.autoReconnect = this.socket.options.autoReconnect
@@ -24,7 +24,7 @@ export class Reconnection {
     public reconnect(): void {
         this.inReconnectionState = true
         this.interval = setInterval((): void => {
-            if (this.socket.websocket.readyState === this.socket.websocket.CLOSED) {
+            if (this.socket.getState() === this.socket.websocket.CLOSED) {
                 this.reconnectionAttempted++
                 if (this.socket.options.reconnectionAttempts !== 0 && this.reconnectionAttempted >= this.socket.options.reconnectionAttempts) {
                     clearInterval(this.interval)
