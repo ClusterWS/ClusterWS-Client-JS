@@ -111,9 +111,9 @@
                     }
                 }
             }, e.prototype.create = function() {
-                var t = this, n = this.options.secure ? "wss://" : "ws://";
-                this.websocket = new WebSocket(n + this.options.url + ":" + this.options.port), 
-                this.websocket.binaryType = "arraybuffer", this.websocket.onopen = function() {
+                var t = this, n = window.MozWebSocket || window.WebSocket, o = this.options.secure ? "wss://" : "ws://";
+                this.websocket = new n(o + this.options.url + ":" + this.options.port), this.websocket.binaryType = "arraybuffer", 
+                this.websocket.onopen = function() {
                     return t.reconnection.isConnected();
                 }, this.websocket.onerror = function(e) {
                     return t.events.emit("error", e.message);

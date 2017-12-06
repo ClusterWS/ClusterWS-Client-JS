@@ -3,6 +3,8 @@ import { EventEmitter } from './utils/emitter'
 import { Reconnection } from './modules/reconnection'
 import { IObject, TSocketMessage, TListener, IUserOptions, IOptions, logError } from './utils/utils'
 
+declare const window: any
+
 export class ClusterWS {
     private static buffer(str: string): ByteString {
         const length: number = str.length
@@ -75,8 +77,9 @@ export class ClusterWS {
     }
 
     public create(): void {
+        const Socket: any = window.MozWebSocket || window.WebSocket
         const protocol: string = this.options.secure ? 'wss://' : 'ws://'
-        this.websocket = new WebSocket(protocol + this.options.url + ':' + this.options.port)
+        this.websocket = new Socket(protocol + this.options.url + ':' + this.options.port)
         this.websocket.binaryType = 'arraybuffer'
 
         this.websocket.onopen = (): void => this.reconnection.isConnected()

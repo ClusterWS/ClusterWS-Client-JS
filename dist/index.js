@@ -111,21 +111,22 @@
                     }
                 }
             }, e.prototype.create = function() {
-                var t = this, n = this.options.secure ? "wss://" : "ws://";
-                this.websocket = new WebSocket(n + this.options.url + ":" + this.options.port), 
-                this.websocket.binaryType = "arraybuffer", this.websocket.onopen = function() {
+                var t = this, n = window.MozWebSocket || window.WebSocket, o = this.options.secure ? "wss://" : "ws://";
+                this.websocket = new n(o + this.options.url + ":" + this.options.port), this.websocket.binaryType = "arraybuffer", 
+                this.websocket.onopen = function() {
                     return t.reconnection.isConnected();
                 }, this.websocket.onerror = function(e) {
                     return t.events.emit("error", e.message);
                 }, this.websocket.onmessage = function(n) {
-                    t.useBinary && "string" != typeof n.data && (n = String.fromCharCode.apply(null, new Uint8Array(n.data))), 
-                    "#0" === n && (t.missedPing = 0, t.send("#1", null, "ping"));
+                    var o = n.data;
+                    if (t.useBinary && "string" != typeof o && (o = String.fromCharCode.apply(null, new Uint8Array(o))), 
+                    "#0" === o) return t.missedPing = 0, t.send("#1", null, "ping");
                     try {
-                        n = JSON.parse(n);
+                        o = JSON.parse(o);
                     } catch (e) {
                         return s.logError(e);
                     }
-                    e.decode(t, n);
+                    e.decode(t, o);
                 }, this.websocket.onclose = function(e) {
                     if (t.missedPing = 0, clearInterval(t.pingInterval), t.events.emit("disconnect", e.code, e.reason), 
                     !t.reconnection.inReconnectionState) {
