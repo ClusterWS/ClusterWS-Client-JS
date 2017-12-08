@@ -10,6 +10,8 @@
  <a title="GitHub version" href="https://badge.fury.io/gh/goriunov%2FClusterWS-Client-JS"><img src="https://badge.fury.io/gh/goriunov%2FClusterWS-Client-JS.svg"></a>
 </p>
 
+**This README, logo and animation will be changed soon, we are currently implementing new GUIDES in wikis and working with new logo and animation**
+
 ## Overview
 This is official JavaScript client for [ClusterWS](https://github.com/ClusterWS/ClusterWS).
 
