@@ -1,13 +1,15 @@
 import { ClusterWS } from '../index'
+import { TListener, logError } from '../utils/utils'
 
 export class Channel {
-    private listener: any
+    private listener: TListener
 
-    constructor(public channel: string, public socket: ClusterWS) {
+    constructor(private socket: ClusterWS, private channel: string) {
         this.subscribe()
     }
 
-    public watch(listener: any): Channel {
+    public watch(listener: TListener): Channel {
+        if ({}.toString.call(listener) !== '[object Function]') return logError('Listener must be a function')
         this.listener = listener
         return this
     }
