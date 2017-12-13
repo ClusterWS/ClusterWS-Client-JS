@@ -56,7 +56,8 @@ var ClusterWS = require('clusterws-client-js').ClusterWS
     autoReconnect: '{boolean} allow to auto-reconnect to the server on lost connection. (default false)',
     reconnectionIntervalMin: '{number} how long min time waut. (default 1000) in ms', 
     reconnectionIntervalMax: '{number} how long max time wait. (default 5000) in ms', 
-    reconnectionAttempts: '{number} how many times to try, 0 means without limit. (default 0)'
+    reconnectionAttempts: '{number} how many times to try, 0 means without limit. (default 0)',
+    secure: '{boolean} user secure connection or not wss/ws. (default false)'
 }
 ```
 
