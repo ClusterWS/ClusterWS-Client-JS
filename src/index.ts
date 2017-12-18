@@ -56,17 +56,13 @@ export class ClusterWS {
     constructor(configuration: IUserOptions) {
         if (!configuration.url || typeof configuration.url !== 'string')
             return logError('Url must be provided and it must be string')
-        if (!configuration.port || typeof configuration.port !== 'number')
-            return logError('Port must be provided and it must be number')
 
         this.options = {
             url: configuration.url,
-            port: configuration.port,
             autoReconnect: configuration.autoReconnect || false,
             reconnectionIntervalMin: configuration.reconnectionIntervalMin || 1000,
             reconnectionIntervalMax: configuration.reconnectionIntervalMax || 5000,
-            reconnectionAttempts: configuration.reconnectionAttempts || 0,
-            secure: configuration.secure || false
+            reconnectionAttempts: configuration.reconnectionAttempts || 0
         }
 
         if (this.options.reconnectionIntervalMin > this.options.reconnectionIntervalMax)
@@ -78,8 +74,7 @@ export class ClusterWS {
 
     public create(): void {
         const Socket: any = window.MozWebSocket || window.WebSocket
-        const protocol: string = this.options.secure ? 'wss://' : 'ws://'
-        this.websocket = new Socket(protocol + this.options.url + ':' + this.options.port)
+        this.websocket = new Socket(this.options.url)
         this.websocket.binaryType = 'arraybuffer'
 
         this.websocket.onopen = (): void => this.reconnection.isConnected()

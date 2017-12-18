@@ -7,22 +7,18 @@ export interface IObject {
 
 export interface IUserOptions {
     url: string
-    port: number
     autoReconnect?: boolean
     reconnectionIntervalMin?: number
     reconnectionIntervalMax?: number
     reconnectionAttempts?: number
-    secure?: boolean
 }
 
 export interface IOptions {
     url: string
-    port: number
     autoReconnect: boolean
     reconnectionIntervalMin: number
     reconnectionIntervalMax: number
     reconnectionAttempts: number
-    secure: boolean
 }
 
 export function logError<T>(data: T): any {

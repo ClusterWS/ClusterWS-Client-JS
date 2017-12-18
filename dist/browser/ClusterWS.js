@@ -7,12 +7,12 @@
     return function(e) {
         function t(o) {
             if (n[o]) return n[o].exports;
-            var r = n[o] = {
+            var i = n[o] = {
                 i: o,
                 l: !1,
                 exports: {}
             };
-            return e[o].call(r.exports, r, r.exports, t), r.l = !0, r.exports;
+            return e[o].call(i.exports, i, i.exports, t), i.l = !0, i.exports;
         }
         var n = {};
         return t.m = e, t.c = n, t.d = function(e, n, o) {
@@ -44,19 +44,17 @@
         Object.defineProperty(t, "__esModule", {
             value: !0
         });
-        var o = n(2), r = n(3), i = n(4), s = n(0), c = function() {
+        var o = n(2), i = n(3), r = n(4), s = n(0), c = function() {
             function e(e) {
-                return this.channels = {}, this.missedPing = 0, this.events = new r.EventEmitter(), 
-                this.useBinary = !1, e.url && "string" == typeof e.url ? e.port && "number" == typeof e.port ? (this.options = {
+                return this.channels = {}, this.missedPing = 0, this.events = new i.EventEmitter(), 
+                this.useBinary = !1, e.url && "string" == typeof e.url ? (this.options = {
                     url: e.url,
-                    port: e.port,
                     autoReconnect: e.autoReconnect || !1,
                     reconnectionIntervalMin: e.reconnectionIntervalMin || 1e3,
                     reconnectionIntervalMax: e.reconnectionIntervalMax || 5e3,
-                    reconnectionAttempts: e.reconnectionAttempts || 0,
-                    secure: e.secure || !1
-                }, this.options.reconnectionIntervalMin > this.options.reconnectionIntervalMax ? s.logError("reconnectionIntervalMin can not be more then reconnectionIntervalMax") : (this.reconnection = new i.Reconnection(this), 
-                void this.create())) : s.logError("Port must be provided and it must be number") : s.logError("Url must be provided and it must be string");
+                    reconnectionAttempts: e.reconnectionAttempts || 0
+                }, this.options.reconnectionIntervalMin > this.options.reconnectionIntervalMax ? s.logError("reconnectionIntervalMin can not be more then reconnectionIntervalMax") : (this.reconnection = new r.Reconnection(this), 
+                void this.create())) : s.logError("Url must be provided and it must be string");
             }
             return e.buffer = function(e) {
                 for (var t = e.length, n = new Uint8Array(t), o = 0; o < t; o++) n[o] = e.charCodeAt(o);
@@ -111,8 +109,8 @@
                     }
                 }
             }, e.prototype.create = function() {
-                var t = this, n = window.MozWebSocket || window.WebSocket, o = this.options.secure ? "wss://" : "ws://";
-                this.websocket = new n(o + this.options.url + ":" + this.options.port), this.websocket.binaryType = "arraybuffer", 
+                var t = this, n = window.MozWebSocket || window.WebSocket;
+                this.websocket = new n(this.options.url), this.websocket.binaryType = "arraybuffer", 
                 this.websocket.onopen = function() {
                     return t.reconnection.isConnected();
                 }, this.websocket.onerror = function(e) {
@@ -155,7 +153,7 @@
         Object.defineProperty(t, "__esModule", {
             value: !0
         });
-        var o = n(0), r = function() {
+        var o = n(0), i = function() {
             function e(e, t) {
                 this.socket = e, this.channel = t, this.subscribe();
             }
@@ -172,13 +170,13 @@
                 this.socket.send("subscribe", this.channel, "system");
             }, e;
         }();
-        t.Channel = r;
+        t.Channel = i;
     }, function(e, t, n) {
         "use strict";
         Object.defineProperty(t, "__esModule", {
             value: !0
         });
-        var o = n(0), r = function() {
+        var o = n(0), i = function() {
             function e() {
                 this.events = {};
             }
@@ -193,7 +191,7 @@
                 this.events = {};
             }, e;
         }();
-        t.EventEmitter = r;
+        t.EventEmitter = i;
     }, function(e, t, n) {
         "use strict";
         Object.defineProperty(t, "__esModule", {
