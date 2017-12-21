@@ -86,7 +86,9 @@ export class ClusterWS {
                 this.missedPing = 0
                 return this.send('#1', null, 'ping')
             }
-            try { data = JSON.parse(data) } catch (e) { return logError(e) }
+            try {
+                data = JSON.parse(data)
+            } catch (e) { return logError(e) }
             ClusterWS.decode(this, data)
         }
         this.websocket.onclose = (event: CloseEvent): void => {
@@ -98,7 +100,7 @@ export class ClusterWS {
             if (this.options.autoReconnect && event.code !== 1000) return this.reconnection.reconnect()
 
             this.events.removeAllEvents()
-            for (const key in this) this.hasOwnProperty(key) ? delete this[key] : ''
+            for (const key in this) this[key] ? delete this[key] : null
         }
     }
 
@@ -107,7 +109,9 @@ export class ClusterWS {
     }
 
     public send(event: string, data: any, type: string = 'emit'): void {
-        this.websocket.send(this.useBinary ? ClusterWS.buffer(ClusterWS.encode(event, data, type)) : ClusterWS.encode(event, data, type))
+        this.websocket.send(this.useBinary ?
+            ClusterWS.buffer(ClusterWS.encode(event, data, type)) :
+            ClusterWS.encode(event, data, type))
     }
 
     public disconnect(code?: number, msg?: any): void {
@@ -119,7 +123,9 @@ export class ClusterWS {
     }
 
     public subscribe(channel: string): void {
-        return this.channels[channel] ? this.channels[channel] : this.channels[channel] = new Channel(this, channel)
+        return this.channels[channel] ?
+            this.channels[channel] :
+            this.channels[channel] = new Channel(this, channel)
     }
 
     public getChannelByName(channelName: string): Channel {

@@ -130,7 +130,7 @@
                     !t.reconnection.inReconnectionState) {
                         if (t.options.autoReconnect && 1e3 !== e.code) return t.reconnection.reconnect();
                         t.events.removeAllEvents();
-                        for (var n in t) t.hasOwnProperty(n) && delete t[n];
+                        for (var n in t) t[n] && delete t[n];
                     }
                 };
             }, e.prototype.on = function(e, t) {
