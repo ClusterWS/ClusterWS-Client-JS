@@ -13,14 +13,14 @@ export class ClusterWS {
         return uint.buffer
     }
 
-    private static decode(socket: ClusterWS, message: TSocketMessage): any {
+    private static decode(socket: ClusterWS, message: TSocketMessage): null | void {
         switch (message['#'][0]) {
             case 'e': return socket.events.emit(message['#'][1], message['#'][2])
-            case 'p': return socket.channels[message['#'][1]] ? socket.channels[message['#'][1]].onMessage(message['#'][2]) : ''
+            case 'p': return socket.channels[message['#'][1]] ? socket.channels[message['#'][1]].onMessage(message['#'][2]) : null
             case 's':
                 switch (message['#'][1]) {
                     case 'c':
-                        socket.pingInterval = setInterval((): void | string => socket.missedPing++ > 2 ? socket.disconnect(4001, 'Did not get pings') : '', message['#'][2].ping)
+                        socket.pingInterval = setInterval((): void | null => socket.missedPing++ > 2 ? socket.disconnect(4001, 'Did not get pings') : null, message['#'][2].ping)
                         socket.useBinary = message['#'][2].binary
                         socket.events.emit('connect')
                     default: break
@@ -81,7 +81,7 @@ export class ClusterWS {
         this.websocket.onerror = (err: TSocketMessage): void => this.events.emit('error', err.message)
         this.websocket.onmessage = (message: TSocketMessage): void => {
             let data: string = message.data
-            if (this.useBinary && typeof data !== 'string') data = String.fromCharCode.apply(null, new Uint8Array(data))
+            if (typeof data !== 'string') data = String.fromCharCode.apply(null, new Uint8Array(data))
             if (data === '#0') {
                 this.missedPing = 0
                 return this.send('#1', null, 'ping')
@@ -100,7 +100,7 @@ export class ClusterWS {
             if (this.options.autoReconnect && event.code !== 1000) return this.reconnection.reconnect()
 
             this.events.removeAllEvents()
-            for (const key in this) this[key] ? delete this[key] : null
+            for (const key in this) this[key] ? this[key] = null : null
         }
     }
 

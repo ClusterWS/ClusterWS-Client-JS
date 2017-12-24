@@ -65,13 +65,13 @@
                     return e.events.emit(t["#"][1], t["#"][2]);
 
                   case "p":
-                    return e.channels[t["#"][1]] ? e.channels[t["#"][1]].onMessage(t["#"][2]) : "";
+                    return e.channels[t["#"][1]] ? e.channels[t["#"][1]].onMessage(t["#"][2]) : null;
 
                   case "s":
                     switch (t["#"][1]) {
                       case "c":
                         e.pingInterval = setInterval(function() {
-                            return e.missedPing++ > 2 ? e.disconnect(4001, "Did not get pings") : "";
+                            return e.missedPing++ > 2 ? e.disconnect(4001, "Did not get pings") : null;
                         }, t["#"][2].ping), e.useBinary = t["#"][2].binary, e.events.emit("connect");
                     }
                 }
@@ -117,7 +117,7 @@
                     return t.events.emit("error", e.message);
                 }, this.websocket.onmessage = function(n) {
                     var o = n.data;
-                    if (t.useBinary && "string" != typeof o && (o = String.fromCharCode.apply(null, new Uint8Array(o))), 
+                    if ("string" != typeof o && (o = String.fromCharCode.apply(null, new Uint8Array(o))), 
                     "#0" === o) return t.missedPing = 0, t.send("#1", null, "ping");
                     try {
                         o = JSON.parse(o);
@@ -130,7 +130,7 @@
                     !t.reconnection.inReconnectionState) {
                         if (t.options.autoReconnect && 1e3 !== e.code) return t.reconnection.reconnect();
                         t.events.removeAllEvents();
-                        for (var n in t) t[n] && delete t[n];
+                        for (var n in t) t[n] && (t[n] = null);
                     }
                 };
             }, e.prototype.on = function(e, t) {
@@ -205,7 +205,7 @@
             return e.prototype.isConnected = function() {
                 clearTimeout(this.timer), clearInterval(this.interval), this.inReconnectionState = !1, 
                 this.reconnectionAttempted = 0;
-                for (var e in this.socket.channels) this.socket.channels.hasOwnProperty(e) && this.socket.channels[e].subscribe();
+                for (var e in this.socket.channels) this.socket.channels[e] && this.socket.channels[e].subscribe();
             }, e.prototype.reconnect = function() {
                 var e = this;
                 this.inReconnectionState = !0, this.interval = setInterval(function() {

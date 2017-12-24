@@ -18,7 +18,7 @@ export class Reconnection {
         this.inReconnectionState = false
         this.reconnectionAttempted = 0
 
-        for (const key in this.socket.channels) this.socket.channels.hasOwnProperty(key) ? this.socket.channels[key].subscribe() : ''
+        for (const key in this.socket.channels) this.socket.channels[key] ? this.socket.channels[key].subscribe() : null
     }
 
     public reconnect(): void {
