@@ -123,7 +123,7 @@ export class ClusterWS {
         return this.websocket.readyState
     }
 
-    public subscribe(channel: string): void {
+    public subscribe(channel: string): Channel {
         return this.channels[channel] ? this.channels[channel] : this.channels[channel] = new Channel(this, channel)
     }
 
