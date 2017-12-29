@@ -10,7 +10,7 @@ export class ClusterWS {
     send(event: string, data: any, type?: string): void;
     disconnect(code?: number, msg?: any): void;
     getState(): number;
-    subscribe(channel: string): void;
+    subscribe(channel: string): Channel;
     getChannelByName(channelName: string): Channel;
 }
 
