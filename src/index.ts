@@ -5,7 +5,7 @@ import { IObject, TSocketMessage, TListener, IUserOptions, IOptions, logError } 
 
 declare const window: any
 
-export class ClusterWS {
+export default class ClusterWS {
     private static buffer(str: string): ByteString {
         const length: number = str.length
         const uint: any = new Uint8Array(length)
@@ -20,7 +20,8 @@ export class ClusterWS {
             case 's':
                 switch (message['#'][1]) {
                     case 'c':
-                        socket.pingInterval = setInterval((): void | null => socket.missedPing++ > 2 ? socket.disconnect(4001, 'Did not get pings') : null, message['#'][2].ping)
+                        socket.pingInterval = setInterval((): void | null => socket.missedPing++ > 2 ?
+                            socket.disconnect(4001, 'Did not get pings') : null, message['#'][2].ping)
                         socket.useBinary = message['#'][2].binary
                         socket.events.emit('connect')
                     default: break

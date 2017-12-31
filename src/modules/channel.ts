@@ -1,4 +1,4 @@
-import { ClusterWS } from '../index'
+import ClusterWS from '../index'
 import { TListener, logError } from '../utils/utils'
 
 export class Channel {
