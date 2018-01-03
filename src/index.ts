@@ -1,7 +1,8 @@
 import { Channel } from './modules/channel/channel'
 import { EventEmitter } from './modules/emitter/emitter'
-import { Options, Configurations, logError, Listener, CustomObject } from './utils/utils'
 import { Reconnection } from './modules/reconnection/reconnection'
+import { buffer, decode, encode } from './modules/parser/parser'
+import { Options, Configurations, logError, Listener, CustomObject } from './utils/utils'
 
 declare const window: any
 
@@ -10,10 +11,10 @@ export default class ClusterWS {
     public websocket: WebSocket
     public channels: CustomObject = {}
 
-    private events: EventEmitter = new EventEmitter()
-    private missedPing: number = 0
-    private useBinary: boolean = false
-    private pingInterval: any
+    public events: EventEmitter = new EventEmitter()
+    public missedPing: number = 0
+    public useBinary: boolean = false
+    public pingInterval: any
 
     private reconnection: Reconnection
 
@@ -54,7 +55,7 @@ export default class ClusterWS {
                 data = JSON.parse(data)
             } catch (e) { return logError(e) }
 
-            ClusterWS.decode(this, data)
+            decode(this, data)
         }
         this.websocket.onclose = (event: CloseEvent): void => {
             this.missedPing = 0
@@ -75,8 +76,8 @@ export default class ClusterWS {
 
     public send(event: string, data: any, type: string = 'emit'): void {
         this.websocket.send(this.useBinary ?
-            ClusterWS.buffer(ClusterWS.encode(event, data, type)) :
-            ClusterWS.encode(event, data, type))
+            buffer(encode(event, data, type)) :
+            encode(event, data, type))
     }
 
     public disconnect(code?: number, msg?: any): void {
@@ -94,44 +95,5 @@ export default class ClusterWS {
 
     public getChannelByName(channelName: string): Channel {
         return this.channels[channelName]
-    }
-
-    private static buffer(str: string): ByteString {
-        const length: number = str.length
-        const uint: any = new Uint8Array(length)
-        for (let i: number = 0; i < length; i++) uint[i] = str.charCodeAt(i)
-        return uint.buffer
-    }
-
-    private static decode(socket: ClusterWS, message: any): any {
-        switch (message['#'][0]) {
-            case 'e': return socket.events.emit(message['#'][1], message['#'][2])
-            case 'p': socket.channels[message['#'][1]] && socket.channels[message['#'][1]].onMessage(message['#'][2])
-            case 's':
-                switch (message['#'][1]) {
-                    case 'c':
-                        socket.pingInterval = setInterval((): void =>
-                            socket.missedPing++ > 2 && socket.disconnect(4001, 'Did not get pings'), message['#'][2].ping)
-                        socket.useBinary = message['#'][2].binary
-                        socket.events.emit('connect')
-                    default: break
-                }
-            default: break
-        }
-    }
-
-    private static encode(event: string, data: any, type: string): any {
-        switch (type) {
-            case 'ping': return event
-            case 'emit': return JSON.stringify({ '#': ['e', event, data] })
-            case 'publish': return JSON.stringify({ '#': ['p', event, data] })
-            case 'system': switch (event) {
-                case 'subscribe': return JSON.stringify({ '#': ['s', 's', data] })
-                case 'unsubscribe': return JSON.stringify({ '#': ['s', 'u', data] })
-                case 'configuration': return JSON.stringify({ '#': ['s', 'c', data] })
-                default: break
-            }
-            default: break
-        }
     }
 }

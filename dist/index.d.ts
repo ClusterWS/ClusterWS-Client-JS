@@ -4,6 +4,10 @@ export default class ClusterWS {
     options: Options;
     websocket: WebSocket;
     channels: CustomObject;
+    events: EventEmitter;
+    missedPing: number;
+    useBinary: boolean;
+    pingInterval: any;
     constructor(configurations: Configurations);
     create(): void;
     on(event: string, listener: Listener): void;
@@ -29,6 +33,10 @@ export class EventEmitter {
     emit(event: string, ...args: any[]): void;
     removeAllEvents(): void;
 }
+
+export function buffer(str: string): ByteString;
+export function decode(socket: ClusterWS, message: any): any;
+export function encode(event: string, data: any, type: string): any;
 
 export class Reconnection {
     socket: ClusterWS;
