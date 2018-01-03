@@ -1,69 +1,33 @@
-import { Channel } from './modules/channel'
-import { EventEmitter } from './utils/emitter'
-import { Reconnection } from './modules/reconnection'
-import { IObject, TSocketMessage, TListener, IUserOptions, IOptions, logError } from './utils/utils'
+import { buffer, decode, encode } from './modules/parser/parser'
+import { Channel } from './modules/channel/channel'
+import { EventEmitter } from './modules/emitter/emitter'
+import { Options, Configurations, logError, Listener, CustomObject } from './utils/utils'
+import { Reconnection } from './modules/reconnection/reconnection'
 
 declare const window: any
 
 export default class ClusterWS {
-    private static buffer(str: string): ByteString {
-        const length: number = str.length
-        const uint: any = new Uint8Array(length)
-        for (let i: number = 0; i < length; i++) uint[i] = str.charCodeAt(i)
-        return uint.buffer
-    }
-
-    private static decode(socket: ClusterWS, message: TSocketMessage): null | void {
-        switch (message['#'][0]) {
-            case 'e': return socket.events.emit(message['#'][1], message['#'][2])
-            case 'p': return socket.channels[message['#'][1]] ? socket.channels[message['#'][1]].onMessage(message['#'][2]) : null
-            case 's':
-                switch (message['#'][1]) {
-                    case 'c':
-                        socket.pingInterval = setInterval((): void | null => socket.missedPing++ > 2 ?
-                            socket.disconnect(4001, 'Did not get pings') : null, message['#'][2].ping)
-                        socket.useBinary = message['#'][2].binary
-                        socket.events.emit('connect')
-                    default: break
-                }
-            default: break
-        }
-    }
-
-    private static encode(event: string, data: any, type: string): any {
-        switch (type) {
-            case 'ping': return event
-            case 'emit': return JSON.stringify({ '#': ['e', event, data] })
-            case 'publish': return JSON.stringify({ '#': ['p', event, data] })
-            case 'system': switch (event) {
-                case 'subscribe': return JSON.stringify({ '#': ['s', 's', data] })
-                case 'unsubscribe': return JSON.stringify({ '#': ['s', 'u', data] })
-                case 'configuration': return JSON.stringify({ '#': ['s', 'c', data] })
-                default: break
-            }
-            default: break
-        }
-    }
-
-    public options: IOptions
-    public channels: IObject = {}
+    public options: Options
     public websocket: WebSocket
-    private missedPing: number = 0
-    private events: EventEmitter = new EventEmitter()
-    private useBinary: boolean = false
-    private pingInterval: number
+    public channels: CustomObject = {}
+
+    public events: EventEmitter = new EventEmitter()
+    public missedPing: number = 0
+    public useBinary: boolean = false
+    public pingInterval: any
+
     private reconnection: Reconnection
 
-    constructor(configuration: IUserOptions) {
-        if (!configuration.url || typeof configuration.url !== 'string')
+    constructor(configurations: Configurations) {
+        if (!configurations.url)
             return logError('Url must be provided and it must be string')
 
         this.options = {
-            url: configuration.url,
-            autoReconnect: configuration.autoReconnect || false,
-            reconnectionIntervalMin: configuration.reconnectionIntervalMin || 1000,
-            reconnectionIntervalMax: configuration.reconnectionIntervalMax || 5000,
-            reconnectionAttempts: configuration.reconnectionAttempts || 0
+            url: configurations.url,
+            autoReconnect: configurations.autoReconnect || false,
+            reconnectionAttempts: configurations.reconnectionAttempts || 0,
+            reconnectionIntervalMin: configurations.reconnectionIntervalMin || 1000,
+            reconnectionIntervalMax: configurations.reconnectionIntervalMax || 5000
         }
 
         if (this.options.reconnectionIntervalMin > this.options.reconnectionIntervalMax)
@@ -75,44 +39,45 @@ export default class ClusterWS {
 
     public create(): void {
         const Socket: any = window.MozWebSocket || window.WebSocket
+
         this.websocket = new Socket(this.options.url)
         this.websocket.binaryType = 'arraybuffer'
-
         this.websocket.onopen = (): void => this.reconnection.isConnected()
-        this.websocket.onerror = (err: TSocketMessage): void => this.events.emit('error', err.message)
-        this.websocket.onmessage = (message: TSocketMessage): void => {
-            let data: string = message.data
-            if (typeof data !== 'string') data = String.fromCharCode.apply(null, new Uint8Array(data))
+        this.websocket.onerror = (err: any): void => this.events.emit('error', err.message)
+        this.websocket.onmessage = (message: any): void => {
+            let data: string = typeof message.data !== 'string' ?
+                String.fromCharCode.apply(null, new Uint8Array(message.data)) : message.data
+
             if (data === '#0') {
                 this.missedPing = 0
                 return this.send('#1', null, 'ping')
-            }
-            try {
+            } else try {
                 data = JSON.parse(data)
             } catch (e) { return logError(e) }
-            ClusterWS.decode(this, data)
+
+            decode(this, data)
         }
         this.websocket.onclose = (event: CloseEvent): void => {
             this.missedPing = 0
             clearInterval(this.pingInterval)
             this.events.emit('disconnect', event.code, event.reason)
 
-            if (this.reconnection.inReconnectionState) return
             if (this.options.autoReconnect && event.code !== 1000) return this.reconnection.reconnect()
 
             this.events.removeAllEvents()
-            for (const key in this) this[key] ? this[key] = null : null
+            for (const key in this)
+                this[key] ? this[key] = null : null
         }
     }
 
-    public on(event: string, listener: TListener): void {
+    public on(event: string, listener: Listener): void {
         this.events.on(event, listener)
     }
 
     public send(event: string, data: any, type: string = 'emit'): void {
         this.websocket.send(this.useBinary ?
-            ClusterWS.buffer(ClusterWS.encode(event, data, type)) :
-            ClusterWS.encode(event, data, type))
+            buffer(encode(event, data, type)) :
+            encode(event, data, type))
     }
 
     public disconnect(code?: number, msg?: any): void {
@@ -123,10 +88,9 @@ export default class ClusterWS {
         return this.websocket.readyState
     }
 
-    public subscribe(channel: string): Channel {
-        return this.channels[channel] ?
-            this.channels[channel] :
-            this.channels[channel] = new Channel(this, channel)
+    public subscribe(channelName: string): Channel {
+        return this.channels[channelName] ? this.channels[channelName] :
+            this.channels[channelName] = new Channel(this, channelName)
     }
 
     public getChannelByName(channelName: string): Channel {

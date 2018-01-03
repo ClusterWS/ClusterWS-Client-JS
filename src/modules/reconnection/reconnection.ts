@@ -1,4 +1,4 @@
-import ClusterWS from '../index'
+import ClusterWS from '../../index'
 
 export class Reconnection {
     public inReconnectionState: boolean = false
@@ -18,10 +18,12 @@ export class Reconnection {
         this.inReconnectionState = false
         this.reconnectionAttempted = 0
 
-        for (const key in this.socket.channels) this.socket.channels[key] ? this.socket.channels[key].subscribe() : null
+        for (const key in this.socket.channels)
+            this.socket.channels[key] && this.socket.channels[key].subscribe()
     }
 
     public reconnect(): void {
+        if (this.inReconnectionState) return
         this.inReconnectionState = true
         this.interval = setInterval((): void => {
             if (this.socket.getState() === this.socket.websocket.CLOSED) {
