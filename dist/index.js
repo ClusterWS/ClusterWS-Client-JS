@@ -1,63 +1,5 @@
 "use strict";
 
-function buffer(t) {
-    for (var e = t.length, n = new Uint8Array(e), o = 0; o < e; o++) n[o] = t.charCodeAt(o);
-    return n.buffer;
-}
-
-function decode(t, e) {
-    switch (e["#"][0]) {
-      case "e":
-        return t.events.emit(e["#"][1], e["#"][2]);
-
-      case "p":
-        t.channels[e["#"][1]] && t.channels[e["#"][1]].onMessage(e["#"][2]);
-
-      case "s":
-        switch (e["#"][1]) {
-          case "c":
-            t.pingInterval = setInterval(function() {
-                return t.missedPing++ > 2 && t.disconnect(4001, "Did not get pings");
-            }, e["#"][2].ping), t.useBinary = e["#"][2].binary, t.events.emit("connect");
-        }
-    }
-}
-
-function encode(t, e, n) {
-    switch (n) {
-      case "ping":
-        return t;
-
-      case "emit":
-        return JSON.stringify({
-            "#": [ "e", t, e ]
-        });
-
-      case "publish":
-        return JSON.stringify({
-            "#": [ "p", t, e ]
-        });
-
-      case "system":
-        switch (t) {
-          case "subscribe":
-            return JSON.stringify({
-                "#": [ "s", "s", e ]
-            });
-
-          case "unsubscribe":
-            return JSON.stringify({
-                "#": [ "s", "u", e ]
-            });
-
-          case "configuration":
-            return JSON.stringify({
-                "#": [ "s", "c", e ]
-            });
-        }
-    }
-}
-
 function logError(t) {
     return console.log(t);
 }
@@ -124,31 +66,31 @@ var Channel = function() {
         void this.create())) : logError("Url must be provided and it must be string");
     }
     return t.prototype.create = function() {
-        var t = this, e = window.MozWebSocket || window.WebSocket;
-        this.websocket = new e(this.options.url), this.websocket.binaryType = "arraybuffer", 
+        var e = this, n = window.MozWebSocket || window.WebSocket;
+        this.websocket = new n(this.options.url), this.websocket.binaryType = "arraybuffer", 
         this.websocket.onopen = function() {
-            return t.reconnection.isConnected();
-        }, this.websocket.onerror = function(e) {
-            return t.events.emit("error", e.message);
-        }, this.websocket.onmessage = function(e) {
-            var n = "string" != typeof e.data ? String.fromCharCode.apply(null, new Uint8Array(e.data)) : e.data;
-            if ("#0" === n) return t.missedPing = 0, t.send("#1", null, "ping");
+            return e.reconnection.isConnected();
+        }, this.websocket.onerror = function(t) {
+            return e.events.emit("error", t.message);
+        }, this.websocket.onmessage = function(n) {
+            var o = "string" != typeof n.data ? String.fromCharCode.apply(null, new Uint8Array(n.data)) : n.data;
+            if ("#0" === o) return e.missedPing = 0, e.send("#1", null, "ping");
             try {
-                n = JSON.parse(n);
+                o = JSON.parse(o);
             } catch (t) {
                 return logError(t);
             }
-            decode(t, n);
-        }, this.websocket.onclose = function(e) {
-            if (t.missedPing = 0, clearInterval(t.pingInterval), t.events.emit("disconnect", e.code, e.reason), 
-            t.options.autoReconnect && 1e3 !== e.code) return t.reconnection.reconnect();
-            t.events.removeAllEvents();
-            for (var n in t) t[n] && (t[n] = null);
+            t.decode(e, o);
+        }, this.websocket.onclose = function(t) {
+            if (e.missedPing = 0, clearInterval(e.pingInterval), e.events.emit("disconnect", t.code, t.reason), 
+            e.options.autoReconnect && 1e3 !== t.code) return e.reconnection.reconnect();
+            e.events.removeAllEvents();
+            for (var n in e) e[n] && (e[n] = null);
         };
     }, t.prototype.on = function(t, e) {
         this.events.on(t, e);
-    }, t.prototype.send = function(t, e, n) {
-        void 0 === n && (n = "emit"), this.websocket.send(this.useBinary ? buffer(encode(t, e, n)) : encode(t, e, n));
+    }, t.prototype.send = function(e, n, o) {
+        void 0 === o && (o = "emit"), this.websocket.send(this.useBinary ? t.buffer(t.encode(e, n, o)) : t.encode(e, n, o));
     }, t.prototype.disconnect = function(t, e) {
         this.websocket.close(t || 1e3, e);
     }, t.prototype.getState = function() {
@@ -157,6 +99,58 @@ var Channel = function() {
         return this.channels[t] ? this.channels[t] : this.channels[t] = new Channel(this, t);
     }, t.prototype.getChannelByName = function(t) {
         return this.channels[t];
+    }, t.buffer = function(t) {
+        for (var e = t.length, n = new Uint8Array(e), o = 0; o < e; o++) n[o] = t.charCodeAt(o);
+        return n.buffer;
+    }, t.decode = function(t, e) {
+        switch (e["#"][0]) {
+          case "e":
+            return t.events.emit(e["#"][1], e["#"][2]);
+
+          case "p":
+            t.channels[e["#"][1]] && t.channels[e["#"][1]].onMessage(e["#"][2]);
+
+          case "s":
+            switch (e["#"][1]) {
+              case "c":
+                t.pingInterval = setInterval(function() {
+                    return t.missedPing++ > 2 && t.disconnect(4001, "Did not get pings");
+                }, e["#"][2].ping), t.useBinary = e["#"][2].binary, t.events.emit("connect");
+            }
+        }
+    }, t.encode = function(t, e, n) {
+        switch (n) {
+          case "ping":
+            return t;
+
+          case "emit":
+            return JSON.stringify({
+                "#": [ "e", t, e ]
+            });
+
+          case "publish":
+            return JSON.stringify({
+                "#": [ "p", t, e ]
+            });
+
+          case "system":
+            switch (t) {
+              case "subscribe":
+                return JSON.stringify({
+                    "#": [ "s", "s", e ]
+                });
+
+              case "unsubscribe":
+                return JSON.stringify({
+                    "#": [ "s", "u", e ]
+                });
+
+              case "configuration":
+                return JSON.stringify({
+                    "#": [ "s", "c", e ]
+                });
+            }
+        }
     }, t;
 }();
 
