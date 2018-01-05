@@ -1,28 +1,23 @@
-export type TListener = (...args: any[]) => void
-export type TSocketMessage = any
+export type Listener = (...args: any[]) => void
 
-export interface IObject {
+export interface CustomObject {
     [propName: string]: any
 }
 
-export interface IUserOptions {
+export interface Options {
     url: string
-    port: number
-    autoReconnect?: boolean
-    reconnectionIntervalMin?: number
-    reconnectionIntervalMax?: number
-    reconnectionAttempts?: number
-    secure?: boolean
-}
-
-export interface IOptions {
-    url: string
-    port: number
     autoReconnect: boolean
+    reconnectionAttempts: number
     reconnectionIntervalMin: number
     reconnectionIntervalMax: number
-    reconnectionAttempts: number
-    secure: boolean
+}
+
+export interface Configurations {
+    url: string
+    autoReconnect?: boolean
+    reconnectionAttempts?: number
+    reconnectionIntervalMin?: number
+    reconnectionIntervalMax?: number
 }
 
 export function logError<T>(data: T): any {

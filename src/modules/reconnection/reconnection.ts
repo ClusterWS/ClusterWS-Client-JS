@@ -1,11 +1,11 @@
-import { ClusterWS } from '../index'
+import ClusterWS from '../../index'
 
 export class Reconnection {
     public inReconnectionState: boolean = false
     private reconnectionAttempted: number = 0
     private autoReconnect: boolean
-    private interval: NodeJS.Timer
-    private timer: NodeJS.Timer
+    private interval: any
+    private timer: any
 
     constructor(public socket: ClusterWS) {
         this.autoReconnect = this.socket.options.autoReconnect
@@ -18,10 +18,12 @@ export class Reconnection {
         this.inReconnectionState = false
         this.reconnectionAttempted = 0
 
-        for (const key in this.socket.channels) this.socket.channels.hasOwnProperty(key) ? this.socket.channels[key].subscribe() : ''
+        for (const key in this.socket.channels)
+            this.socket.channels[key] && this.socket.channels[key].subscribe()
     }
 
     public reconnect(): void {
+        if (this.inReconnectionState) return
         this.inReconnectionState = true
         this.interval = setInterval((): void => {
             if (this.socket.getState() === this.socket.websocket.CLOSED) {
@@ -32,7 +34,8 @@ export class Reconnection {
                     this.inReconnectionState = false
                 }
                 clearTimeout(this.timer)
-                this.timer = setTimeout((): void => this.socket.create(), Math.floor(Math.random() * (this.socket.options.reconnectionIntervalMax - this.socket.options.reconnectionIntervalMin + 1)))
+                this.timer = setTimeout((): void => this.socket.create(),
+                    Math.floor(Math.random() * (this.socket.options.reconnectionIntervalMax - this.socket.options.reconnectionIntervalMin + 1)))
             }
         }, this.socket.options.reconnectionIntervalMin)
     }
