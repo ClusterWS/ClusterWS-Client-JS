@@ -10,5 +10,11 @@
  <a title="GitHub version" href="https://badge.fury.io/gh/goriunov%2FClusterWS-Client-JS"><img src="https://badge.fury.io/gh/goriunov%2FClusterWS-Client-JS.svg"></a>
 </p>
 
-*Official JavaScript  client library for [ClusterWS](https://github.com/ClusterWS/ClusterWS)*
+<p align="center">
+    <i>Official JavaScript Client library for <a href="https://github.com/ClusterWS/ClusterWS">ClusterWS</a> - lightweight, fast and powerful framework for building horizontally & vertically scalable WebSocket applications in Node.js</i>
+</p>
 
+<h1></h1>
+<h3 align="center">
+    <a href="https://github.com/ClusterWS/ClusterWS-Client-JS/wiki"><strong>ClusterWS JavaScript Client Documentation</strong></a>
+</h3>
