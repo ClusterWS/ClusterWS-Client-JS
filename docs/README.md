@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-    <i>Official JavaScript  client library for <a href="https://github.com/ClusterWS/ClusterWS">ClusterWS</a></i>
+    <i>Official JavaScript Client library for <a href="https://github.com/ClusterWS/ClusterWS">ClusterWS</a> - lightweight, fast and powerful framework for building horizontally & vertically scalable WebSocket applications in Node.js</i>
 </p>
 
 <h1></h1>
