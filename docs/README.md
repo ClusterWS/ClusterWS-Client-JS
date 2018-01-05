@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-    <i>Official JavaScript  client library for <a href="https://github.com/ClusterWS/ClusterWS">ClusterWS</a> uWebSockets</a></i>
+    <i>Official JavaScript  client library for <a href="https://github.com/ClusterWS/ClusterWS">ClusterWS</a></i>
 </p>
 
 <h1></h1>
