@@ -162,4 +162,4 @@ var ClusterWS = function() {
     }, t;
 }();
 
-module.exports = ClusterWS;
+module.exports.default = ClusterWS, module.exports = ClusterWS;
