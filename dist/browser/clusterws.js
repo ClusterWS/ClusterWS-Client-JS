@@ -154,5 +154,5 @@ var ClusterWS = function() {
             return this.channels[t];
         }, s;
     }();
-    return module.exports.default = s, s;
+    return module.exports = s, module.exports.default = s, s;
 }();
