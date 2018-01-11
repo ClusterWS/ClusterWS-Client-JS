@@ -97,6 +97,3 @@ export default class ClusterWS {
         return this.channels[channelName]
     }
 }
-
-module.exports = ClusterWS
-module.exports.default = ClusterWS
