@@ -27,9 +27,8 @@ var ClusterWS = function() {
             if ("[object Function]" !== {}.toString.call(e)) return t("Listener must be a function");
             this.events[n] = e;
         }, n.prototype.emit = function(t) {
-            for (var n = [], e = 1; e < arguments.length; e++) n[e - 1] = arguments[e];
-            this.events[t] && (o = this.events[t]).call.apply(o, [ null ].concat(n));
-            var o;
+            for (var n, e = [], o = 1; o < arguments.length; o++) e[o - 1] = arguments[o];
+            this.events[t] && (n = this.events[t]).call.apply(n, [ null ].concat(e));
         }, n.prototype.removeAllEvents = function() {
             this.events = {};
         }, n;

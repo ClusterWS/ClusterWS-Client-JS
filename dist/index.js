@@ -28,9 +28,8 @@ var Channel = function() {
         if ("[object Function]" !== {}.toString.call(e)) return logError("Listener must be a function");
         this.events[t] = e;
     }, t.prototype.emit = function(t) {
-        for (var e = [], n = 1; n < arguments.length; n++) e[n - 1] = arguments[n];
-        this.events[t] && (o = this.events[t]).call.apply(o, [ null ].concat(e));
-        var o;
+        for (var e, n = [], o = 1; o < arguments.length; o++) n[o - 1] = arguments[o];
+        this.events[t] && (e = this.events[t]).call.apply(e, [ null ].concat(n));
     }, t.prototype.removeAllEvents = function() {
         this.events = {};
     }, t;
@@ -162,4 +161,4 @@ var ClusterWS = function() {
     }, t;
 }();
 
-module.exports = ClusterWS;
+module.exports = ClusterWS, module.exports.default = ClusterWS;

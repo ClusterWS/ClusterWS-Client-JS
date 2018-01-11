@@ -1,6 +1,6 @@
 {
   "name": "clusterws-client-js",
-  "version": "1.5.0",
+  "version": "1.5.3",
   "description": "JavaScript Client for ClusterWS - lightweight, fast and powerful framework for building horizontally & vertically scalable WebSocket applications in Node.js.",
   "main": "index.js",
   "author": "Dmitrii Goriunov",
@@ -16,6 +16,6 @@
     "url": "https://github.com/ClusterWS/ClusterWS-Client-JS"
   },
   "devDependencies": {
-    "ts-builder": "^0.5.11"
+    "ts-builder": "^0.5.21"
   }
 }
