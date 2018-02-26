@@ -1,4 +1,6 @@
 import ClusterWS from '../../index'
+import { CustomObject } from '../../utils/interfaces'
+
 
 export function buffer(str: string): ByteString {
     const length: number = str.length
@@ -7,34 +9,36 @@ export function buffer(str: string): ByteString {
     return uint.buffer
 }
 
-export function decode(socket: ClusterWS, message: any): any {
-    switch (message['#'][0]) {
-        case 'e': return socket.events.emit(message['#'][1], message['#'][2])
-        case 'p': socket.channels[message['#'][1]] && socket.channels[message['#'][1]].onMessage(message['#'][2])
-        case 's':
-            switch (message['#'][1]) {
-                case 'c':
-                    socket.pingInterval = setInterval((): void =>
-                        socket.missedPing++ > 2 && socket.disconnect(4001, 'Did not get pings'), message['#'][2].ping)
-                    socket.useBinary = message['#'][2].binary
-                    socket.events.emit('connect')
-                default: break
+export function decode(socket: ClusterWS, message: any) {
+    const actions: CustomObject = {
+        'e': (): void => socket.events.emit(message['#'][1], message['#'][2]),
+        'p': (): void => socket.channels[message['#'][1]] && socket.channels[message['#'][1]].onMessage(message['#'][2]),
+        's': {
+            'c': (): void => {
+                socket.pingInterval = setInterval((): void =>
+                    socket.missedPing++ > 2 && socket.disconnect(4001, 'Did not get pings'), message['#'][2].ping)
+                socket.useBinary = message['#'][2].binary
+                socket.events.emit('connect')
             }
-        default: break
+        }
     }
+
+    return message['#'][0] === 's' ?
+        actions[message['#'][0]][message['#'][1]] && actions[message['#'][0]][message['#'][1]].call(null) :
+        actions[message['#'][0]] && actions[message['#'][0]].call(null)
 }
 
-export function encode(event: string, data: any, type: string): any {
-    switch (type) {
-        case 'ping': return event
-        case 'emit': return JSON.stringify({ '#': ['e', event, data] })
-        case 'publish': return JSON.stringify({ '#': ['p', event, data] })
-        case 'system': switch (event) {
-            case 'subscribe': return JSON.stringify({ '#': ['s', 's', data] })
-            case 'unsubscribe': return JSON.stringify({ '#': ['s', 'u', data] })
-            case 'configuration': return JSON.stringify({ '#': ['s', 'c', data] })
-            default: break
+export function encode(event: string, data: any, type: string): string {
+    const message: CustomObject = {
+        'emit': { '#': ['e', event, data] },
+        'publish': { '#': ['p', event, data] },
+        'system': {
+            'subscribe': { '#': ['s', 's', data] },
+            'unsubscribe': { '#': ['s', 'u', data] }
         }
-        default: break
     }
+
+    return type === 'ping' ? event :
+        JSON.stringify(type === 'system' ?
+            message[type][event] : message[type])
 }

@@ -1,22 +1,23 @@
 import { Channel } from './modules/channel/channel'
+import { logError } from './utils/functions'
 import { EventEmitter } from './modules/emitter/emitter'
-import { Reconnection } from './modules/reconnection/reconnection'
-import { buffer, decode, encode } from './modules/parser/parser'
-import { Options, Configurations, logError, Listener, CustomObject } from './utils/utils'
+import { decode, encode, buffer } from './modules/parser/parser'
+import { Options, Configurations, Listener, CustomObject } from './utils/interfaces'
 
 declare const window: any
 
 export default class ClusterWS {
+    public events: EventEmitter = new EventEmitter()
     public options: Options
     public websocket: WebSocket
     public channels: CustomObject = {}
 
-    public events: EventEmitter = new EventEmitter()
-    public missedPing: number = 0
     public useBinary: boolean = false
+    public missedPing: number = 0
     public pingInterval: any
 
-    private reconnection: Reconnection
+    private inReconnection: boolean = false
+    private reconnectionAttempted: number = 0
 
     constructor(configurations: Configurations) {
         if (!configurations.url)
@@ -33,17 +34,22 @@ export default class ClusterWS {
         if (this.options.reconnectionIntervalMin > this.options.reconnectionIntervalMax)
             return logError('reconnectionIntervalMin can not be more then reconnectionIntervalMax')
 
-        this.reconnection = new Reconnection(this)
         this.create()
     }
 
-    public create(): void {
+    private create(): void {
         const Socket: any = window.MozWebSocket || window.WebSocket
 
         this.websocket = new Socket(this.options.url)
         this.websocket.binaryType = 'arraybuffer'
-        this.websocket.onopen = (): void => this.reconnection.isConnected()
-        this.websocket.onerror = (err: any): void => this.events.emit('error', err.message)
+
+        this.websocket.onopen = (): void => {
+            this.reconnectionAttempted = 0
+            for (const key in this.channels)
+                this.channels[key] && this.channels[key].subscribe()
+        }
+
+        this.websocket.onerror = (err: any): void => this.events.emit('error', err)
         this.websocket.onmessage = (message: any): void => {
             let data: string = typeof message.data !== 'string' ?
                 String.fromCharCode.apply(null, new Uint8Array(message.data)) : message.data
@@ -62,14 +68,26 @@ export default class ClusterWS {
             clearInterval(this.pingInterval)
             this.events.emit('disconnect', event.code, event.reason)
 
-            if (this.options.autoReconnect && event.code !== 1000) return this.reconnection.reconnect()
-
-            this.events.removeAllEvents()
-            for (const key in this)
-                this[key] ? this[key] = null : null
+            if (this.options.autoReconnect && event.code !== 1000 &&
+                (this.options.reconnectionAttempts === 0 || this.reconnectionAttempted < this.options.reconnectionAttempts)) {
+                if (this.websocket.readyState === this.websocket.CLOSED) {
+                    this.reconnectionAttempted++
+                    this.websocket = null
+                    setTimeout(() => this.create(),
+                        Math.floor(Math.random() * (this.options.reconnectionIntervalMax - this.options.reconnectionIntervalMin + 1)))
+                }
+            } else {
+                this.events.removeAllEvents()
+                for (const key in this)
+                    this[key] ? this[key] = null : null
+            }
         }
     }
 
+    public on(event: 'error', listener: (err: any) => void): void
+    public on(event: 'connect', listener: () => void): void
+    public on(event: 'disconnect', listener: (code?: number, reason?: string) => void): void
+    public on(event: string, listener: Listener): void
     public on(event: string, listener: Listener): void {
         this.events.on(event, listener)
     }
@@ -80,12 +98,8 @@ export default class ClusterWS {
             encode(event, data, type))
     }
 
-    public disconnect(code?: number, msg?: any): void {
-        this.websocket.close(code || 1000, msg)
-    }
-
-    public getState(): number {
-        return this.websocket.readyState
+    public disconnect(code?: number, reason?: any): void {
+        this.websocket.close(code || 1000, reason)
     }
 
     public subscribe(channelName: string): Channel {
@@ -95,5 +109,9 @@ export default class ClusterWS {
 
     public getChannelByName(channelName: string): Channel {
         return this.channels[channelName]
+    }
+
+    public getState(): number {
+        return this.websocket.readyState
     }
 }

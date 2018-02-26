@@ -1,5 +1,7 @@
 import ClusterWS from '../../index'
-import { Listener, logError } from '../../utils/utils'
+import { Listener } from '../../utils/interfaces'
+import { logError } from '../../utils/functions'
+
 
 export class Channel {
     private listener: Listener

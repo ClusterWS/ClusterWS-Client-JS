@@ -1,4 +1,5 @@
-import { Listener, logError } from '../../utils/utils'
+import { logError } from '../../utils/functions'
+import { Listener } from '../../utils/interfaces'
 
 export class EventEmitter {
     private events: any = {}
