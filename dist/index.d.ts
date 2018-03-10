@@ -2,8 +2,6 @@
 
 export default class ClusterWS {
     events: EventEmitter;
-    options: Options;
-    websocket: WebSocket;
     channels: CustomObject;
     useBinary: boolean;
     missedPing: number;
@@ -13,7 +11,7 @@ export default class ClusterWS {
     on(event: 'connect', listener: () => void): void;
     on(event: 'disconnect', listener: (code?: number, reason?: string) => void): void;
     on(event: string, listener: Listener): void;
-    send(event: string, data: any, type?: string): void;
+    send(event: string, message: Message, eventType?: string): void;
     disconnect(code?: number, reason?: any): void;
     subscribe(channelName: string): Channel;
     getChannelByName(channelName: string): Channel;
@@ -37,27 +35,32 @@ export class EventEmitter {
 }
 
 export function buffer(str: string): ByteString;
-export function decode(socket: ClusterWS, message: any): any;
-export function encode(event: string, data: any, type: string): string;
+export function decode(socket: ClusterWS, message: any): void;
+export function encode(event: string, data: any, eventType: string): string;
 
 export function logError<T>(data: T): any;
 
+export type Message = any;
 export type Listener = (...args: any[]) => void;
-export interface CustomObject {
+export type CustomObject = {
     [propName: string]: any;
-}
-export interface Options {
+};
+export type Options = {
     url: string;
     autoReconnect: boolean;
-    reconnectionAttempts: number;
-    reconnectionIntervalMin: number;
-    reconnectionIntervalMax: number;
-}
-export interface Configurations {
+    autoReconnectOptions: {
+        attempts: number;
+        minInterval: number;
+        maxInterval: number;
+    };
+};
+export type Configurations = {
     url: string;
     autoReconnect?: boolean;
-    reconnectionAttempts?: number;
-    reconnectionIntervalMin?: number;
-    reconnectionIntervalMax?: number;
-}
+    autoReconnectOptions?: {
+        attempts?: number;
+        minInterval?: number;
+        maxInterval?: number;
+    };
+};
 
