@@ -17,6 +17,18 @@
     "url": "https://github.com/ClusterWS/ClusterWS-Client-JS"
   },
   "devDependencies": {
-    "ts-builder": "^0.6.7"
-  }
+    "ts-builder": "^0.6.8"
+  },
+  "keywords": [
+    "clusterws",
+    "websocket",
+    "scale",
+    "uws",
+    "node js websocket",
+    "scale node js websocket",
+    "real-time",
+    "cluster",
+    "ws client",
+    "javascript"
+  ]
 }
