@@ -17,7 +17,7 @@
     "url": "https://github.com/ClusterWS/ClusterWS-Client-JS"
   },
   "devDependencies": {
-    "ts-builder": "^0.6.8"
+    "ts-builder": "^0.6.10"
   },
   "keywords": [
     "clusterws",
