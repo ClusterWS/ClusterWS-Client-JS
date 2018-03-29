@@ -14,8 +14,8 @@ export function decode(socket: ClusterWS, message: any): void {
     p: (): void => socket.channels[message['#'][1]] && socket.channels[message['#'][1]].onMessage(message['#'][2]),
     s: {
       c: (): void => {
-        socket.pingInterval = setInterval((): void => socket.missedPing++ > 2 && socket.disconnect(4001, 'Did not get pings'), message['#'][2].ping)
         socket.useBinary = message['#'][2].binary
+        socket.pingInterval = setInterval((): void => socket.missedPing++ > 2 && socket.disconnect(4001, 'Did not get pings'), message['#'][2].ping)
         socket.events.emit('connect')
       }
     }

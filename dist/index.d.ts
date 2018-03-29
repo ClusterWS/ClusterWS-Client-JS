@@ -2,6 +2,7 @@
 
 export default class ClusterWS {
     events: EventEmitter;
+    isAlive: boolean;
     channels: CustomObject;
     useBinary: boolean;
     missedPing: number;

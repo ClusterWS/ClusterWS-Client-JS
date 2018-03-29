@@ -8,6 +8,7 @@ declare const window: any
 
 export default class ClusterWS {
   public events: EventEmitter = new EventEmitter()
+  public isAlive: boolean = true
   public channels: CustomObject = {}
   public useBinary: boolean = false
   public missedPing: number = 0
@@ -19,7 +20,7 @@ export default class ClusterWS {
 
   constructor(configurations: Configurations) {
     if (!configurations.url)
-      return logError('Url must be provided and it must be string')
+      return logError('Url must be provided and it must be a string')
 
     this.options = {
       url: configurations.url,
@@ -88,12 +89,13 @@ export default class ClusterWS {
         this.missedPing = 0
         return this.send('#1', null, 'ping')
       }
+
       try {
         data = JSON.parse(data)
+        decode(this, data)
       } catch (e) { return logError(e) }
-
-      decode(this, data)
     }
+
     this.websocket.onclose = (event: CloseEvent): void => {
       this.missedPing = 0
       clearInterval(this.pingInterval)

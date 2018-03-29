@@ -50,9 +50,9 @@ function decode(t, e) {
         },
         s: {
             c: function() {
-                t.pingInterval = setInterval(function() {
+                t.useBinary = e["#"][2].binary, t.pingInterval = setInterval(function() {
                     return t.missedPing++ > 2 && t.disconnect(4001, "Did not get pings");
-                }, e["#"][2].ping), t.useBinary = e["#"][2].binary, t.events.emit("connect");
+                }, e["#"][2].ping), t.events.emit("connect");
             }
         }
     };
@@ -81,8 +81,8 @@ function encode(t, e, n) {
 
 var ClusterWS = function() {
     function t(t) {
-        return this.events = new EventEmitter(), this.channels = {}, this.useBinary = !1, 
-        this.missedPing = 0, this.reconnectionAttempted = 0, t.url ? (this.options = {
+        return this.events = new EventEmitter(), this.isAlive = !0, this.channels = {}, 
+        this.useBinary = !1, this.missedPing = 0, this.reconnectionAttempted = 0, t.url ? (this.options = {
             url: t.url,
             autoReconnect: t.autoReconnect || !1,
             autoReconnectOptions: t.autoReconnectOptions ? {
@@ -94,7 +94,7 @@ var ClusterWS = function() {
                 minInterval: 1e3,
                 maxInterval: 5e3
             }
-        }, this.options.autoReconnectOptions.minInterval > this.options.autoReconnectOptions.maxInterval ? logError("minInterval option can not be more than maxInterval option") : void this.create()) : logError("Url must be provided and it must be string");
+        }, this.options.autoReconnectOptions.minInterval > this.options.autoReconnectOptions.maxInterval ? logError("minInterval option can not be more than maxInterval option") : void this.create()) : logError("Url must be provided and it must be a string");
     }
     return t.prototype.on = function(t, e) {
         this.events.on(t, e);
@@ -120,11 +120,10 @@ var ClusterWS = function() {
             var n = "string" != typeof e.data ? String.fromCharCode.apply(null, new Uint8Array(e.data)) : e.data;
             if ("#0" === n) return t.missedPing = 0, t.send("#1", null, "ping");
             try {
-                n = JSON.parse(n);
+                n = JSON.parse(n), decode(t, n);
             } catch (t) {
                 return logError(t);
             }
-            decode(t, n);
         }, this.websocket.onclose = function(e) {
             if (t.missedPing = 0, clearInterval(t.pingInterval), t.events.emit("disconnect", e.code, e.reason), 
             t.options.autoReconnect && 1e3 !== e.code && (0 === t.options.autoReconnectOptions.attempts || t.reconnectionAttempted < t.options.autoReconnectOptions.attempts)) t.websocket.readyState === t.websocket.CLOSED ? (t.reconnectionAttempted++, 
