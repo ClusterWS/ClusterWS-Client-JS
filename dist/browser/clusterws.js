@@ -55,7 +55,7 @@ var ClusterWS = function() {
     return function() {
         function s(e) {
             return this.events = new n(), this.isAlive = !0, this.channels = {}, this.useBinary = !1, 
-            this.reconnectionAttempted = 0, e.url ? (this.options = {
+            this.missedPing = 0, this.reconnectionAttempted = 0, e.url ? (this.options = {
                 url: e.url,
                 autoReconnect: e.autoReconnect || !1,
                 autoReconnectOptions: e.autoReconnectOptions ? {
@@ -94,7 +94,7 @@ var ClusterWS = function() {
                 return e.events.emit("error", t);
             }, this.websocket.onmessage = function(n) {
                 var o = "string" != typeof n.data ? String.fromCharCode.apply(null, new Uint8Array(n.data)) : n.data;
-                if ("#10" === o) return e.isAlive = !0;
+                if ("#0" === o) return e.missedPing = 0, e.send("#1", null, "ping");
                 try {
                     o = JSON.parse(o), function(t, e) {
                         var n = {
@@ -107,7 +107,7 @@ var ClusterWS = function() {
                             s: {
                                 c: function() {
                                     t.useBinary = e["#"][2].binary, t.pingInterval = setInterval(function() {
-                                        t.isAlive ? (t.send("#9", null, "ping"), t.isAlive = !1) : t.disconnect(4001, "No pong from the server");
+                                        return t.missedPing++ > 2 && t.disconnect(4001, "Did not get pings");
                                     }, e["#"][2].ping), t.events.emit("connect");
                                 }
                             }
@@ -118,7 +118,7 @@ var ClusterWS = function() {
                     return t(e);
                 }
             }, this.websocket.onclose = function(t) {
-                if (clearInterval(e.pingInterval), e.events.emit("disconnect", t.code, t.reason), 
+                if (e.missedPing = 0, clearInterval(e.pingInterval), e.events.emit("disconnect", t.code, t.reason), 
                 e.options.autoReconnect && 1e3 !== t.code && (0 === e.options.autoReconnectOptions.attempts || e.reconnectionAttempted < e.options.autoReconnectOptions.attempts)) e.websocket.readyState === e.websocket.CLOSED ? (e.reconnectionAttempted++, 
                 e.websocket = void 0, setTimeout(function() {
                     return e.create();

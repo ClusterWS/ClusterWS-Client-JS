@@ -15,14 +15,7 @@ export function decode(socket: ClusterWS, message: any): void {
     s: {
       c: (): void => {
         socket.useBinary = message['#'][2].binary
-        socket.pingInterval = setInterval(
-          (): void => {
-            if (socket.isAlive) {
-              socket.send('#9', null, 'ping')
-              socket.isAlive = false
-            } else socket.disconnect(4001, 'No pong from the server')
-          },
-          message['#'][2].ping)
+        socket.pingInterval = setInterval((): void => socket.missedPing++ > 2 && socket.disconnect(4001, 'Did not get pings'), message['#'][2].ping)
         socket.events.emit('connect')
       }
     }

@@ -11,6 +11,7 @@ export default class ClusterWS {
   public isAlive: boolean = true
   public channels: CustomObject = {}
   public useBinary: boolean = false
+  public missedPing: number = 0
   public pingInterval: any
 
   private options: Options
@@ -80,12 +81,14 @@ export default class ClusterWS {
         this.channels[keys[i]] && this.channels[keys[i]].subscribe()
     }
     this.websocket.onerror = (err: any): void => this.events.emit('error', err)
-    this.websocket.onmessage = (message: any): boolean => {
+    this.websocket.onmessage = (message: any): void => {
       let data: string = typeof message.data !== 'string' ?
         String.fromCharCode.apply(null, new Uint8Array(message.data)) : message.data
 
-      if (data === '#10')
-        return this.isAlive = true
+      if (data === '#0') {
+        this.missedPing = 0
+        return this.send('#1', null, 'ping')
+      }
 
       try {
         data = JSON.parse(data)
@@ -94,6 +97,7 @@ export default class ClusterWS {
     }
 
     this.websocket.onclose = (event: CloseEvent): void => {
+      this.missedPing = 0
       clearInterval(this.pingInterval)
       this.events.emit('disconnect', event.code, event.reason)
 

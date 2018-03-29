@@ -5,6 +5,7 @@ export default class ClusterWS {
     isAlive: boolean;
     channels: CustomObject;
     useBinary: boolean;
+    missedPing: number;
     pingInterval: any;
     constructor(configurations: Configurations);
     on(event: 'error', listener: (err: any) => void): void;

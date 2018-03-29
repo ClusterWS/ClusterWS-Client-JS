@@ -51,7 +51,7 @@ function decode(t, e) {
         s: {
             c: function() {
                 t.useBinary = e["#"][2].binary, t.pingInterval = setInterval(function() {
-                    t.isAlive ? (t.send("#9", null, "ping"), t.isAlive = !1) : t.disconnect(4001, "No pong from the server");
+                    return t.missedPing++ > 2 && t.disconnect(4001, "Did not get pings");
                 }, e["#"][2].ping), t.events.emit("connect");
             }
         }
@@ -82,7 +82,7 @@ function encode(t, e, n) {
 var ClusterWS = function() {
     function t(t) {
         return this.events = new EventEmitter(), this.isAlive = !0, this.channels = {}, 
-        this.useBinary = !1, this.reconnectionAttempted = 0, t.url ? (this.options = {
+        this.useBinary = !1, this.missedPing = 0, this.reconnectionAttempted = 0, t.url ? (this.options = {
             url: t.url,
             autoReconnect: t.autoReconnect || !1,
             autoReconnectOptions: t.autoReconnectOptions ? {
@@ -118,14 +118,14 @@ var ClusterWS = function() {
             return t.events.emit("error", e);
         }, this.websocket.onmessage = function(e) {
             var n = "string" != typeof e.data ? String.fromCharCode.apply(null, new Uint8Array(e.data)) : e.data;
-            if ("#10" === n) return t.isAlive = !0;
+            if ("#0" === n) return t.missedPing = 0, t.send("#1", null, "ping");
             try {
                 n = JSON.parse(n), decode(t, n);
             } catch (t) {
                 return logError(t);
             }
         }, this.websocket.onclose = function(e) {
-            if (clearInterval(t.pingInterval), t.events.emit("disconnect", e.code, e.reason), 
+            if (t.missedPing = 0, clearInterval(t.pingInterval), t.events.emit("disconnect", e.code, e.reason), 
             t.options.autoReconnect && 1e3 !== e.code && (0 === t.options.autoReconnectOptions.attempts || t.reconnectionAttempted < t.options.autoReconnectOptions.attempts)) t.websocket.readyState === t.websocket.CLOSED ? (t.reconnectionAttempted++, 
             t.websocket = void 0, setTimeout(function() {
                 return t.create();
