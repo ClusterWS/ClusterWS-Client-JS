@@ -1,5 +1,5 @@
 import ClusterWS from '../index'
-import { CustomObject } from '../utils/types'
+import { CustomObject, Message } from '../utils/types'
 
 export function buffer(str: string): ByteString {
   const length: number = str.length
@@ -8,14 +8,15 @@ export function buffer(str: string): ByteString {
   return uint.buffer
 }
 
-export function decode(socket: ClusterWS, message: any): void {
+export function decode(socket: ClusterWS, message: Message): void {
   const actions: CustomObject = {
     e: (): void => socket.events.emit(message['#'][1], message['#'][2]),
     p: (): void => socket.channels[message['#'][1]] && socket.channels[message['#'][1]].onMessage(message['#'][2]),
     s: {
       c: (): void => {
         socket.useBinary = message['#'][2].binary
-        socket.pingInterval = setInterval((): void => socket.missedPing++ > 2 && socket.disconnect(4001, 'Did not get pings'), message['#'][2].ping)
+        socket.pingInterval = message['#'][2].ping
+        socket.ping()
         socket.events.emit('connect')
       }
     }
@@ -26,7 +27,7 @@ export function decode(socket: ClusterWS, message: any): void {
     actions[message['#'][0]] && actions[message['#'][0]].call(null)
 }
 
-export function encode(event: string, data: any, eventType: string): string {
+export function encode(event: string, data: Message, eventType: string): string {
   const message: CustomObject = {
     emit: { '#': ['e', event, data] },
     publish: { '#': ['p', event, data] },
@@ -36,7 +37,6 @@ export function encode(event: string, data: any, eventType: string): string {
     }
   }
 
-  return eventType === 'ping' ? event :
-    JSON.stringify(eventType === 'system' ?
-      message[eventType][event] : message[eventType])
+  return JSON.stringify(eventType === 'system' ?
+    message[eventType][event] : message[eventType])
 }

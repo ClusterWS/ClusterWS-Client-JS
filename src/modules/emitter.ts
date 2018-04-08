@@ -11,7 +11,7 @@ export class EventEmitter {
   }
 
   public emit(event: string, ...args: any[]): void {
-    if (this.events[event]) this.events[event].call(null, ...args)
+    if (this.events[event]) this.events[event](...args)
   }
 
   public removeAllEvents(): void {

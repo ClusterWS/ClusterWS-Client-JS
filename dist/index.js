@@ -29,7 +29,7 @@ var Channel = function() {
         this.events[t] = e;
     }, t.prototype.emit = function(t) {
         for (var e, n = [], o = 1; o < arguments.length; o++) n[o - 1] = arguments[o];
-        this.events[t] && (e = this.events[t]).call.apply(e, [ null ].concat(n));
+        this.events[t] && (e = this.events)[t].apply(e, n);
     }, t.prototype.removeAllEvents = function() {
         this.events = {};
     }, t;
@@ -50,9 +50,7 @@ function decode(t, e) {
         },
         s: {
             c: function() {
-                t.useBinary = e["#"][2].binary, t.pingInterval = setInterval(function() {
-                    return t.missedPing++ > 2 && t.disconnect(4001, "Did not get pings");
-                }, e["#"][2].ping), t.events.emit("connect");
+                t.useBinary = e["#"][2].binary, t.pingInterval = e["#"][2].ping, t.ping(), t.events.emit("connect");
             }
         }
     };
@@ -76,13 +74,13 @@ function encode(t, e, n) {
             }
         }
     };
-    return "ping" === n ? t : JSON.stringify("system" === n ? o[n][t] : o[n]);
+    return JSON.stringify("system" === n ? o[n][t] : o[n]);
 }
 
 var ClusterWS = function() {
     function t(t) {
         return this.events = new EventEmitter(), this.isAlive = !0, this.channels = {}, 
-        this.useBinary = !1, this.missedPing = 0, this.reconnectionAttempted = 0, t.url ? (this.options = {
+        this.useBinary = !1, this.reconnectionAttempted = 0, t.url ? (this.options = {
             url: t.url,
             autoReconnect: t.autoReconnect || !1,
             autoReconnectOptions: t.autoReconnectOptions ? {
@@ -96,36 +94,31 @@ var ClusterWS = function() {
             }
         }, this.options.autoReconnectOptions.minInterval > this.options.autoReconnectOptions.maxInterval ? logError("minInterval option can not be more than maxInterval option") : void this.create()) : logError("Url must be provided and it must be a string");
     }
-    return t.prototype.on = function(t, e) {
-        this.events.on(t, e);
-    }, t.prototype.send = function(t, e, n) {
+    return t.prototype.send = function(t, e, n) {
         void 0 === n && (n = "emit"), this.websocket.send(this.useBinary ? buffer(encode(t, e, n)) : encode(t, e, n));
+    }, t.prototype.on = function(t, e) {
+        this.events.on(t, e);
     }, t.prototype.disconnect = function(t, e) {
         this.websocket.close(t || 1e3, e);
+    }, t.prototype.getState = function() {
+        return this.websocket.readyState;
     }, t.prototype.subscribe = function(t) {
         return this.channels[t] ? this.channels[t] : this.channels[t] = new Channel(this, t);
     }, t.prototype.getChannelByName = function(t) {
         return this.channels[t];
-    }, t.prototype.getState = function() {
-        return this.websocket.readyState;
+    }, t.prototype.ping = function() {
+        var t = this;
+        clearTimeout(this.pingTimeout), this.pingTimeout = setTimeout(function() {
+            return t.disconnect(4001, "Did not get pings");
+        }, 2 * this.pingInterval);
     }, t.prototype.create = function() {
         var t = this, e = window.MozWebSocket || window.WebSocket;
         this.websocket = new e(this.options.url), this.websocket.binaryType = "arraybuffer", 
         this.websocket.onopen = function() {
             t.reconnectionAttempted = 0;
             for (var e = 0, n = Object.keys(t.channels), o = n.length; e < o; e++) t.channels[n[e]] && t.channels[n[e]].subscribe();
-        }, this.websocket.onerror = function(e) {
-            return t.events.emit("error", e);
-        }, this.websocket.onmessage = function(e) {
-            var n = "string" != typeof e.data ? String.fromCharCode.apply(null, new Uint8Array(e.data)) : e.data;
-            if ("#0" === n) return t.missedPing = 0, t.send("#1", null, "ping");
-            try {
-                n = JSON.parse(n), decode(t, n);
-            } catch (t) {
-                return logError(t);
-            }
         }, this.websocket.onclose = function(e) {
-            if (t.missedPing = 0, clearInterval(t.pingInterval), t.events.emit("disconnect", e.code, e.reason), 
+            if (clearTimeout(t.pingTimeout), t.events.emit("disconnect", e.code, e.reason), 
             t.options.autoReconnect && 1e3 !== e.code && (0 === t.options.autoReconnectOptions.attempts || t.reconnectionAttempted < t.options.autoReconnectOptions.attempts)) t.websocket.readyState === t.websocket.CLOSED ? (t.reconnectionAttempted++, 
             t.websocket = void 0, setTimeout(function() {
                 return t.create();
@@ -133,6 +126,16 @@ var ClusterWS = function() {
                 t.events.removeAllEvents();
                 for (var n = 0, o = Object.keys(t), s = o.length; n < s; n++) t[o[n]] = null;
             }
+        }, this.websocket.onmessage = function(e) {
+            var n = "string" != typeof e.data ? String.fromCharCode.apply(null, new Uint8Array(e.data)) : e.data;
+            if ("9" === n) return t.websocket.send(buffer("A")), t.ping();
+            try {
+                n = JSON.parse(n), decode(t, n);
+            } catch (t) {
+                return logError(t);
+            }
+        }, this.websocket.onerror = function(e) {
+            return t.events.emit("error", e);
         };
     }, t;
 }();

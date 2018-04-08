@@ -5,27 +5,28 @@ export default class ClusterWS {
     isAlive: boolean;
     channels: CustomObject;
     useBinary: boolean;
-    missedPing: number;
+    pingTimeout: any;
     pingInterval: any;
     constructor(configurations: Configurations);
+    send(event: string, message: Message, eventType?: string): void;
     on(event: 'error', listener: (err: any) => void): void;
     on(event: 'connect', listener: () => void): void;
     on(event: 'disconnect', listener: (code?: number, reason?: string) => void): void;
     on(event: string, listener: Listener): void;
-    send(event: string, message: Message, eventType?: string): void;
-    disconnect(code?: number, reason?: any): void;
+    disconnect(code?: number, reason?: string): void;
+    getState(): number;
     subscribe(channelName: string): Channel;
     getChannelByName(channelName: string): Channel;
-    getState(): number;
+    ping(): void;
 }
 
 export class Channel {
     name: string;
     constructor(socket: ClusterWS, name: string);
     watch(listener: Listener): Channel;
-    publish(data: any): Channel;
+    publish(data: Message): Channel;
     unsubscribe(): void;
-    onMessage(data: any): void;
+    onMessage(data: Message): void;
     subscribe(): void;
 }
 
@@ -36,8 +37,8 @@ export class EventEmitter {
 }
 
 export function buffer(str: string): ByteString;
-export function decode(socket: ClusterWS, message: any): void;
-export function encode(event: string, data: any, eventType: string): string;
+export function decode(socket: ClusterWS, message: Message): void;
+export function encode(event: string, data: Message, eventType: string): string;
 
 export function logError<T>(data: T): any;
 
