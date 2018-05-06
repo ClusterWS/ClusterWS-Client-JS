@@ -1,6 +1,6 @@
 import ClusterWS from '../index'
-import { Listener } from '../utils/types'
 import { logError } from '../utils/functions'
+import { Listener, Message } from '../utils/types'
 
 export class Channel {
   public name: string
@@ -20,7 +20,7 @@ export class Channel {
     return this
   }
 
-  public publish(data: any): Channel {
+  public publish(data: Message): Channel {
     this.socket.send(this.name, data, 'publish')
     return this
   }
@@ -30,7 +30,7 @@ export class Channel {
     this.socket.channels[this.name] = null
   }
 
-  public onMessage(data: any): void {
+  public onMessage(data: Message): void {
     this.listener && this.listener.call(null, data)
   }
 

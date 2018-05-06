@@ -1,32 +1,28 @@
 import ClusterWS from '../index'
-import { CustomObject } from '../utils/types'
+import { CustomObject, Message } from '../utils/types'
 
-export function buffer(str: string): ByteString {
-  const length: number = str.length
-  const uint: any = new Uint8Array(length)
-  for (let i: number = 0; i < length; i++) uint[i] = str.charCodeAt(i)
-  return uint.buffer
-}
+export function decode(socket: ClusterWS, message: Message): void {
+  const userMessage: Message = socket.options.encodeDecodeEngine ?
+    socket.options.encodeDecodeEngine.decode(message['#'][2]) : message['#'][2]
 
-export function decode(socket: ClusterWS, message: any): void {
   const actions: CustomObject = {
-    e: (): void => socket.events.emit(message['#'][1], message['#'][2]),
-    p: (): void => socket.channels[message['#'][1]] && socket.channels[message['#'][1]].onMessage(message['#'][2]),
+    e: (): void => socket.events.emit(message['#'][1], userMessage),
+    p: (): void => socket.channels[message['#'][1]] && socket.channels[message['#'][1]].onMessage(userMessage),
     s: {
       c: (): void => {
-        socket.useBinary = message['#'][2].binary
-        socket.pingInterval = setInterval((): void => socket.missedPing++ > 2 && socket.disconnect(4001, 'Did not get pings'), message['#'][2].ping)
+        socket.useBinary = userMessage.binary
+        socket.resetPing(userMessage.ping)
         socket.events.emit('connect')
       }
     }
   }
 
   return message['#'][0] === 's' ?
-    actions[message['#'][0]][message['#'][1]] && actions[message['#'][0]][message['#'][1]].call(null) :
-    actions[message['#'][0]] && actions[message['#'][0]].call(null)
+    actions[message['#'][0]][message['#'][1]] && actions[message['#'][0]][message['#'][1]]() :
+    actions[message['#'][0]] && actions[message['#'][0]]()
 }
 
-export function encode(event: string, data: any, eventType: string): string {
+export function encode(event: string, data: Message, eventType: string): string {
   const message: CustomObject = {
     emit: { '#': ['e', event, data] },
     publish: { '#': ['p', event, data] },
@@ -36,7 +32,6 @@ export function encode(event: string, data: any, eventType: string): string {
     }
   }
 
-  return eventType === 'ping' ? event :
-    JSON.stringify(eventType === 'system' ?
-      message[eventType][event] : message[eventType])
+  return JSON.stringify(eventType === 'system' ?
+    message[eventType][event] : message[eventType])
 }

@@ -1,13 +1,13 @@
 {
   "name": "clusterws-client-js",
-  "version": "2.2.1",
+  "version": "3.0.0",
   "description": "JavaScript Client for ClusterWS - lightweight, fast and powerful framework for building horizontally & vertically scalable WebSocket applications in Node.js.",
   "main": "index.js",
   "types": "index.d.ts",
   "author": "Dmitrii Goriunov",
   "scripts": {
-    "build:npm": "ts-builder -npm -folder src -mainfile index.ts -outfolder dist -outfile index.js",
-    "build:browser": "ts-builder -format iife -folder src -mainfile index.ts -outfolder dist/browser -outfile clusterws.js && ts-builder -prod -format iife -folder src -mainfile index.ts -outfolder dist/browser -outfile clusterws.min.js",
+    "build:npm": "clusterws-builder -npm -src=src -dist=dist -type=browser",
+    "build:browser": "clusterws-builder -format=iife -src=src -dist=dist/browser -distFile=clusterws.js -type=browser && clusterws-builder -min -format=iife -src=src -dist=dist/browser -distFile=clusterws.min.js -type=browser",
     "build:prod": "npm run build:npm && npm run build:browser",
     "publish": "npm run build:prod && cd dist && npm publish && cd .."
   },
@@ -17,15 +17,15 @@
     "url": "https://github.com/ClusterWS/ClusterWS-Client-JS"
   },
   "devDependencies": {
-    "ts-builder": "^0.6.10"
+    "clusterws-builder": "0.0.10"
   },
   "keywords": [
     "clusterws",
     "websocket",
     "scale",
     "uws",
-    "node js websocket",
-    "scale node js websocket",
+    "node js",
+    "scale node js",
     "real-time",
     "cluster",
     "ws client",

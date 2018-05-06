@@ -13,6 +13,7 @@ export type Options = {
     minInterval: number
     maxInterval: number
   }
+  encodeDecodeEngine: EncodeDecodeEngine | false
 }
 
 export type Configurations = {
@@ -23,4 +24,10 @@ export type Configurations = {
     minInterval?: number
     maxInterval?: number
   }
+  encodeDecodeEngine?: EncodeDecodeEngine
+}
+
+export type EncodeDecodeEngine = {
+  encode: (message: Message) => Message,
+  decode: (message: Message) => Message
 }

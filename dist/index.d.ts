@@ -2,30 +2,29 @@
 
 export default class ClusterWS {
     events: EventEmitter;
-    isAlive: boolean;
+    options: Options;
     channels: CustomObject;
     useBinary: boolean;
-    missedPing: number;
-    pingInterval: any;
     constructor(configurations: Configurations);
-    on(event: 'error', listener: (err: any) => void): void;
+    on(event: 'error', listener: (err: ErrorEvent) => void): void;
     on(event: 'connect', listener: () => void): void;
     on(event: 'disconnect', listener: (code?: number, reason?: string) => void): void;
     on(event: string, listener: Listener): void;
+    getState(): number;
+    resetPing(interval?: number): void;
+    disconnect(code?: number, reason?: string): void;
     send(event: string, message: Message, eventType?: string): void;
-    disconnect(code?: number, reason?: any): void;
     subscribe(channelName: string): Channel;
     getChannelByName(channelName: string): Channel;
-    getState(): number;
 }
 
 export class Channel {
     name: string;
     constructor(socket: ClusterWS, name: string);
     watch(listener: Listener): Channel;
-    publish(data: any): Channel;
+    publish(data: Message): Channel;
     unsubscribe(): void;
-    onMessage(data: any): void;
+    onMessage(data: Message): void;
     subscribe(): void;
 }
 
@@ -35,11 +34,12 @@ export class EventEmitter {
     removeAllEvents(): void;
 }
 
-export function buffer(str: string): ByteString;
-export function decode(socket: ClusterWS, message: any): void;
-export function encode(event: string, data: any, eventType: string): string;
+export function decode(socket: ClusterWS, message: Message): void;
+export function encode(event: string, data: Message, eventType: string): string;
 
 export function logError<T>(data: T): any;
+export function uint8ArrayToString(buffer: any): string;
+export function stringToArrayBuffer(str: string): any;
 
 export type Message = any;
 export type Listener = (...args: any[]) => void;
@@ -54,6 +54,7 @@ export type Options = {
         minInterval: number;
         maxInterval: number;
     };
+    encodeDecodeEngine: EncodeDecodeEngine | false;
 };
 export type Configurations = {
     url: string;
@@ -63,5 +64,10 @@ export type Configurations = {
         minInterval?: number;
         maxInterval?: number;
     };
+    encodeDecodeEngine?: EncodeDecodeEngine;
+};
+export type EncodeDecodeEngine = {
+    encode: (message: Message) => Message;
+    decode: (message: Message) => Message;
 };
 
