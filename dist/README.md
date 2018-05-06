@@ -6,13 +6,13 @@
 </p>
 
 <p align="center">
-    <a href="https://www.npmjs.com/package/clusterws-client-js"><img src="https://img.shields.io/badge/npm-3.0.3-AE1E80.svg?style=for-the-badge" alt="NPM Version" /></a>
+    <a href="https://www.npmjs.com/package/clusterws-client-js"><img src="https://img.shields.io/badge/npm-3.0.4-AE1E80.svg?style=for-the-badge" alt="NPM Version" /></a>
     <a href="https://github.com/ClusterWS/ClusterWS-Client-JS/graphs/commit-activity"><img src="https://img.shields.io/badge/Maintain-Yes-AE1E80.svg?style=for-the-badge" alt="Maintain" /></a>
     <a href="https://github.com/ClusterWS/ClusterWS-Client-JS/blob/master/LICENSE"><img src="https://img.shields.io/badge/LICENSE-MIT-AE1E80.svg?style=for-the-badge" alt="GitHub license"/></a>
 </p>
 
 <p align="center">
-    <i>Official JavaScript Client library for <a href="https://github.com/ClusterWS/ClusterWS">ClusterWS</a> - <strong>lightweight, fast and powerful</strong> framework for building <strong>scalable</strong> WebSockets applications in Node.js.</i>
+    <i>Official <strong>JavaScript Client</strong> library for <a href="https://github.com/ClusterWS/ClusterWS">ClusterWS</a> - <strong>lightweight</strong>, <strong>fast</strong> and <strong>powerful</strong> framework for building <strong>scalable</strong> WebSockets applications in Node.js.</i>
 </p>
 
 <h1></h1>
