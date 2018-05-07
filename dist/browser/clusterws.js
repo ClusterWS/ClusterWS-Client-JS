@@ -127,7 +127,7 @@ var ClusterWS = function() {
                             }
                         };
                         "s" === e["#"][0] ? o[e["#"][0]][e["#"][1]] && o[e["#"][0]][e["#"][1]]() : o[e["#"][0]] && o[e["#"][0]]();
-                    }(e, JSON.parse(function(t) {
+                    }(e, JSON.parse("string" == typeof o ? o : function(t) {
                         for (var e = "", n = 65535, o = t.length, s = 0; s < o; s += n) s + n > o && (n = o - s), 
                         e += String.fromCharCode.apply(null, t.subarray(s, s + n));
                         return e;

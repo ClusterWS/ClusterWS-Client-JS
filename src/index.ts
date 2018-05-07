@@ -107,6 +107,7 @@ export default class ClusterWS {
           this[keys[i]] = null
       }
     }
+
     this.websocket.onmessage = (data: Message): void => {
       const message: Message = typeof data.data !== 'string' ? new Uint8Array(data.data) : data.data
 
@@ -116,7 +117,7 @@ export default class ClusterWS {
       }
 
       try {
-        decode(this, JSON.parse(uint8ArrayToString(message)))
+        decode(this, JSON.parse(typeof message === 'string' ? message : uint8ArrayToString(message)))
       } catch (e) { return logError(e) }
     }
     this.websocket.onerror = (err: ErrorEvent): void => this.events.emit('error', err)
