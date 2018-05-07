@@ -138,7 +138,7 @@ var Socket = window.MozWebSocket || window.WebSocket, ClusterWS = function() {
             var n = "string" != typeof e.data ? new Uint8Array(e.data) : e.data;
             if (57 === n[0]) return t.websocket.send(t.pong), t.resetPing();
             try {
-                decode(t, JSON.parse(uint8ArrayToString(n)));
+                decode(t, JSON.parse("string" == typeof n ? n : uint8ArrayToString(n)));
             } catch (t) {
                 return logError(t);
             }
