@@ -49,7 +49,7 @@ export default class ClusterWS {
   }
 
   public getState(): number {
-    return this.websocket ? this.websocket.readyState : 0;
+    return this.websocket ? this.websocket.readyState : 0
   }
 
   public resetPing(interval?: number): void {
