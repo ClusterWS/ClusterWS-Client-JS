@@ -78,7 +78,7 @@ var ClusterWS = function() {
         return r.prototype.on = function(t, e) {
             this.events.on(t, e);
         }, r.prototype.getState = function() {
-            return this.websocket.readyState;
+            return this.websocket ? this.websocket.readyState : 0;
         }, r.prototype.resetPing = function(t) {
             var e = this;
             t && (this.pingInterval = t), clearTimeout(this.pingTimeout), this.pingTimeout = setTimeout(function() {
