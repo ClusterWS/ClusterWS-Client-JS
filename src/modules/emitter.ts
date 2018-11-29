@@ -10,6 +10,12 @@ export class EventEmitter {
     this.events[event] = listener
   }
 
+  public off(event: string): void {
+      if (event in this.events)
+          return logError('There is no Listener for this event')
+      delete this.events[event];
+  }
+
   public emit(event: string, ...args: any[]): void {
     if (this.events[event]) this.events[event](...args)
   }

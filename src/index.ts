@@ -48,6 +48,10 @@ export default class ClusterWS {
     this.events.on(event, listener)
   }
 
+  public off(event: string) {
+    this.events.off(event)
+  }
+
   public getState(): number {
     return this.websocket ? this.websocket.readyState : 0
   }
