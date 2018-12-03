@@ -11,9 +11,7 @@ export class EventEmitter {
   }
 
   public off(event: string): void {
-      if (event in this.events)
-          return logError('There is no Listener for this event')
-      delete this.events[event];
+      delete this.events[event]
   }
 
   public emit(event: string, ...args: any[]): void {
