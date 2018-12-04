@@ -10,6 +10,10 @@ export class EventEmitter {
     this.events[event] = listener
   }
 
+  public off(event: string): void {
+      delete this.events[event]
+  }
+
   public emit(event: string, ...args: any[]): void {
     if (this.events[event]) this.events[event](...args)
   }
