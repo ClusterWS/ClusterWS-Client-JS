@@ -30,6 +30,8 @@ var ClusterWS = function() {
         return e.prototype.on = function(e, n) {
             if ("[object Function]" !== {}.toString.call(n)) return t("Listener must be a function");
             this.events[e] = n;
+        }, e.prototype.off = function(t) {
+            delete this.events[t];
         }, e.prototype.emit = function(t) {
             for (var e, n = [], o = 1; o < arguments.length; o++) n[o - 1] = arguments[o];
             this.events[t] && (e = this.events)[t].apply(e, n);
@@ -77,6 +79,8 @@ var ClusterWS = function() {
         }
         return r.prototype.on = function(t, e) {
             this.events.on(t, e);
+        }, r.prototype.off = function(t) {
+            this.events.off(t);
         }, r.prototype.getState = function() {
             return this.websocket ? this.websocket.readyState : 0;
         }, r.prototype.resetPing = function(t) {

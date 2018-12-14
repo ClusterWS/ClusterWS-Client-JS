@@ -10,6 +10,7 @@ export default class ClusterWS {
     on(event: 'connect', listener: () => void): void;
     on(event: 'disconnect', listener: (code?: number, reason?: string) => void): void;
     on(event: string, listener: Listener): void;
+    off(event: string): void;
     getState(): number;
     resetPing(interval?: number): void;
     disconnect(code?: number, reason?: string): void;
@@ -30,6 +31,7 @@ export class Channel {
 
 export class EventEmitter {
     on(event: string, listener: Listener): void;
+    off(event: string): void;
     emit(event: string, ...args: any[]): void;
     removeAllEvents(): void;
 }

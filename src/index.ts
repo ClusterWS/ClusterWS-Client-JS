@@ -48,7 +48,7 @@ export default class ClusterWS {
     this.events.on(event, listener)
   }
 
-  public off(event: string) {
+  public off(event: string): void {
     this.events.off(event)
   }
 

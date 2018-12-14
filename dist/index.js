@@ -38,6 +38,8 @@ var Channel = function() {
     return t.prototype.on = function(t, e) {
         if ("[object Function]" !== {}.toString.call(e)) return logError("Listener must be a function");
         this.events[t] = e;
+    }, t.prototype.off = function(t) {
+        delete this.events[t];
     }, t.prototype.emit = function(t) {
         for (var e, n = [], o = 1; o < arguments.length; o++) n[o - 1] = arguments[o];
         this.events[t] && (e = this.events)[t].apply(e, n);
@@ -103,6 +105,8 @@ var Socket = window.MozWebSocket || window.WebSocket, ClusterWS = function() {
     }
     return t.prototype.on = function(t, e) {
         this.events.on(t, e);
+    }, t.prototype.off = function(t) {
+        this.events.off(t);
     }, t.prototype.getState = function() {
         return this.websocket ? this.websocket.readyState : 0;
     }, t.prototype.resetPing = function(t) {
