@@ -18,8 +18,8 @@ export type Options = {
 }
 
 export type Configurations = {
-  autoConnect?: boolean;
   url: string
+  autoConnect?: boolean;
   autoReconnect?: boolean
   autoReconnectOptions?: {
     attempts?: number

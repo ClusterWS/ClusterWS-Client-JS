@@ -18,7 +18,7 @@ export default class ClusterWS {
   private pingTimeout: any
   private pingInterval: number
   private reconnectionAttempted: number = 0
-  private hasStarted: boolean = false
+  private hasStartedConnection: boolean = false
 
   constructor(configurations: Configurations) {
     this.options = {
@@ -88,14 +88,15 @@ export default class ClusterWS {
     return this.channels[channelName]
   }
 
-  public start(): void {
-    if (this.hasStarted)
-      console.log('The socket has already been created');
+  public connect(): void {
+    if (this.hasStartedConnection)
+      logError('The socket has already been created');
     else
       this.create()
   }
 
   private create(): void {
+    this.hasStartedConnection = true
     this.websocket = new Socket(this.options.url)
     this.websocket.binaryType = 'arraybuffer'
 
@@ -135,6 +136,5 @@ export default class ClusterWS {
       } catch (e) { return logError(e) }
     }
     this.websocket.onerror = (err: ErrorEvent): void => this.events.emit('error', err)
-    this.hasStarted = true
   }
 }
