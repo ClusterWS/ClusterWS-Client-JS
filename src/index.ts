@@ -30,7 +30,7 @@ export default class ClusterWS {
         maxInterval: configurations.autoReconnectOptions.maxInterval || 5000
       } : { attempts: 0, minInterval: 1000, maxInterval: 5000 },
       encodeDecodeEngine: configurations.encodeDecodeEngine || false,
-      autoConnect: configurations.autoConnect || true,
+      autoConnect: configurations.autoConnect !== false,
     };
 
     if (!this.options.url)
