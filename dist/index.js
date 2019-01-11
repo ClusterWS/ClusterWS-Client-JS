@@ -88,7 +88,7 @@ function encode(t, e, n) {
 var Socket = window.MozWebSocket || window.WebSocket, ClusterWS = function() {
     function t(t) {
         return this.events = new EventEmitter(), this.channels = {}, this.pong = stringToArrayBuffer("A"), 
-        this.reconnectionAttempted = 0, this.options = {
+        this.reconnectionAttempted = 0, this.hasStartedConnection = !1, this.options = {
             url: t.url,
             autoReconnect: t.autoReconnect || !1,
             autoReconnectOptions: t.autoReconnectOptions ? {
@@ -100,8 +100,9 @@ var Socket = window.MozWebSocket || window.WebSocket, ClusterWS = function() {
                 minInterval: 1e3,
                 maxInterval: 5e3
             },
-            encodeDecodeEngine: t.encodeDecodeEngine || !1
-        }, this.options.url ? this.options.autoReconnectOptions.minInterval > this.options.autoReconnectOptions.maxInterval ? logError("minInterval option can not be more than maxInterval option") : void this.create() : logError("Url must be provided and it must be a string");
+            encodeDecodeEngine: t.encodeDecodeEngine || !1,
+            autoConnect: !1 !== t.autoConnect
+        }, this.options.url ? this.options.autoReconnectOptions.minInterval > this.options.autoReconnectOptions.maxInterval ? logError("minInterval option can not be more than maxInterval option") : void (this.options.autoConnect && this.create()) : logError("Url must be provided and it must be a string");
     }
     return t.prototype.on = function(t, e) {
         this.events.on(t, e);
@@ -123,9 +124,11 @@ var Socket = window.MozWebSocket || window.WebSocket, ClusterWS = function() {
         return this.channels[t] ? this.channels[t] : this.channels[t] = new Channel(this, t);
     }, t.prototype.getChannelByName = function(t) {
         return this.channels[t];
+    }, t.prototype.connect = function() {
+        this.hasStartedConnection ? logError("The socket has already been created") : this.create();
     }, t.prototype.create = function() {
         var t = this;
-        this.websocket = new Socket(this.options.url), this.websocket.binaryType = "arraybuffer", 
+        this.hasStartedConnection = !0, this.websocket = new Socket(this.options.url), this.websocket.binaryType = "arraybuffer", 
         this.websocket.onopen = function() {
             t.reconnectionAttempted = 0;
             for (var e = 0, n = Object.keys(t.channels), o = n.length; e < o; e++) t.channels.hasOwnProperty(n[e]) && t.channels[n[e]].subscribe();
@@ -139,8 +142,9 @@ var Socket = window.MozWebSocket || window.WebSocket, ClusterWS = function() {
                 for (var n = 0, o = Object.keys(t), s = o.length; n < s; n++) t[o[n]] = null;
             }
         }, this.websocket.onmessage = function(e) {
-            var n = "string" != typeof e.data ? new Uint8Array(e.data) : e.data;
-            if (57 === n[0]) return t.websocket.send(t.pong), t.resetPing();
+            var n;
+            if (57 === (n = e.data ? "string" != typeof e.data ? new Uint8Array(e.data) : e.data : "string" != typeof e ? new Uint8Array(e) : e)[0]) return t.websocket.send(t.pong), 
+            t.resetPing();
             try {
                 decode(t, JSON.parse("string" == typeof n ? n : uint8ArrayToString(n)));
             } catch (t) {

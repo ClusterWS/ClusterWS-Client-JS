@@ -31,7 +31,7 @@ export default class ClusterWS {
       } : { attempts: 0, minInterval: 1000, maxInterval: 5000 },
       encodeDecodeEngine: configurations.encodeDecodeEngine || false,
       autoConnect: configurations.autoConnect !== false,
-    };
+    }
 
     if (!this.options.url)
       return logError('Url must be provided and it must be a string')
@@ -90,7 +90,7 @@ export default class ClusterWS {
 
   public connect(): void {
     if (this.hasStartedConnection)
-      logError('The socket has already been created');
+      logError('The socket has already been created')
     else
       this.create()
   }
@@ -124,7 +124,11 @@ export default class ClusterWS {
     }
 
     this.websocket.onmessage = (data: Message): void => {
-      const message: Message = typeof data.data !== 'string' ? new Uint8Array(data.data) : data.data
+      let message: Message
+      if (data.data)
+        message = typeof data.data !== 'string' ? new Uint8Array(data.data) : data.data
+      else
+        message = typeof data !== 'string' ? new Uint8Array(data) : data
 
       if (message[0] === 57) {
         this.websocket.send(this.pong)

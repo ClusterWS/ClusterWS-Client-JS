@@ -17,6 +17,7 @@ export default class ClusterWS {
     send(event: string, message: Message, eventType?: string): void;
     subscribe(channelName: string): Channel;
     getChannelByName(channelName: string): Channel;
+    connect(): void;
 }
 
 export class Channel {
@@ -50,6 +51,7 @@ export type CustomObject = {
 };
 export type Options = {
     url: string;
+    autoConnect: boolean;
     autoReconnect: boolean;
     autoReconnectOptions: {
         attempts: number;
@@ -60,6 +62,7 @@ export type Options = {
 };
 export type Configurations = {
     url: string;
+    autoConnect?: boolean;
     autoReconnect?: boolean;
     autoReconnectOptions?: {
         attempts?: number;

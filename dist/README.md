@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-    <a href="https://www.npmjs.com/package/clusterws-client-js"><img src="https://img.shields.io/badge/npm-3.1.1-AE1E80.svg?style=for-the-badge" alt="NPM Version" /></a>
+    <a href="https://www.npmjs.com/package/clusterws-client-js"><img src="https://img.shields.io/badge/npm-3.2.0-AE1E80.svg?style=for-the-badge" alt="NPM Version" /></a>
     <a href="https://github.com/ClusterWS/ClusterWS-Client-JS/graphs/commit-activity"><img src="https://img.shields.io/badge/Maintain-Yes-AE1E80.svg?style=for-the-badge" alt="Maintain" /></a>
     <a href="https://github.com/ClusterWS/ClusterWS-Client-JS/blob/master/LICENSE"><img src="https://img.shields.io/badge/LICENSE-MIT-AE1E80.svg?style=for-the-badge" alt="GitHub license"/></a>
 </p>
