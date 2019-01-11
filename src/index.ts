@@ -18,6 +18,7 @@ export default class ClusterWS {
   private pingTimeout: any
   private pingInterval: number
   private reconnectionAttempted: number = 0
+  private hasStartedConnection: boolean = false
 
   constructor(configurations: Configurations) {
     this.options = {
@@ -28,8 +29,9 @@ export default class ClusterWS {
         minInterval: configurations.autoReconnectOptions.minInterval || 1000,
         maxInterval: configurations.autoReconnectOptions.maxInterval || 5000
       } : { attempts: 0, minInterval: 1000, maxInterval: 5000 },
-      encodeDecodeEngine: configurations.encodeDecodeEngine || false
-    }
+      encodeDecodeEngine: configurations.encodeDecodeEngine || false,
+      autoConnect: configurations.autoConnect !== false,
+    };
 
     if (!this.options.url)
       return logError('Url must be provided and it must be a string')
@@ -37,7 +39,8 @@ export default class ClusterWS {
     if (this.options.autoReconnectOptions.minInterval > this.options.autoReconnectOptions.maxInterval)
       return logError('minInterval option can not be more than maxInterval option')
 
-    this.create()
+    if (this.options.autoConnect)
+      this.create()
   }
 
   public on(event: 'error', listener: (err: ErrorEvent) => void): void
@@ -85,7 +88,15 @@ export default class ClusterWS {
     return this.channels[channelName]
   }
 
+  public connect(): void {
+    if (this.hasStartedConnection)
+      logError('The socket has already been created');
+    else
+      this.create()
+  }
+
   private create(): void {
+    this.hasStartedConnection = true
     this.websocket = new Socket(this.options.url)
     this.websocket.binaryType = 'arraybuffer'
 

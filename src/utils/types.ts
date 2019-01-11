@@ -7,6 +7,7 @@ export type CustomObject = {
 
 export type Options = {
   url: string
+  autoConnect: boolean
   autoReconnect: boolean
   autoReconnectOptions: {
     attempts: number
@@ -18,6 +19,7 @@ export type Options = {
 
 export type Configurations = {
   url: string
+  autoConnect?: boolean;
   autoReconnect?: boolean
   autoReconnectOptions?: {
     attempts?: number
