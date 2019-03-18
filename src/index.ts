@@ -110,6 +110,9 @@ export default class ClusterWS {
       }
     };
     this.websocket.onclose = (event: CloseEvent): void => {
+      if (!this.options.autoResubscribe) {
+        this.channels = {}
+      }
       clearTimeout(this.pingTimeout)
       this.events.emit('disconnect', event.code, event.reason)
 
