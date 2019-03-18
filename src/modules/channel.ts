@@ -7,10 +7,10 @@ export class Channel {
   private socket: ClusterWS
   private listener: Listener
 
-  constructor(socket: ClusterWS, name: string) {
+    constructor(socket: ClusterWS, name: string, autoResubscribe: boolean) {
     this.name = name
     this.socket = socket
-    this.subscribe()
+    autoResubscribe && this.subscribe();
   }
 
   public watch(listener: Listener): Channel {

@@ -14,6 +14,7 @@ export type Options = {
     minInterval: number
     maxInterval: number
   }
+  autoResubscribe: boolean;
   encodeDecodeEngine: EncodeDecodeEngine | false
 }
 
@@ -26,6 +27,7 @@ export type Configurations = {
     minInterval?: number
     maxInterval?: number
   }
+  autoResubscribe?: boolean;
   encodeDecodeEngine?: EncodeDecodeEngine
 }
 
