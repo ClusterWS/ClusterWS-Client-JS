@@ -82,7 +82,7 @@ export default class ClusterWS {
 
   public subscribe(channelName: string): Channel {
     return this.channels[channelName] ? this.channels[channelName] :
-      this.channels[channelName] = new Channel(this, channelName, this.options.autoResubscribe);
+      this.channels[channelName] = new Channel(this, channelName);
   }
 
   public getChannelByName(channelName: string): Channel {
