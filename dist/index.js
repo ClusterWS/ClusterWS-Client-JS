@@ -101,7 +101,8 @@ var Socket = window.MozWebSocket || window.WebSocket, ClusterWS = function() {
                 maxInterval: 5e3
             },
             encodeDecodeEngine: t.encodeDecodeEngine || !1,
-            autoConnect: !1 !== t.autoConnect
+            autoConnect: !1 !== t.autoConnect,
+            autoResubscribe: !1 !== t.autoResubscribe
         }, this.options.url ? this.options.autoReconnectOptions.minInterval > this.options.autoReconnectOptions.maxInterval ? logError("minInterval option can not be more than maxInterval option") : void (this.options.autoConnect && this.create()) : logError("Url must be provided and it must be a string");
     }
     return t.prototype.on = function(t, e) {
@@ -130,11 +131,10 @@ var Socket = window.MozWebSocket || window.WebSocket, ClusterWS = function() {
         var t = this;
         this.hasStartedConnection = !0, this.websocket = new Socket(this.options.url), this.websocket.binaryType = "arraybuffer", 
         this.websocket.onopen = function() {
-            t.reconnectionAttempted = 0;
-            for (var e = 0, n = Object.keys(t.channels), o = n.length; e < o; e++) t.channels.hasOwnProperty(n[e]) && t.channels[n[e]].subscribe();
+            if (t.reconnectionAttempted = 0, t.options.autoResubscribe) for (var e = 0, n = Object.keys(t.channels), o = n.length; e < o; e++) t.channels.hasOwnProperty(n[e]) && t.channels[n[e]].subscribe();
         }, this.websocket.onclose = function(e) {
-            if (clearTimeout(t.pingTimeout), t.events.emit("disconnect", e.code, e.reason), 
-            t.options.autoReconnect && 1e3 !== e.code && (0 === t.options.autoReconnectOptions.attempts || t.reconnectionAttempted < t.options.autoReconnectOptions.attempts)) t.websocket.readyState === t.websocket.CLOSED ? (t.reconnectionAttempted++, 
+            if (t.options.autoResubscribe || (t.channels = {}), clearTimeout(t.pingTimeout), 
+            t.events.emit("disconnect", e.code, e.reason), t.options.autoReconnect && 1e3 !== e.code && (0 === t.options.autoReconnectOptions.attempts || t.reconnectionAttempted < t.options.autoReconnectOptions.attempts)) t.websocket.readyState === t.websocket.CLOSED ? (t.reconnectionAttempted++, 
             t.websocket = void 0, setTimeout(function() {
                 return t.create();
             }, Math.floor(Math.random() * (t.options.autoReconnectOptions.maxInterval - t.options.autoReconnectOptions.minInterval + 1)))) : console.log("Some thing went wrong with close event please contact developer"); else {

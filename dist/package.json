@@ -1,6 +1,6 @@
 {
 	"name": "clusterws-client-js",
-	"version": "3.2.0",
+	"version": "3.3.0",
 	"description": "JavaScript Client for ClusterWS - lightweight, fast and powerful framework for building scalable WebSockets applications in Node.js.",
 	"main": "index.js",
 	"types": "index.d.ts",

@@ -32,7 +32,7 @@ export default class ClusterWS {
       encodeDecodeEngine: configurations.encodeDecodeEngine || false,
       autoConnect: configurations.autoConnect !== false,
       autoResubscribe: configurations.autoResubscribe !== false,
-    };
+    }
 
     if (!this.options.url)
       return logError('Url must be provided and it must be a string')
@@ -82,7 +82,7 @@ export default class ClusterWS {
 
   public subscribe(channelName: string): Channel {
     return this.channels[channelName] ? this.channels[channelName] :
-      this.channels[channelName] = new Channel(this, channelName);
+      this.channels[channelName] = new Channel(this, channelName)
   }
 
   public getChannelByName(channelName: string): Channel {
@@ -105,10 +105,10 @@ export default class ClusterWS {
       this.reconnectionAttempted = 0
       if (this.options.autoResubscribe) {
         for (let i: number = 0, keys: string[] = Object.keys(this.channels), keysLength: number = keys.length; i < keysLength; i++) {
-          this.channels.hasOwnProperty(keys[i]) && this.channels[keys[i]].subscribe();
+          this.channels.hasOwnProperty(keys[i]) && this.channels[keys[i]].subscribe()
         }
       }
-    };
+    }
     this.websocket.onclose = (event: CloseEvent): void => {
       if (!this.options.autoResubscribe) {
         this.channels = {}
