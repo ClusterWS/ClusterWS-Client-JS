@@ -1,8 +1,14 @@
+# TODO: clean up git ignore
 .npm
 .idea/
 .vscode/
-.builder/cache/
 
+old/
+play.js
 node_modules/
 package-lock.json
 
+manual-test/
+
+# Tests
+coverage/
