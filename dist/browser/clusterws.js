@@ -32,21 +32,34 @@ var ClusterWS = (function () {
   }
 
   const Socket = window.MozWebSocket || window.WebSocket;
-  class ClusterWS {
-      constructor(options) {
-          this.options = options;
+  class ClusterWSClient {
+      constructor(configurations) {
+          this.options = configurations;
           this.events = new EventEmitter({});
           if (this.options.autoConnect) {
               this.connect();
           }
       }
       connect() {
+          if (this.isCreated) {
+              return console.log('Instance exists');
+          }
+          this.isCreated = true;
+          this.socket = new Socket(this.options.url);
+          this.socket.onopen = () => {
+          };
+          this.socket.onclose = () => {
+          };
+          this.socket.onmessage = () => {
+          };
+          this.socket.onerror = () => {
+          };
       }
       on(event, listener) {
           this.events.on(event, listener);
       }
   }
 
-  return ClusterWS;
+  return ClusterWSClient;
 
 }());

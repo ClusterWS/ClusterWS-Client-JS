@@ -1,15 +1,20 @@
 
 import { EventEmitter } from './utils/emitter';
-import { Listener } from './utils/types';
+import { Listener, Configurations, Options } from './utils/types';
 
 declare const window: any;
 const Socket: any = window.MozWebSocket || window.WebSocket;
 
-export default class ClusterWS {
+export default class ClusterWSClient {
   private socket: WebSocket;
   private events: EventEmitter;
+  private options: Options;
 
-  constructor(private options: any) {
+  private isCreated: boolean;
+
+  constructor(configurations: Configurations) {
+    // TODO: build correct options
+    this.options = (configurations as any);
     // TODO: add logger
     this.events = new EventEmitter({});
 
@@ -19,7 +24,29 @@ export default class ClusterWS {
   }
 
   public connect(): void {
-    // TODO: write connection logic
+    if (this.isCreated) {
+      // TODO: Add logger
+      return console.log('Instance exists');
+    }
+
+    this.isCreated = true;
+    this.socket = new Socket(this.options.url);
+
+    this.socket.onopen = (): void => {
+      // websocket connection has been open
+    };
+
+    this.socket.onclose = (): void => {
+      // websocket connection is closed
+    };
+
+    this.socket.onmessage = (): void => {
+      // new message received
+    };
+
+    this.socket.onerror = (): void => {
+      // there are some error
+    };
   }
 
   // TODO: emit on ping and on pong events

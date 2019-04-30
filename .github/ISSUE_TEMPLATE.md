@@ -2,7 +2,7 @@
 <!-- Select from following by placing `x` between braces like: [x] -->
 - [ ] Bug
 - [ ] Question
-- [ ] Suggetion
+- [ ] Suggestion
 - [ ] Other
 
 ### Details

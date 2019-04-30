@@ -13,8 +13,8 @@ class EventEmitter {
         this.events[t] = e;
     }
     emit(t, ...e) {
-        const n = this.events[t];
-        n && n(...e);
+        const s = this.events[t];
+        s && s(...e);
     }
     exist(t) {
         return !!this.events[t];
@@ -29,14 +29,18 @@ class EventEmitter {
 
 const Socket = window.MozWebSocket || window.WebSocket;
 
-class ClusterWS {
+class ClusterWSClient {
     constructor(t) {
         this.options = t, this.events = new EventEmitter({}), this.options.autoConnect && this.connect();
     }
-    connect() {}
+    connect() {
+        if (this.isCreated) return console.log("Instance exists");
+        this.isCreated = !0, this.socket = new Socket(this.options.url), this.socket.onopen = (() => {}), 
+        this.socket.onclose = (() => {}), this.socket.onmessage = (() => {}), this.socket.onerror = (() => {});
+    }
     on(t, e) {
         this.events.on(t, e);
     }
 }
 
-module.exports = ClusterWS; module.exports.default = ClusterWS;
+module.exports = ClusterWSClient; module.exports.default = ClusterWSClient;

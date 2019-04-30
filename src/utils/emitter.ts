@@ -4,7 +4,7 @@ import { isFunction } from './helpers';
 export class EventEmitter {
   private events: { [key: string]: Listener } = {};
 
-  // TODO: connect logger
+  // TODO: add logger
   constructor(private logger: any) { }
 
   public on(event: string, listener: Listener): void {
