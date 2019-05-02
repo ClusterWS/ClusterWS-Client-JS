@@ -1,3 +1,4 @@
+import { Logger } from './logger';
 import { Listener } from './types';
 import { isFunction } from './helpers';
 
@@ -5,7 +6,7 @@ export class EventEmitter {
   private events: { [key: string]: Listener } = {};
 
   // TODO: add logger
-  constructor(private logger: any) { }
+  constructor(private logger: Logger) { }
 
   public on(event: string, listener: Listener): void {
     if (!isFunction(listener)) {
