@@ -50,7 +50,7 @@ var EventEmitter = function() {
     }, e.prototype.removeEvents = function() {
         this.events = {};
     }, e;
-}(), Socket = window.MozWebSocket || window.WebSocket, ClusterWSClient = function() {
+}(), Socket = window.MozWebSocket || window.WebSocket, PONG = new Uint8Array([ "A".charCodeAt(0) ]).buffer, ClusterWSClient = function() {
     function e(e) {
         if (this.options = {
             url: e.url,
@@ -80,11 +80,13 @@ var EventEmitter = function() {
     }), e.prototype.connect = function() {
         var e = this;
         if (this.isCreated) return this.options.logger.error("Connect event has been called multiple times");
-        this.isCreated = !0, this.socket = new Socket(this.options.url), this.socket.onopen = function() {}, 
-        this.socket.onclose = function() {}, this.socket.onmessage = function(t) {
+        this.isCreated = !0, this.socket = new Socket(this.options.url), this.socket.binaryType = "arraybuffer", 
+        this.socket.onopen = function() {}, this.socket.onclose = function() {}, this.socket.onmessage = function(t) {
             var o = t;
-            if (t.data && (o = t.data), e.emitter.exist("message")) return e.emitter.emit("message", o);
-            e.processMessage(o);
+            t.data && (o = t.data), e.withPing(o, function() {
+                if (e.emitter.exist("message")) return e.emitter.emit("message", o);
+                e.processMessage(o);
+            });
         }, this.socket.onerror = function(t) {
             if (e.emitter.exist("error")) return e.emitter.emit("error", t);
             e.options.logger.error(t), e.close();
@@ -93,7 +95,22 @@ var EventEmitter = function() {
         this.emitter.on(e, t);
     }, e.prototype.close = function(e, t) {
         this.socket.close(e || 1e3, t);
-    }, e.prototype.processMessage = function(e) {}, e;
+    }, e.prototype.processMessage = function(e) {}, e.prototype.withPing = function(e, t) {
+        var o = this;
+        if (1 === e.size || 1 === e.byteLength) {
+            var n = function(e) {
+                return 57 === new Uint8Array(e)[0] ? (o.socket.send(PONG), o.emitter.emit("ping")) : t();
+            };
+            if (e instanceof Blob) {
+                var r = new FileReader();
+                return r.onload = function(e) {
+                    return n(e.srcElement.result);
+                }, r.readAsArrayBuffer(e);
+            }
+            return n(e);
+        }
+        return t();
+    }, e;
 }();
 
 module.exports = ClusterWSClient; module.exports.default = ClusterWSClient;

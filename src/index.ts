@@ -5,6 +5,7 @@ import { Listener, Configurations, Options, LogLevel, Message } from './utils/ty
 
 declare const window: any;
 const Socket: any = window.MozWebSocket || window.WebSocket;
+const PONG: any = new Uint8Array(['A'.charCodeAt(0)]).buffer;
 
 export default class ClusterWSClient {
   private socket: WebSocket;
@@ -56,6 +57,7 @@ export default class ClusterWSClient {
 
     this.isCreated = true;
     this.socket = new Socket(this.options.url);
+    this.socket.binaryType = 'arraybuffer';
 
     this.socket.onopen = (): void => {
       // websocket connection has been open
@@ -66,18 +68,19 @@ export default class ClusterWSClient {
     };
 
     this.socket.onmessage = (message: MessageEvent | Message): void => {
-      let processMessage: Message = message;
+      let messageToProcess: Message = message;
       if (message.data) {
-        // this means it is browser
-        processMessage = message.data;
+        // this means we run in browser
+        messageToProcess = message.data;
       }
 
-      // Send message event if it was requested by user
-      if (this.emitter.exist('message')) {
-        return this.emitter.emit('message', processMessage);
-      }
+      this.withPing(messageToProcess, () => {
+        if (this.emitter.exist('message')) {
+          return this.emitter.emit('message', messageToProcess);
+        }
 
-      this.processMessage(processMessage);
+        this.processMessage(messageToProcess);
+      });
     };
 
     this.socket.onerror = (error: ErrorEvent): void => {
@@ -102,5 +105,31 @@ export default class ClusterWSClient {
 
   public processMessage(message: Message): void {
     // write message processor
+  }
+
+  private withPing(message: Message, next: Listener): void {
+    // we should handle ping before emitting on message
+    if (message.size === 1 || message.byteLength === 1) {
+      const pingProcessor: Listener = (possiblePingMessage: Message): void => {
+        if (new Uint8Array(possiblePingMessage)[0] === 57) {
+          // this is our ping need to send pong response and trigger ping
+          this.socket.send(PONG);
+          return this.emitter.emit('ping');
+        }
+
+        return next();
+      };
+
+      if (message instanceof Blob) {
+        // transform blob to arrayBuffer
+        const reader: FileReader = new FileReader();
+        reader.onload = (event: any): void => pingProcessor(event.srcElement.result);
+        return reader.readAsArrayBuffer(message);
+      }
+
+      return pingProcessor(message);
+    }
+
+    return next();
   }
 }

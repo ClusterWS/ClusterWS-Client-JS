@@ -1,4 +1,4 @@
-var ClusterWS = (function () {
+var ClusterWSClient = (function () {
   'use strict';
 
   var LogLevel;
@@ -93,6 +93,7 @@ var ClusterWS = (function () {
   }());
 
   var Socket = window.MozWebSocket || window.WebSocket;
+  var PONG = new Uint8Array(['A'.charCodeAt(0)]).buffer;
   var ClusterWSClient = (function () {
       function ClusterWSClient(configurations) {
           this.options = {
@@ -138,19 +139,22 @@ var ClusterWS = (function () {
           }
           this.isCreated = true;
           this.socket = new Socket(this.options.url);
+          this.socket.binaryType = 'arraybuffer';
           this.socket.onopen = function () {
           };
           this.socket.onclose = function () {
           };
           this.socket.onmessage = function (message) {
-              var processMessage = message;
+              var messageToProcess = message;
               if (message.data) {
-                  processMessage = message.data;
+                  messageToProcess = message.data;
               }
-              if (_this.emitter.exist('message')) {
-                  return _this.emitter.emit('message', processMessage);
-              }
-              _this.processMessage(processMessage);
+              _this.withPing(messageToProcess, function () {
+                  if (_this.emitter.exist('message')) {
+                      return _this.emitter.emit('message', messageToProcess);
+                  }
+                  _this.processMessage(messageToProcess);
+              });
           };
           this.socket.onerror = function (error) {
               if (_this.emitter.exist('error')) {
@@ -167,6 +171,25 @@ var ClusterWS = (function () {
           this.socket.close(code || 1000, reason);
       };
       ClusterWSClient.prototype.processMessage = function (message) {
+      };
+      ClusterWSClient.prototype.withPing = function (message, next) {
+          var _this = this;
+          if (message.size === 1 || message.byteLength === 1) {
+              var pingProcessor_1 = function (possiblePingMessage) {
+                  if (new Uint8Array(possiblePingMessage)[0] === 57) {
+                      _this.socket.send(PONG);
+                      return _this.emitter.emit('ping');
+                  }
+                  return next();
+              };
+              if (message instanceof Blob) {
+                  var reader = new FileReader();
+                  reader.onload = function (event) { return pingProcessor_1(event.srcElement.result); };
+                  return reader.readAsArrayBuffer(message);
+              }
+              return pingProcessor_1(message);
+          }
+          return next();
       };
       return ClusterWSClient;
   }());
