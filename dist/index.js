@@ -57,12 +57,28 @@ var EventEmitter = function() {
             autoConnect: !1 !== e.autoConnect,
             autoReconnect: e.autoReconnect || !1,
             autoResubscribe: !1 !== e.autoResubscribe,
-            autoReconnectOptions: {},
-            logger: e.loggerOptions && e.loggerOptions.logger ? e.loggerOptions.logger : new Logger(e.loggerOptions && e.loggerOptions.level ? e.loggerOptions.level : LogLevel.ALL)
+            autoReconnectOptions: {
+                attempts: e.autoReconnectOptions && e.autoReconnectOptions.attempts || 0,
+                minInterval: e.autoReconnectOptions && e.autoReconnectOptions.maxInterval || 500,
+                maxInterval: e.autoReconnectOptions && e.autoReconnectOptions.maxInterval || 2e3
+            },
+            logger: e.loggerOptions && e.loggerOptions.logger ? e.loggerOptions.logger : new Logger(e.loggerOptions && e.loggerOptions.level || LogLevel.ALL)
         }, !this.options.url) return this.options.logger.error("url must be provided");
         this.emitter = new EventEmitter(this.options.logger), this.options.autoConnect && this.connect();
     }
-    return Object.defineProperty(e.prototype, "readyState", {
+    return Object.defineProperty(e.prototype, "OPEN", {
+        get: function() {
+            return this.socket.OPEN;
+        },
+        enumerable: !0,
+        configurable: !0
+    }), Object.defineProperty(e.prototype, "CLOSED", {
+        get: function() {
+            return this.socket.CLOSED;
+        },
+        enumerable: !0,
+        configurable: !0
+    }), Object.defineProperty(e.prototype, "readyState", {
         get: function() {
             return this.socket ? this.socket.readyState : 0;
         },
@@ -80,10 +96,17 @@ var EventEmitter = function() {
     }), e.prototype.connect = function() {
         var e = this;
         if (this.isCreated) return this.options.logger.error("Connect event has been called multiple times");
-        this.isCreated = !0, this.socket = new Socket(this.options.url), this.socket.binaryType = "arraybuffer", 
-        this.socket.onopen = function() {}, this.socket.onclose = function() {}, this.socket.onmessage = function(t) {
+        this.isCreated = !0, this.socket = new Socket(this.options.url), this.socket.onopen = function() {}, 
+        this.socket.onclose = function(t, o) {
+            e.isCreated = !1;
+            var n = "number" == typeof t ? t : t.code, r = "number" == typeof t ? o : t.reason;
+            if (e.emitter.emit("close", n, r), e.options.autoReconnect && 1e3 !== n && e.readyState === e.CLOSED) return setTimeout(function() {
+                e.connect();
+            }, Math.floor(Math.random() * (e.options.autoReconnectOptions.maxInterval - e.options.autoReconnectOptions.minInterval + 1)));
+            e.emitter.removeEvents();
+        }, this.socket.onmessage = function(t) {
             var o = t;
-            t.data && (o = t.data), e.withPing(o, function() {
+            t.data && (o = t.data), e.parsePing(o, function() {
                 if (e.emitter.exist("message")) return e.emitter.emit("message", o);
                 e.processMessage(o);
             });
@@ -95,7 +118,7 @@ var EventEmitter = function() {
         this.emitter.on(e, t);
     }, e.prototype.close = function(e, t) {
         this.socket.close(e || 1e3, t);
-    }, e.prototype.processMessage = function(e) {}, e.prototype.withPing = function(e, t) {
+    }, e.prototype.processMessage = function(e) {}, e.prototype.parsePing = function(e, t) {
         var o = this;
         if (1 === e.size || 1 === e.byteLength) {
             var n = function(e) {

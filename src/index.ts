@@ -1,4 +1,3 @@
-
 import { Logger } from './utils/logger';
 import { EventEmitter } from './utils/emitter';
 import { Listener, Configurations, Options, LogLevel, Message } from './utils/types';
@@ -20,11 +19,17 @@ export default class ClusterWSClient {
       autoConnect: configurations.autoConnect !== false,
       autoReconnect: configurations.autoReconnect || false,
       autoResubscribe: configurations.autoResubscribe !== false,
-      autoReconnectOptions: ({} as any), // TODO: add auto reconnect options
+      autoReconnectOptions: {
+        attempts: configurations.autoReconnectOptions ?
+          configurations.autoReconnectOptions.attempts || 0 : 0,
+        minInterval: configurations.autoReconnectOptions ?
+          configurations.autoReconnectOptions.maxInterval || 500 : 500,
+        maxInterval: configurations.autoReconnectOptions ?
+          configurations.autoReconnectOptions.maxInterval || 2000 : 2000
+      },
       logger: configurations.loggerOptions && configurations.loggerOptions.logger ?
         configurations.loggerOptions.logger :
-        new Logger(configurations.loggerOptions && configurations.loggerOptions.level ?
-          configurations.loggerOptions.level : LogLevel.ALL)
+        new Logger(configurations.loggerOptions ? configurations.loggerOptions.level || LogLevel.ALL : LogLevel.ALL)
     };
 
     if (!this.options.url) {
@@ -38,12 +43,20 @@ export default class ClusterWSClient {
     }
   }
 
+  public get OPEN(): number {
+    return this.socket.OPEN;
+  }
+
+  public get CLOSED(): number {
+    return this.socket.CLOSED;
+  }
+
   public get readyState(): number {
     return this.socket ? this.socket.readyState : 0;
   }
 
-  public set binaryType(type: BinaryType) {
-    this.socket.binaryType = type;
+  public set binaryType(binaryType: BinaryType) {
+    this.socket.binaryType = binaryType;
   }
 
   public get binaryType(): BinaryType {
@@ -57,14 +70,32 @@ export default class ClusterWSClient {
 
     this.isCreated = true;
     this.socket = new Socket(this.options.url);
-    this.socket.binaryType = 'arraybuffer';
 
     this.socket.onopen = (): void => {
+      // TODO: reset attempts
       // websocket connection has been open
     };
 
-    this.socket.onclose = (): void => {
-      // websocket connection is closed
+    this.socket.onclose = (codeEvent: CloseEvent | number, reason?: string): any => {
+      this.isCreated = false;
+      const closeCode: number = typeof codeEvent === 'number' ? codeEvent : codeEvent.code;
+      const closeReason: string = typeof codeEvent === 'number' ? reason : codeEvent.reason;
+
+      this.emitter.emit('close', closeCode, closeReason);
+
+      if (this.options.autoReconnect && closeCode !== 1000) {
+        // TODO: add limited number of attempts
+        if (this.readyState === this.CLOSED) {
+
+          // This will trigger reconnect in between maxInterval and minInterval time
+          return setTimeout(() => {
+            this.connect();
+          }, Math.floor(Math.random() * (this.options.autoReconnectOptions.maxInterval - this.options.autoReconnectOptions.minInterval + 1)));
+        }
+      }
+
+      // clean up connection events
+      this.emitter.removeEvents();
     };
 
     this.socket.onmessage = (message: MessageEvent | Message): void => {
@@ -74,7 +105,7 @@ export default class ClusterWSClient {
         messageToProcess = message.data;
       }
 
-      this.withPing(messageToProcess, () => {
+      this.parsePing(messageToProcess, () => {
         if (this.emitter.exist('message')) {
           return this.emitter.emit('message', messageToProcess);
         }
@@ -107,10 +138,10 @@ export default class ClusterWSClient {
     // write message processor
   }
 
-  private withPing(message: Message, next: Listener): void {
+  private parsePing(message: Message, next: Listener): void {
     // we should handle ping before emitting on message
     if (message.size === 1 || message.byteLength === 1) {
-      const pingProcessor: Listener = (possiblePingMessage: Message): void => {
+      const parser: Listener = (possiblePingMessage: Message): void => {
         if (new Uint8Array(possiblePingMessage)[0] === 57) {
           // this is our ping need to send pong response and trigger ping
           this.socket.send(PONG);
@@ -123,11 +154,11 @@ export default class ClusterWSClient {
       if (message instanceof Blob) {
         // transform blob to arrayBuffer
         const reader: FileReader = new FileReader();
-        reader.onload = (event: any): void => pingProcessor(event.srcElement.result);
+        reader.onload = (event: any): void => parser(event.srcElement.result);
         return reader.readAsArrayBuffer(message);
       }
 
-      return pingProcessor(message);
+      return parser(message);
     }
 
     return next();
