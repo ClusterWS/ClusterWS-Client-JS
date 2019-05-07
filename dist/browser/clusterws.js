@@ -96,6 +96,7 @@ var ClusterWSClient = (function () {
   var PONG = new Uint8Array(['A'.charCodeAt(0)]).buffer;
   var ClusterWSClient = (function () {
       function ClusterWSClient(configurations) {
+          this.reconnectAttempts = 0;
           this.options = {
               url: configurations.url,
               autoConnect: configurations.autoConnect !== false,
@@ -105,7 +106,7 @@ var ClusterWSClient = (function () {
                   attempts: configurations.autoReconnectOptions ?
                       configurations.autoReconnectOptions.attempts || 0 : 0,
                   minInterval: configurations.autoReconnectOptions ?
-                      configurations.autoReconnectOptions.maxInterval || 500 : 500,
+                      configurations.autoReconnectOptions.minInterval || 500 : 500,
                   maxInterval: configurations.autoReconnectOptions ?
                       configurations.autoReconnectOptions.maxInterval || 2000 : 2000
               },
@@ -117,6 +118,7 @@ var ClusterWSClient = (function () {
               return this.options.logger.error('url must be provided');
           }
           this.emitter = new EventEmitter(this.options.logger);
+          this.reconnectAttempts = this.options.autoReconnectOptions.attempts;
           if (this.options.autoConnect) {
               this.connect();
           }
@@ -154,12 +156,14 @@ var ClusterWSClient = (function () {
       });
       ClusterWSClient.prototype.connect = function () {
           var _this = this;
+          console.log('Creating');
           if (this.isCreated) {
               return this.options.logger.error('Connect event has been called multiple times');
           }
           this.isCreated = true;
           this.socket = new Socket(this.options.url);
           this.socket.onopen = function () {
+              _this.reconnectAttempts = _this.options.autoReconnectOptions.attempts;
           };
           this.socket.onclose = function (codeEvent, reason) {
               _this.isCreated = false;
@@ -168,9 +172,12 @@ var ClusterWSClient = (function () {
               _this.emitter.emit('close', closeCode, closeReason);
               if (_this.options.autoReconnect && closeCode !== 1000) {
                   if (_this.readyState === _this.CLOSED) {
-                      return setTimeout(function () {
-                          _this.connect();
-                      }, Math.floor(Math.random() * (_this.options.autoReconnectOptions.maxInterval - _this.options.autoReconnectOptions.minInterval + 1)));
+                      if (_this.options.autoReconnectOptions.attempts === 0 || _this.reconnectAttempts > 0) {
+                          _this.reconnectAttempts--;
+                          return setTimeout(function () {
+                              _this.connect();
+                          }, Math.floor(Math.random() * (_this.options.autoReconnectOptions.maxInterval - _this.options.autoReconnectOptions.minInterval + 1)));
+                      }
                   }
               }
               _this.emitter.removeEvents();

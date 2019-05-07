@@ -12,6 +12,7 @@ export default class ClusterWSClient {
   private options: Options;
 
   private isCreated: boolean;
+  private reconnectAttempts: number = 0;
 
   constructor(configurations: Configurations) {
     this.options = {
@@ -23,7 +24,7 @@ export default class ClusterWSClient {
         attempts: configurations.autoReconnectOptions ?
           configurations.autoReconnectOptions.attempts || 0 : 0,
         minInterval: configurations.autoReconnectOptions ?
-          configurations.autoReconnectOptions.maxInterval || 500 : 500,
+          configurations.autoReconnectOptions.minInterval || 500 : 500,
         maxInterval: configurations.autoReconnectOptions ?
           configurations.autoReconnectOptions.maxInterval || 2000 : 2000
       },
@@ -37,6 +38,7 @@ export default class ClusterWSClient {
     }
 
     this.emitter = new EventEmitter(this.options.logger);
+    this.reconnectAttempts = this.options.autoReconnectOptions.attempts;
 
     if (this.options.autoConnect) {
       this.connect();
@@ -72,7 +74,7 @@ export default class ClusterWSClient {
     this.socket = new Socket(this.options.url);
 
     this.socket.onopen = (): void => {
-      // TODO: reset attempts
+      this.reconnectAttempts = this.options.autoReconnectOptions.attempts;
       // websocket connection has been open
     };
 
@@ -84,13 +86,13 @@ export default class ClusterWSClient {
       this.emitter.emit('close', closeCode, closeReason);
 
       if (this.options.autoReconnect && closeCode !== 1000) {
-        // TODO: add limited number of attempts
         if (this.readyState === this.CLOSED) {
-
-          // This will trigger reconnect in between maxInterval and minInterval time
-          return setTimeout(() => {
-            this.connect();
-          }, Math.floor(Math.random() * (this.options.autoReconnectOptions.maxInterval - this.options.autoReconnectOptions.minInterval + 1)));
+          if (this.options.autoReconnectOptions.attempts === 0 || this.reconnectAttempts > 0) {
+            this.reconnectAttempts--;
+            return setTimeout(() => {
+              this.connect();
+            }, Math.floor(Math.random() * (this.options.autoReconnectOptions.maxInterval - this.options.autoReconnectOptions.minInterval + 1)));
+          }
         }
       }
 
