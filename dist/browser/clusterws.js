@@ -92,6 +92,28 @@ var ClusterWSClient = (function () {
       return EventEmitter;
   }());
 
+  function decode(socket, data) {
+      var msgType = data[0], param = data[1], message = data[2];
+      if (msgType === 'e') {
+          return socket.emitter.emit(param, message);
+      }
+  }
+  function encode(event, data, eventType) {
+      var message = {
+          emit: ['e', event, data],
+          publish: ['p', event, data],
+          system: {
+              subscribe: ['s', 's', data],
+              unsubscribe: ['s', 'u', data],
+              configuration: ['s', 'c', data]
+          }
+      };
+      if (eventType === 'system') {
+          return JSON.stringify(message[eventType][event]);
+      }
+      return JSON.stringify(message[eventType]);
+  }
+
   var Socket = window.MozWebSocket || window.WebSocket;
   var PONG = new Uint8Array(['A'.charCodeAt(0)]).buffer;
   var ClusterWSClient = (function () {
@@ -156,7 +178,6 @@ var ClusterWSClient = (function () {
       });
       ClusterWSClient.prototype.connect = function () {
           var _this = this;
-          console.log('Creating');
           if (this.isCreated) {
               return this.options.logger.error('Connect event has been called multiple times');
           }
@@ -205,10 +226,44 @@ var ClusterWSClient = (function () {
       ClusterWSClient.prototype.on = function (event, listener) {
           this.emitter.on(event, listener);
       };
+      ClusterWSClient.prototype.send = function (event, message, eventType) {
+          if (eventType === void 0) { eventType = 'emit'; }
+          if (message === undefined) {
+              return this.socket.send(event);
+          }
+          return this.socket.send(encode(event, message, eventType));
+      };
       ClusterWSClient.prototype.close = function (code, reason) {
           this.socket.close(code || 1000, reason);
       };
       ClusterWSClient.prototype.processMessage = function (message) {
+          try {
+              if (message instanceof Array) {
+                  return decode(this, message);
+              }
+              if (typeof message !== 'string') {
+                  var err = new Error('processMessage accepts only string or array types');
+                  if (this.emitter.exist('error')) {
+                      return this.emitter.emit('error', err);
+                  }
+                  throw err;
+              }
+              if (message[0] !== '[') {
+                  var err = new Error('processMessage received incorrect message');
+                  if (this.emitter.exist('error')) {
+                      return this.emitter.emit('error', err);
+                  }
+                  throw err;
+              }
+              return decode(this, JSON.parse(message));
+          }
+          catch (err) {
+              if (this.emitter.exist('error')) {
+                  return this.emitter.emit('error', err);
+              }
+              this.close();
+              throw err;
+          }
       };
       ClusterWSClient.prototype.parsePing = function (message, next) {
           var _this = this;

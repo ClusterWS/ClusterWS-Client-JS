@@ -1,10 +1,14 @@
 import { Logger } from './utils/logger';
 import { EventEmitter } from './utils/emitter';
+import { decode, encode } from './modules/parser';
 import { Listener, Configurations, Options, LogLevel, Message } from './utils/types';
 
 declare const window: any;
 const Socket: any = window.MozWebSocket || window.WebSocket;
 const PONG: any = new Uint8Array(['A'.charCodeAt(0)]).buffer;
+
+// TODO:
+// add ping expire, add channels, add message processor
 
 export default class ClusterWSClient {
   private socket: WebSocket;
@@ -132,12 +136,55 @@ export default class ClusterWSClient {
     this.emitter.on(event, listener);
   }
 
+  // TODO: add overload to this function
+  public send(event: string, message: Message, eventType: string = 'emit'): void {
+    // we swap to default websocket send if no event and message provided correctly
+    if (message === undefined) {
+      return this.socket.send(event);
+    }
+
+    return this.socket.send(encode(event, message, eventType));
+  }
+
   public close(code?: number, reason?: string): void {
     this.socket.close(code || 1000, reason);
   }
 
   public processMessage(message: Message): void {
     // write message processor
+    try {
+      if (message instanceof Array) {
+        return decode(this as any, message);
+      }
+
+      if (typeof message !== 'string') {
+        const err: Error = new Error('processMessage accepts only string or array types');
+        if (this.emitter.exist('error')) {
+          return this.emitter.emit('error', err);
+        }
+
+        throw err;
+      }
+
+      if (message[0] !== '[') {
+        const err: Error = new Error('processMessage received incorrect message');
+        if (this.emitter.exist('error')) {
+          return this.emitter.emit('error', err);
+        }
+
+        throw err;
+      }
+
+      return decode(this as any, JSON.parse(message));
+    } catch (err) {
+      // This will parse the rest of the errors
+      if (this.emitter.exist('error')) {
+        return this.emitter.emit('error', err);
+      }
+
+      this.close();
+      throw err;
+    }
   }
 
   private parsePing(message: Message, next: Listener): void {
