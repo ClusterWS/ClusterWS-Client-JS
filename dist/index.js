@@ -40,9 +40,9 @@ var EventEmitter = function() {
         if (!isFunction(t)) return this.logger.error("Listener must be a function");
         this.events[e] = t;
     }, e.prototype.emit = function(e) {
-        for (var t = [], o = 1; o < arguments.length; o++) t[o - 1] = arguments[o];
-        var n = this.events[e];
-        n && n.apply(void 0, t);
+        for (var t = [], n = 1; n < arguments.length; n++) t[n - 1] = arguments[n];
+        var o = this.events[e];
+        o && o.apply(void 0, t);
     }, e.prototype.exist = function(e) {
         return !!this.events[e];
     }, e.prototype.off = function(e) {
@@ -53,12 +53,20 @@ var EventEmitter = function() {
 }();
 
 function decode(e, t) {
-    var o = t[0], n = t[1], r = t[2];
-    if ("e" === o) return e.emitter.emit(n, r);
+    var n = t[0], o = t[1], r = t[2];
+    if ("e" === n) return e.emitter.emit(o, r);
+    if ("p" === n) for (var i = 0, s = (l = Object.keys(r)).length; i < s; i++) for (var c = r[p = l[i]], a = 0, u = c.length; a < u; a++) e.channels.channelNewMessage(p, c[a]);
+    if ("s" === n && "s" === o) {
+        var l;
+        for (i = 0, s = (l = Object.keys(r)).length; i < s; i++) {
+            var p = l[i];
+            e.channels.channelSetStatus(p, r[p]);
+        }
+    }
 }
 
-function encode(e, t, o) {
-    var n = {
+function encode(e, t, n) {
+    var o = {
         emit: [ "e", e, t ],
         publish: [ "p", e, t ],
         system: {
@@ -67,10 +75,49 @@ function encode(e, t, o) {
             configuration: [ "s", "c", t ]
         }
     };
-    return "system" === o ? JSON.stringify(n[o][e]) : JSON.stringify(n[o]);
+    return "system" === n ? JSON.stringify(o[n][e]) : JSON.stringify(o[n]);
 }
 
-var Socket = window.MozWebSocket || window.WebSocket, PONG = new Uint8Array([ "A".charCodeAt(0) ]).buffer, ClusterWSClient = function() {
+var Channel = function() {
+    function e(e, t, n) {
+        this.client = e, this.name = t, this.listener = n, this.READY = 1, this.status = 0, 
+        this.events = {}, this.client.send("subscribe", [ this.name ], "system");
+    }
+    return e.prototype.on = function(e, t) {
+        this.events[e] = t;
+    }, e.prototype.publish = function(e) {
+        this.status === this.READY && this.client.send(this.name, e, "publish");
+    }, e.prototype.unsubscribe = function() {
+        this.status = 0, this.emit("unsubscribed"), this.client.channels.removeChannel(this.name), 
+        this.client.send("unsubscribe", this.name, "system");
+    }, e.prototype.emit = function(e) {
+        var t = this.events[e];
+        t && t();
+    }, e;
+}(), Channels = function() {
+    function e(e) {
+        this.client = e, this.channels = {};
+    }
+    return e.prototype.subscribe = function(e, t) {
+        if (!this.channels[e]) {
+            var n = new Channel(this.client, e, t);
+            return this.channels[e] = n, n;
+        }
+    }, e.prototype.getChannelByName = function(e) {
+        return this.channels[e] || null;
+    }, e.prototype.channelNewMessage = function(e, t) {
+        var n = this.channels[e];
+        n && n.status === n.READY && n.listener(t);
+    }, e.prototype.channelSetStatus = function(e, t) {
+        var n = this.channels[e];
+        if (n) {
+            if (!t) return n.emit("canceled"), this.removeChannel(e);
+            n.status = 1, n.emit("subscribed");
+        }
+    }, e.prototype.removeChannel = function(e) {
+        delete this.channels[e];
+    }, e;
+}(), Socket = window.MozWebSocket || window.WebSocket, PONG = new Uint8Array([ "A".charCodeAt(0) ]).buffer, ClusterWSClient = function() {
     function e(e) {
         if (this.reconnectAttempts = 0, this.options = {
             url: e.url,
@@ -84,8 +131,8 @@ var Socket = window.MozWebSocket || window.WebSocket, PONG = new Uint8Array([ "A
             },
             logger: e.loggerOptions && e.loggerOptions.logger ? e.loggerOptions.logger : new Logger(e.loggerOptions && e.loggerOptions.level || LogLevel.ALL)
         }, !this.options.url) return this.options.logger.error("url must be provided");
-        this.emitter = new EventEmitter(this.options.logger), this.reconnectAttempts = this.options.autoReconnectOptions.attempts, 
-        this.options.autoConnect && this.connect();
+        this.emitter = new EventEmitter(this.options.logger), this.channels = new Channels(this), 
+        this.reconnectAttempts = this.options.autoReconnectOptions.attempts, this.options.autoConnect && this.connect();
     }
     return Object.defineProperty(e.prototype, "OPEN", {
         get: function() {
@@ -119,19 +166,19 @@ var Socket = window.MozWebSocket || window.WebSocket, PONG = new Uint8Array([ "A
         if (this.isCreated) return this.options.logger.error("Connect event has been called multiple times");
         this.isCreated = !0, this.socket = new Socket(this.options.url), this.socket.onopen = function() {
             e.reconnectAttempts = e.options.autoReconnectOptions.attempts;
-        }, this.socket.onclose = function(t, o) {
+        }, this.socket.onclose = function(t, n) {
             e.isCreated = !1;
-            var n = "number" == typeof t ? t : t.code, r = "number" == typeof t ? o : t.reason;
-            if (e.emitter.emit("close", n, r), e.options.autoReconnect && 1e3 !== n && e.readyState === e.CLOSED && (0 === e.options.autoReconnectOptions.attempts || e.reconnectAttempts > 0)) return e.reconnectAttempts--, 
+            var o = "number" == typeof t ? t : t.code, r = "number" == typeof t ? n : t.reason;
+            if (e.emitter.emit("close", o, r), e.options.autoReconnect && 1e3 !== o && e.readyState === e.CLOSED && (0 === e.options.autoReconnectOptions.attempts || e.reconnectAttempts > 0)) return e.reconnectAttempts--, 
             setTimeout(function() {
                 e.connect();
             }, Math.floor(Math.random() * (e.options.autoReconnectOptions.maxInterval - e.options.autoReconnectOptions.minInterval + 1)));
             e.emitter.removeEvents();
         }, this.socket.onmessage = function(t) {
-            var o = t;
-            t.data && (o = t.data), e.parsePing(o, function() {
-                if (e.emitter.exist("message")) return e.emitter.emit("message", o);
-                e.processMessage(o);
+            var n = t;
+            t.data && (n = t.data), e.parsePing(n, function() {
+                if (e.emitter.exist("message")) return e.emitter.emit("message", n);
+                e.processMessage(n);
             });
         }, this.socket.onerror = function(t) {
             if (e.emitter.exist("error")) return e.emitter.emit("error", t);
@@ -139,10 +186,14 @@ var Socket = window.MozWebSocket || window.WebSocket, PONG = new Uint8Array([ "A
         };
     }, e.prototype.on = function(e, t) {
         this.emitter.on(e, t);
-    }, e.prototype.send = function(e, t, o) {
-        return void 0 === o && (o = "emit"), void 0 === t ? this.socket.send(e) : this.socket.send(encode(e, t, o));
+    }, e.prototype.send = function(e, t, n) {
+        return void 0 === n && (n = "emit"), void 0 === t ? this.socket.send(e) : this.socket.send(encode(e, t, n));
     }, e.prototype.close = function(e, t) {
         this.socket.close(e || 1e3, t);
+    }, e.prototype.subscribe = function(e, t) {
+        return this.channels.subscribe(e, t);
+    }, e.prototype.getChannelByName = function(e) {
+        return this.channels.getChannelByName(e);
     }, e.prototype.processMessage = function(e) {
         try {
             if (e instanceof Array) return decode(this, e);
@@ -162,18 +213,18 @@ var Socket = window.MozWebSocket || window.WebSocket, PONG = new Uint8Array([ "A
             throw this.close(), t;
         }
     }, e.prototype.parsePing = function(e, t) {
-        var o = this;
+        var n = this;
         if (1 === e.size || 1 === e.byteLength) {
-            var n = function(e) {
-                return 57 === new Uint8Array(e)[0] ? (o.socket.send(PONG), o.emitter.emit("ping")) : t();
+            var o = function(e) {
+                return 57 === new Uint8Array(e)[0] ? (n.socket.send(PONG), n.emitter.emit("ping")) : t();
             };
             if (e instanceof Blob) {
                 var r = new FileReader();
                 return r.onload = function(e) {
-                    return n(e.srcElement.result);
+                    return o(e.srcElement.result);
                 }, r.readAsArrayBuffer(e);
             }
-            return n(e);
+            return o(e);
         }
         return t();
     }, e;

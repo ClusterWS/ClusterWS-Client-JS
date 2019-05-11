@@ -1,6 +1,7 @@
 import { Logger } from './utils/logger';
 import { EventEmitter } from './utils/emitter';
 import { decode, encode } from './modules/parser';
+import { Channels, Channel } from './modules/channels';
 import { Listener, Configurations, Options, LogLevel, Message } from './utils/types';
 
 declare const window: any;
@@ -8,12 +9,15 @@ const Socket: any = window.MozWebSocket || window.WebSocket;
 const PONG: any = new Uint8Array(['A'.charCodeAt(0)]).buffer;
 
 // TODO:
-// add ping expire, add channels, add message processor
+// - Add ping expire
+// - Add channels
+// - Add message processor
 
 export default class ClusterWSClient {
   private socket: WebSocket;
   private emitter: EventEmitter;
   private options: Options;
+  private channels: Channels;
 
   private isCreated: boolean;
   private reconnectAttempts: number = 0;
@@ -42,6 +46,7 @@ export default class ClusterWSClient {
     }
 
     this.emitter = new EventEmitter(this.options.logger);
+    this.channels = new Channels(this);
     this.reconnectAttempts = this.options.autoReconnectOptions.attempts;
 
     if (this.options.autoConnect) {
@@ -148,6 +153,14 @@ export default class ClusterWSClient {
 
   public close(code?: number, reason?: string): void {
     this.socket.close(code || 1000, reason);
+  }
+
+  public subscribe(channelName: string, listener: Listener): Channel {
+    return this.channels.subscribe(channelName, listener);
+  }
+
+  public getChannelByName(channelName: string): Channel {
+    return this.channels.getChannelByName(channelName);
   }
 
   public processMessage(message: Message): void {

@@ -9,8 +9,30 @@ export function decode(socket: ClusterWSClient, data: Message): void {
     return (socket as any).emitter.emit(param, message);
   }
 
-  // TODO: add channels parsing
-  // TODO: add system parsing
+  if (msgType === 'p') {
+    const channels: string[] = Object.keys(message);
+    for (let i: number = 0, len: number = channels.length; i < len; i++) {
+      const channel: string = channels[i];
+      const messages: Message[] = message[channel];
+      for (let j: number = 0, msgLen: number = messages.length; j < msgLen; j++) {
+        (socket as any).channels.channelNewMessage(channel, messages[j]);
+      }
+    }
+  }
+
+  if (msgType === 's') {
+    if (param === 's') {
+      const channels: string[] = Object.keys(message);
+      for (let i: number = 0, len: number = channels.length; i < len; i++) {
+        const channel: string = channels[i];
+        (socket as any).channels.channelSetStatus(channel, message[channel]);
+      }
+    }
+
+    if (param === 'c') {
+      // handle configurations
+    }
+  }
 }
 
 export function encode(event: string, data: Message, eventType: string): string {
