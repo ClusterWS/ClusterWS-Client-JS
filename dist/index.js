@@ -53,15 +53,19 @@ var EventEmitter = function() {
 }();
 
 function decode(e, t) {
-    var n = t[0], o = t[1], r = t[2];
-    if ("e" === n) return e.emitter.emit(o, r);
-    if ("p" === n) for (var i = 0, s = (l = Object.keys(r)).length; i < s; i++) for (var c = r[p = l[i]], a = 0, u = c.length; a < u; a++) e.channels.channelNewMessage(p, c[a]);
-    if ("s" === n && "s" === o) {
-        var l;
-        for (i = 0, s = (l = Object.keys(r)).length; i < s; i++) {
-            var p = l[i];
-            e.channels.channelSetStatus(p, r[p]);
+    var n = t[0], o = t[1], i = t[2];
+    if ("e" === n) return e.emitter.emit(o, i);
+    if ("p" === n) for (var r = 0, s = (l = Object.keys(i)).length; r < s; r++) for (var c = i[p = l[r]], a = 0, u = c.length; a < u; a++) e.channels.channelNewMessage(p, c[a]);
+    if ("s" === n) {
+        if ("s" === o) {
+            var l;
+            for (r = 0, s = (l = Object.keys(i)).length; r < s; r++) {
+                var p = l[r];
+                e.channels.channelSetStatus(p, i[p]);
+            }
         }
+        "c" === o && (e.autoPing = i.autoPing, e.pingInterval = i.pingInterval, e.resetPing(), 
+        console.log(e));
     }
 }
 
@@ -81,7 +85,7 @@ function encode(e, t, n) {
 var Channel = function() {
     function e(e, t, n) {
         this.client = e, this.name = t, this.listener = n, this.READY = 1, this.status = 0, 
-        this.events = {}, this.client.send("subscribe", [ this.name ], "system");
+        this.events = {}, this.client.readyState === this.client.OPEN && this.client.send("subscribe", [ this.name ], "system");
     }
     return e.prototype.on = function(e, t) {
         this.events[e] = t;
@@ -103,6 +107,9 @@ var Channel = function() {
             var n = new Channel(this.client, e, t);
             return this.channels[e] = n, n;
         }
+    }, e.prototype.resubscribe = function() {
+        var e = Object.keys(this.channels);
+        e.length && this.client.send("subscribe", e, "system");
     }, e.prototype.getChannelByName = function(e) {
         return this.channels[e] || null;
     }, e.prototype.channelNewMessage = function(e, t) {
@@ -116,6 +123,8 @@ var Channel = function() {
         }
     }, e.prototype.removeChannel = function(e) {
         delete this.channels[e];
+    }, e.prototype.removeAllChannels = function() {
+        this.channels = {};
     }, e;
 }(), Socket = window.MozWebSocket || window.WebSocket, PONG = new Uint8Array([ "A".charCodeAt(0) ]).buffer, ClusterWSClient = function() {
     function e(e) {
@@ -165,15 +174,16 @@ var Channel = function() {
         var e = this;
         if (this.isCreated) return this.options.logger.error("Connect event has been called multiple times");
         this.isCreated = !0, this.socket = new Socket(this.options.url), this.socket.onopen = function() {
-            e.reconnectAttempts = e.options.autoReconnectOptions.attempts;
+            e.reconnectAttempts = e.options.autoReconnectOptions.attempts, e.options.autoResubscribe ? e.channels.resubscribe() : e.channels.removeAllChannels(), 
+            e.emitter.emit("open");
         }, this.socket.onclose = function(t, n) {
-            e.isCreated = !1;
-            var o = "number" == typeof t ? t : t.code, r = "number" == typeof t ? n : t.reason;
-            if (e.emitter.emit("close", o, r), e.options.autoReconnect && 1e3 !== o && e.readyState === e.CLOSED && (0 === e.options.autoReconnectOptions.attempts || e.reconnectAttempts > 0)) return e.reconnectAttempts--, 
+            clearTimeout(e.pingTimeout), e.isCreated = !1;
+            var o = "number" == typeof t ? t : t.code, i = "number" == typeof t ? n : t.reason;
+            if (e.emitter.emit("close", o, i), e.options.autoReconnect && 1e3 !== o && e.readyState === e.CLOSED && (0 === e.options.autoReconnectOptions.attempts || e.reconnectAttempts > 0)) return e.reconnectAttempts--, 
             setTimeout(function() {
                 e.connect();
             }, Math.floor(Math.random() * (e.options.autoReconnectOptions.maxInterval - e.options.autoReconnectOptions.minInterval + 1)));
-            e.emitter.removeEvents();
+            e.emitter.removeEvents(), e.channels.removeAllChannels();
         }, this.socket.onmessage = function(t) {
             var n = t;
             t.data && (n = t.data), e.parsePing(n, function() {
@@ -216,17 +226,22 @@ var Channel = function() {
         var n = this;
         if (1 === e.size || 1 === e.byteLength) {
             var o = function(e) {
-                return 57 === new Uint8Array(e)[0] ? (n.socket.send(PONG), n.emitter.emit("ping")) : t();
+                return 57 === new Uint8Array(e)[0] ? (n.resetPing(), n.socket.send(PONG), n.emitter.emit("ping")) : t();
             };
             if (e instanceof Blob) {
-                var r = new FileReader();
-                return r.onload = function(e) {
+                var i = new FileReader();
+                return i.onload = function(e) {
                     return o(e.srcElement.result);
-                }, r.readAsArrayBuffer(e);
+                }, i.readAsArrayBuffer(e);
             }
             return o(e);
         }
         return t();
+    }, e.prototype.resetPing = function() {
+        var e = this;
+        clearTimeout(this.pingTimeout), this.pingInterval && this.autoPing && (this.pingTimeout = setTimeout(function() {
+            e.close(4001, "No ping received in " + (e.pingInterval + 500) + "ms");
+        }, this.pingInterval + 500));
     }, e;
 }();
 

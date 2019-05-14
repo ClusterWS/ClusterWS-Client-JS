@@ -10,7 +10,7 @@ export class EventEmitter {
 
   public on(event: string, listener: Listener): void {
     if (!isFunction(listener)) {
-      return this.logger.error('Listener must be a function');
+      // return this.logger.error('Listener must be a function');
     }
 
     this.events[event] = listener;

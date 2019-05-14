@@ -30,7 +30,10 @@ export function decode(socket: ClusterWSClient, data: Message): void {
     }
 
     if (param === 'c') {
-      // handle configurations
+      (socket as any).autoPing = message.autoPing;
+      (socket as any).pingInterval = message.pingInterval;
+      (socket as any).resetPing();
+      console.log(socket);
     }
   }
 }

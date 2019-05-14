@@ -10,7 +10,9 @@ export class Channel {
   private events: any = {};
 
   constructor(private client: ClusterWSClient, public name: string, public listener: Listener) {
-    this.client.send('subscribe', [this.name], 'system');
+    if (this.client.readyState === this.client.OPEN) {
+      this.client.send('subscribe', [this.name], 'system');
+    }
   }
 
   public on(event: string, listener: Listener): void {
@@ -51,6 +53,13 @@ export class Channels {
     }
   }
 
+  public resubscribe(): void {
+    const allChannels: string[] = Object.keys(this.channels);
+    if (allChannels.length) {
+      this.client.send('subscribe', allChannels, 'system');
+    }
+  }
+
   public getChannelByName(channelName: string): Channel {
     return this.channels[channelName] || null;
   }
@@ -79,5 +88,9 @@ export class Channels {
 
   public removeChannel(channelName: string): void {
     delete this.channels[channelName];
+  }
+
+  public removeAllChannels(): void {
+    this.channels = {};
   }
 }

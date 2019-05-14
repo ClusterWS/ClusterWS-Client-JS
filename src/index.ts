@@ -9,9 +9,8 @@ const Socket: any = window.MozWebSocket || window.WebSocket;
 const PONG: any = new Uint8Array(['A'.charCodeAt(0)]).buffer;
 
 // TODO:
-// - Add ping expire
-// - Add channels
-// - Add message processor
+// - implement d.ts file
+// - remove logger as it is not necessary use default throw Error or on websocket error
 
 export default class ClusterWSClient {
   private socket: WebSocket;
@@ -21,6 +20,10 @@ export default class ClusterWSClient {
 
   private isCreated: boolean;
   private reconnectAttempts: number = 0;
+
+  private autoPing: boolean;
+  private pingInterval: number;
+  private pingTimeout: any;
 
   constructor(configurations: Configurations) {
     this.options = {
@@ -84,10 +87,15 @@ export default class ClusterWSClient {
 
     this.socket.onopen = (): void => {
       this.reconnectAttempts = this.options.autoReconnectOptions.attempts;
-      // websocket connection has been open
+      this.options.autoResubscribe ?
+        this.channels.resubscribe() :
+        this.channels.removeAllChannels();
+
+      this.emitter.emit('open');
     };
 
     this.socket.onclose = (codeEvent: CloseEvent | number, reason?: string): any => {
+      clearTimeout(this.pingTimeout);
       this.isCreated = false;
       const closeCode: number = typeof codeEvent === 'number' ? codeEvent : codeEvent.code;
       const closeReason: string = typeof codeEvent === 'number' ? reason : codeEvent.reason;
@@ -105,8 +113,9 @@ export default class ClusterWSClient {
         }
       }
 
-      // clean up connection events
+      // clean up connection events if we are done with this socket
       this.emitter.removeEvents();
+      this.channels.removeAllChannels();
     };
 
     this.socket.onmessage = (message: MessageEvent | Message): void => {
@@ -206,6 +215,7 @@ export default class ClusterWSClient {
       const parser: Listener = (possiblePingMessage: Message): void => {
         if (new Uint8Array(possiblePingMessage)[0] === 57) {
           // this is our ping need to send pong response and trigger ping
+          this.resetPing();
           this.socket.send(PONG);
           return this.emitter.emit('ping');
         }
@@ -224,5 +234,14 @@ export default class ClusterWSClient {
     }
 
     return next();
+  }
+
+  private resetPing(): void {
+    clearTimeout(this.pingTimeout);
+    if (this.pingInterval && this.autoPing) {
+      this.pingTimeout = setTimeout(() => {
+        this.close(4001, `No ping received in ${this.pingInterval + 500}ms`);
+      }, this.pingInterval + 500);
+    }
   }
 }

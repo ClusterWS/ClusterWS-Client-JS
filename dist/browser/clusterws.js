@@ -115,6 +115,12 @@ var ClusterWSClient = (function () {
                   socket.channels.channelSetStatus(channel, message[channel]);
               }
           }
+          if (param === 'c') {
+              socket.autoPing = message.autoPing;
+              socket.pingInterval = message.pingInterval;
+              socket.resetPing();
+              console.log(socket);
+          }
       }
   }
   function encode(event, data, eventType) {
@@ -141,7 +147,9 @@ var ClusterWSClient = (function () {
           this.READY = 1;
           this.status = 0;
           this.events = {};
-          this.client.send('subscribe', [this.name], 'system');
+          if (this.client.readyState === this.client.OPEN) {
+              this.client.send('subscribe', [this.name], 'system');
+          }
       }
       Channel.prototype.on = function (event, listener) {
           this.events[event] = listener;
@@ -175,6 +183,12 @@ var ClusterWSClient = (function () {
               return channel;
           }
       };
+      Channels.prototype.resubscribe = function () {
+          var allChannels = Object.keys(this.channels);
+          if (allChannels.length) {
+              this.client.send('subscribe', allChannels, 'system');
+          }
+      };
       Channels.prototype.getChannelByName = function (channelName) {
           return this.channels[channelName] || null;
       };
@@ -197,6 +211,9 @@ var ClusterWSClient = (function () {
       };
       Channels.prototype.removeChannel = function (channelName) {
           delete this.channels[channelName];
+      };
+      Channels.prototype.removeAllChannels = function () {
+          this.channels = {};
       };
       return Channels;
   }());
@@ -273,8 +290,13 @@ var ClusterWSClient = (function () {
           this.socket = new Socket(this.options.url);
           this.socket.onopen = function () {
               _this.reconnectAttempts = _this.options.autoReconnectOptions.attempts;
+              _this.options.autoResubscribe ?
+                  _this.channels.resubscribe() :
+                  _this.channels.removeAllChannels();
+              _this.emitter.emit('open');
           };
           this.socket.onclose = function (codeEvent, reason) {
+              clearTimeout(_this.pingTimeout);
               _this.isCreated = false;
               var closeCode = typeof codeEvent === 'number' ? codeEvent : codeEvent.code;
               var closeReason = typeof codeEvent === 'number' ? reason : codeEvent.reason;
@@ -290,6 +312,7 @@ var ClusterWSClient = (function () {
                   }
               }
               _this.emitter.removeEvents();
+              _this.channels.removeAllChannels();
           };
           this.socket.onmessage = function (message) {
               var messageToProcess = message;
@@ -364,6 +387,7 @@ var ClusterWSClient = (function () {
           if (message.size === 1 || message.byteLength === 1) {
               var parser_1 = function (possiblePingMessage) {
                   if (new Uint8Array(possiblePingMessage)[0] === 57) {
+                      _this.resetPing();
                       _this.socket.send(PONG);
                       return _this.emitter.emit('ping');
                   }
@@ -377,6 +401,15 @@ var ClusterWSClient = (function () {
               return parser_1(message);
           }
           return next();
+      };
+      ClusterWSClient.prototype.resetPing = function () {
+          var _this = this;
+          clearTimeout(this.pingTimeout);
+          if (this.pingInterval && this.autoPing) {
+              this.pingTimeout = setTimeout(function () {
+                  _this.close(4001, "No ping received in " + (_this.pingInterval + 500) + "ms");
+              }, this.pingInterval + 500);
+          }
       };
       return ClusterWSClient;
   }());
