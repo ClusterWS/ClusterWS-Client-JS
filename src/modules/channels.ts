@@ -8,8 +8,9 @@ export class Channel {
   public status: number = 0;
 
   private events: any = {};
+  private watchers: any[] = [];
 
-  constructor(private client: ClusterWSClient, public name: string, public listener: Listener) {
+  constructor(private client: ClusterWSClient, public name: string) {
     if (this.client.readyState === this.client.OPEN) {
       this.client.send('subscribe', [this.name], 'system');
     }
@@ -19,13 +20,25 @@ export class Channel {
     this.events[event] = listener;
   }
 
-  public publish(message: Message): any {
+  public publish(message: Message): void {
     if (this.status === this.READY) {
       this.client.send(this.name, message, 'publish');
     }
   }
 
-  // unsubscribe from the channel
+  public setWatcher(listener: Listener): void {
+    this.watchers.push(listener);
+  }
+
+  public removeWatcher(listener: Listener): void {
+    for (let i: number = 0, len: number = this.watchers.length; i < len; i++) {
+      if (this.watchers[i] === listener) {
+        this.watchers.splice(i, 1);
+        break;
+      }
+    }
+  }
+
   public unsubscribe(): any {
     this.status = 0;
     this.emit('unsubscribed');
@@ -37,6 +50,12 @@ export class Channel {
     const listener: Listener = this.events[event];
     listener && listener();
   }
+
+  private broadcast(message: Message): void {
+    for (let i: number = 0, len: number = this.watchers.length; i < len; i++) {
+      this.watchers[i](message);
+    }
+  }
 }
 
 // Channels manager
@@ -45,9 +64,9 @@ export class Channels {
 
   constructor(private client: ClusterWSClient) { }
 
-  public subscribe(channelName: string, listener: Listener): Channel {
+  public subscribe(channelName: string): Channel {
     if (!this.channels[channelName]) {
-      const channel: Channel = new Channel(this.client, channelName, listener);
+      const channel: Channel = new Channel(this.client, channelName);
       this.channels[channelName] = channel;
       return channel;
     }
@@ -65,10 +84,10 @@ export class Channels {
   }
 
   // This is used internally when new message is received
-  public channelNewMessage(channelName: string, message: any): void {
+  public channelNewMessage(channelName: string, message: Message): void {
     const channel: Channel = this.channels[channelName];
     if (channel && channel.status === channel.READY) {
-      channel.listener(message);
+      (channel as any).broadcast(message);
     }
   }
 

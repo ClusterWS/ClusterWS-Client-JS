@@ -13,8 +13,8 @@ var EventEmitter = function() {
         this.events[t] = e;
     }, t.prototype.emit = function(t) {
         for (var e = [], n = 1; n < arguments.length; n++) e[n - 1] = arguments[n];
-        var i = this.events[t];
-        i && i.apply(void 0, e);
+        var s = this.events[t];
+        s && s.apply(void 0, e);
     }, t.prototype.exist = function(t) {
         return !!this.events[t];
     }, t.prototype.off = function(t) {
@@ -25,24 +25,24 @@ var EventEmitter = function() {
 }();
 
 function decode(t, e) {
-    var n = e[0], i = e[1], s = e[2];
-    if ("e" === n) return t.emitter.emit(i, s);
-    if ("p" === n) for (var o = 0, r = (h = Object.keys(s)).length; o < r; o++) for (var c = s[p = h[o]], a = 0, u = c.length; a < u; a++) t.channels.channelNewMessage(p, c[a]);
+    var n = e[0], s = e[1], i = e[2];
+    if ("e" === n) return t.emitter.emit(s, i);
+    if ("p" === n) for (var o = 0, r = (h = Object.keys(i)).length; o < r; o++) for (var c = i[p = h[o]], a = 0, u = c.length; a < u; a++) t.channels.channelNewMessage(p, c[a]);
     if ("s" === n) {
-        if ("s" === i) {
+        if ("s" === s) {
             var h;
-            for (o = 0, r = (h = Object.keys(s)).length; o < r; o++) {
+            for (o = 0, r = (h = Object.keys(i)).length; o < r; o++) {
                 var p = h[o];
-                t.channels.channelSetStatus(p, s[p]);
+                t.channels.channelSetStatus(p, i[p]);
             }
         }
-        "c" === i && (t.autoPing = s.autoPing, t.pingInterval = s.pingInterval, t.resetPing(), 
+        "c" === s && (t.autoPing = i.autoPing, t.pingInterval = i.pingInterval, t.resetPing(), 
         console.log(t));
     }
 }
 
 function encode(t, e, n) {
-    var i = {
+    var s = {
         emit: [ "e", t, e ],
         publish: [ "p", t, e ],
         system: {
@@ -51,33 +51,42 @@ function encode(t, e, n) {
             configuration: [ "s", "c", e ]
         }
     };
-    return "system" === n ? JSON.stringify(i[n][t]) : JSON.stringify(i[n]);
+    return "system" === n ? JSON.stringify(s[n][t]) : JSON.stringify(s[n]);
 }
 
 var Channel = function() {
-    function t(t, e, n) {
-        this.client = t, this.name = e, this.listener = n, this.READY = 1, this.status = 0, 
-        this.events = {}, this.client.readyState === this.client.OPEN && this.client.send("subscribe", [ this.name ], "system");
+    function t(t, e) {
+        this.client = t, this.name = e, this.READY = 1, this.status = 0, this.events = {}, 
+        this.watchers = [], this.client.readyState === this.client.OPEN && this.client.send("subscribe", [ this.name ], "system");
     }
     return t.prototype.on = function(t, e) {
         this.events[t] = e;
     }, t.prototype.publish = function(t) {
         this.status === this.READY && this.client.send(this.name, t, "publish");
+    }, t.prototype.setWatcher = function(t) {
+        this.watchers.push(t);
+    }, t.prototype.removeWatcher = function(t) {
+        for (var e = 0, n = this.watchers.length; e < n; e++) if (this.watchers[e] === t) {
+            this.watchers.splice(e, 1);
+            break;
+        }
     }, t.prototype.unsubscribe = function() {
         this.status = 0, this.emit("unsubscribed"), this.client.channels.removeChannel(this.name), 
         this.client.send("unsubscribe", this.name, "system");
     }, t.prototype.emit = function(t) {
         var e = this.events[t];
         e && e();
+    }, t.prototype.broadcast = function(t) {
+        for (var e = 0, n = this.watchers.length; e < n; e++) this.watchers[e](t);
     }, t;
 }(), Channels = function() {
     function t(t) {
         this.client = t, this.channels = {};
     }
-    return t.prototype.subscribe = function(t, e) {
+    return t.prototype.subscribe = function(t) {
         if (!this.channels[t]) {
-            var n = new Channel(this.client, t, e);
-            return this.channels[t] = n, n;
+            var e = new Channel(this.client, t);
+            return this.channels[t] = e, e;
         }
     }, t.prototype.resubscribe = function() {
         var t = Object.keys(this.channels);
@@ -86,7 +95,7 @@ var Channel = function() {
         return this.channels[t] || null;
     }, t.prototype.channelNewMessage = function(t, e) {
         var n = this.channels[t];
-        n && n.status === n.READY && n.listener(e);
+        n && n.status === n.READY && n.broadcast(e);
     }, t.prototype.channelSetStatus = function(t, e) {
         var n = this.channels[t];
         if (n) {
@@ -149,8 +158,8 @@ var Channel = function() {
             t.emitter.emit("open");
         }, this.socket.onclose = function(e, n) {
             clearTimeout(t.pingTimeout), t.isCreated = !1;
-            var i = "number" == typeof e ? e : e.code, s = "number" == typeof e ? n : e.reason;
-            if (t.emitter.emit("close", i, s), t.options.autoReconnect && 1e3 !== i && t.readyState === t.CLOSED && (0 === t.options.autoReconnectOptions.attempts || t.reconnectAttempts > 0)) return t.reconnectAttempts--, 
+            var s = "number" == typeof e ? e : e.code, i = "number" == typeof e ? n : e.reason;
+            if (t.emitter.emit("close", s, i), t.options.autoReconnect && 1e3 !== s && t.readyState === t.CLOSED && (0 === t.options.autoReconnectOptions.attempts || t.reconnectAttempts > 0)) return t.reconnectAttempts--, 
             setTimeout(function() {
                 t.connect();
             }, Math.floor(Math.random() * (t.options.autoReconnectOptions.maxInterval - t.options.autoReconnectOptions.minInterval + 1)));
@@ -171,8 +180,8 @@ var Channel = function() {
         return void 0 === n && (n = "emit"), void 0 === e ? this.socket.send(t) : this.socket.send(encode(t, e, n));
     }, t.prototype.close = function(t, e) {
         this.socket.close(t || 1e3, e);
-    }, t.prototype.subscribe = function(t, e) {
-        return this.channels.subscribe(t, e);
+    }, t.prototype.subscribe = function(t) {
+        return this.channels.subscribe(t);
     }, t.prototype.getChannelByName = function(t) {
         return this.channels.getChannelByName(t);
     }, t.prototype.processMessage = function(t) {
@@ -196,16 +205,16 @@ var Channel = function() {
     }, t.prototype.parsePing = function(t, e) {
         var n = this;
         if (1 === t.size || 1 === t.byteLength) {
-            var i = function(t) {
+            var s = function(t) {
                 return 57 === new Uint8Array(t)[0] ? (n.resetPing(), n.socket.send(PONG), n.emitter.emit("ping")) : e();
             };
             if (t instanceof Blob) {
-                var s = new FileReader();
-                return s.onload = function(t) {
-                    return i(t.srcElement.result);
-                }, s.readAsArrayBuffer(t);
+                var i = new FileReader();
+                return i.onload = function(t) {
+                    return s(t.srcElement.result);
+                }, i.readAsArrayBuffer(t);
             }
-            return i(t);
+            return s(t);
         }
         return e();
     }, t.prototype.resetPing = function() {

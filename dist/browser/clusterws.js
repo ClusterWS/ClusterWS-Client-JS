@@ -83,13 +83,13 @@ var ClusterWSClient = (function () {
   }
 
   var Channel = (function () {
-      function Channel(client, name, listener) {
+      function Channel(client, name) {
           this.client = client;
           this.name = name;
-          this.listener = listener;
           this.READY = 1;
           this.status = 0;
           this.events = {};
+          this.watchers = [];
           if (this.client.readyState === this.client.OPEN) {
               this.client.send('subscribe', [this.name], 'system');
           }
@@ -102,6 +102,17 @@ var ClusterWSClient = (function () {
               this.client.send(this.name, message, 'publish');
           }
       };
+      Channel.prototype.setWatcher = function (listener) {
+          this.watchers.push(listener);
+      };
+      Channel.prototype.removeWatcher = function (listener) {
+          for (var i = 0, len = this.watchers.length; i < len; i++) {
+              if (this.watchers[i] === listener) {
+                  this.watchers.splice(i, 1);
+                  break;
+              }
+          }
+      };
       Channel.prototype.unsubscribe = function () {
           this.status = 0;
           this.emit('unsubscribed');
@@ -112,6 +123,11 @@ var ClusterWSClient = (function () {
           var listener = this.events[event];
           listener && listener();
       };
+      Channel.prototype.broadcast = function (message) {
+          for (var i = 0, len = this.watchers.length; i < len; i++) {
+              this.watchers[i](message);
+          }
+      };
       return Channel;
   }());
   var Channels = (function () {
@@ -119,9 +135,9 @@ var ClusterWSClient = (function () {
           this.client = client;
           this.channels = {};
       }
-      Channels.prototype.subscribe = function (channelName, listener) {
+      Channels.prototype.subscribe = function (channelName) {
           if (!this.channels[channelName]) {
-              var channel = new Channel(this.client, channelName, listener);
+              var channel = new Channel(this.client, channelName);
               this.channels[channelName] = channel;
               return channel;
           }
@@ -138,7 +154,7 @@ var ClusterWSClient = (function () {
       Channels.prototype.channelNewMessage = function (channelName, message) {
           var channel = this.channels[channelName];
           if (channel && channel.status === channel.READY) {
-              channel.listener(message);
+              channel.broadcast(message);
           }
       };
       Channels.prototype.channelSetStatus = function (channelName, pass) {
@@ -287,8 +303,8 @@ var ClusterWSClient = (function () {
       ClusterWSClient.prototype.close = function (code, reason) {
           this.socket.close(code || 1000, reason);
       };
-      ClusterWSClient.prototype.subscribe = function (channelName, listener) {
-          return this.channels.subscribe(channelName, listener);
+      ClusterWSClient.prototype.subscribe = function (channelName) {
+          return this.channels.subscribe(channelName);
       };
       ClusterWSClient.prototype.getChannelByName = function (channelName) {
           return this.channels.getChannelByName(channelName);

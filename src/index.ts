@@ -159,8 +159,8 @@ export default class ClusterWSClient {
     this.socket.close(code || 1000, reason);
   }
 
-  public subscribe(channelName: string, listener: Listener): Channel {
-    return this.channels.subscribe(channelName, listener);
+  public subscribe(channelName: string): Channel {
+    return this.channels.subscribe(channelName);
   }
 
   public getChannelByName(channelName: string): Channel {

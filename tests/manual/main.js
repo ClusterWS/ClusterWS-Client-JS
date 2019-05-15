@@ -26,10 +26,29 @@ socket.on('close', (code, reason) => {
 });
 
 
-let helloWorldChannel = socket.subscribe('hello world', (message) => {
-  console.log("Received message in hello world", message);
-});
+let helloWorldChannel = socket.subscribe('hello world');
 
 helloWorldChannel.on('subscribed', () => {
   console.log('Channels hello world has been subscribed');
+
+  setInterval(() => {
+    helloWorldChannel.publish('My super message');
+  }, 5000);
 });
+
+
+let watcherOne = (message) => {
+  console.log("Received message watcher 1 in hello world", message);
+};
+
+let watcherTwo = (message) => {
+  console.log("Received message watcher 2 in hello world", message);
+}
+
+helloWorldChannel.setWatcher(watcherOne);
+helloWorldChannel.setWatcher(watcherTwo);
+
+setTimeout(() => {
+  helloWorldChannel.removeWatcher(watcherTwo);
+}, 15000)
+
