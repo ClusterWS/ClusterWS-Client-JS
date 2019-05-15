@@ -1,8 +1,7 @@
-import { Logger } from './utils/logger';
 import { EventEmitter } from './utils/emitter';
 import { decode, encode } from './modules/parser';
 import { Channels, Channel } from './modules/channels';
-import { Listener, Configurations, Options, LogLevel, Message } from './utils/types';
+import { Listener, Configurations, Options, Message } from './utils/types';
 
 declare const window: any;
 const Socket: any = window.MozWebSocket || window.WebSocket;
@@ -10,7 +9,6 @@ const PONG: any = new Uint8Array(['A'.charCodeAt(0)]).buffer;
 
 // TODO:
 // - implement d.ts file
-// - remove logger as it is not necessary use default throw Error or on websocket error
 
 export default class ClusterWSClient {
   private socket: WebSocket;
@@ -38,17 +36,14 @@ export default class ClusterWSClient {
           configurations.autoReconnectOptions.minInterval || 500 : 500,
         maxInterval: configurations.autoReconnectOptions ?
           configurations.autoReconnectOptions.maxInterval || 2000 : 2000
-      },
-      logger: configurations.loggerOptions && configurations.loggerOptions.logger ?
-        configurations.loggerOptions.logger :
-        new Logger(configurations.loggerOptions ? configurations.loggerOptions.level || LogLevel.ALL : LogLevel.ALL)
+      }
     };
 
     if (!this.options.url) {
-      return this.options.logger.error('url must be provided');
+      throw new Error('url must be provided');
     }
 
-    this.emitter = new EventEmitter(this.options.logger);
+    this.emitter = new EventEmitter();
     this.channels = new Channels(this);
     this.reconnectAttempts = this.options.autoReconnectOptions.attempts;
 
@@ -79,7 +74,7 @@ export default class ClusterWSClient {
 
   public connect(): void {
     if (this.isCreated) {
-      return this.options.logger.error('Connect event has been called multiple times');
+      throw new Error('Connect event has been called multiple times');
     }
 
     this.isCreated = true;
@@ -139,8 +134,8 @@ export default class ClusterWSClient {
         return this.emitter.emit('error', error);
       }
       // if error catch is not there then we can close connection on any error
-      this.options.logger.error(error);
       this.close();
+      throw new Error('Connect event has been called multiple times');
     };
   }
 

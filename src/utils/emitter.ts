@@ -1,16 +1,12 @@
-import { Logger } from './logger';
 import { Listener } from './types';
 import { isFunction } from './helpers';
 
 export class EventEmitter {
   private events: { [key: string]: Listener } = {};
 
-  // TODO: add logger
-  constructor(private logger: Logger) { }
-
   public on(event: string, listener: Listener): void {
     if (!isFunction(listener)) {
-      // return this.logger.error('Listener must be a function');
+      throw new Error('Listener must be a function');
     }
 
     this.events[event] = listener;

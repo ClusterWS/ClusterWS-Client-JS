@@ -1,74 +1,17 @@
 var ClusterWSClient = (function () {
   'use strict';
 
-  var LogLevel;
-  (function (LogLevel) {
-      LogLevel[LogLevel["ALL"] = 0] = "ALL";
-      LogLevel[LogLevel["DEBUG"] = 1] = "DEBUG";
-      LogLevel[LogLevel["INFO"] = 2] = "INFO";
-      LogLevel[LogLevel["WARN"] = 3] = "WARN";
-      LogLevel[LogLevel["ERROR"] = 4] = "ERROR";
-  })(LogLevel || (LogLevel = {}));
-
-  var Logger = (function () {
-      function Logger(level) {
-          this.level = level;
-      }
-      Logger.prototype.debug = function () {
-          var args = [];
-          for (var _i = 0; _i < arguments.length; _i++) {
-              args[_i] = arguments[_i];
-          }
-          if (this.level > LogLevel.DEBUG) {
-              return;
-          }
-          console.log.apply(console, ["\u001B[36mdebug:\u001B[0m"].concat(args.map(function (item) { return typeof item === 'object' ? JSON.stringify(item) : item; })));
-      };
-      Logger.prototype.info = function () {
-          var args = [];
-          for (var _i = 0; _i < arguments.length; _i++) {
-              args[_i] = arguments[_i];
-          }
-          if (this.level > LogLevel.INFO) {
-              return;
-          }
-          console.log.apply(console, ["\u001B[32minfo:\u001B[0m"].concat(args));
-      };
-      Logger.prototype.error = function () {
-          var args = [];
-          for (var _i = 0; _i < arguments.length; _i++) {
-              args[_i] = arguments[_i];
-          }
-          if (this.level > LogLevel.ERROR) {
-              return;
-          }
-          console.log.apply(console, ["\u001B[31merror:\u001B[0m"].concat(args));
-      };
-      Logger.prototype.warning = function () {
-          var args = [];
-          for (var _i = 0; _i < arguments.length; _i++) {
-              args[_i] = arguments[_i];
-          }
-          if (this.level > LogLevel.WARN) {
-              return;
-          }
-          console.log.apply(console, ["\u001B[33mwarning:\u001B[0m"].concat(args));
-      };
-      return Logger;
-  }());
-
   function isFunction(fn) {
       return typeof fn === 'function';
   }
 
   var EventEmitter = (function () {
-      function EventEmitter(logger) {
-          this.logger = logger;
+      function EventEmitter() {
           this.events = {};
       }
       EventEmitter.prototype.on = function (event, listener) {
           if (!isFunction(listener)) {
-              return this.logger.error('Listener must be a function');
+              throw new Error('Listener must be a function');
           }
           this.events[event] = listener;
       };
@@ -235,15 +178,12 @@ var ClusterWSClient = (function () {
                       configurations.autoReconnectOptions.minInterval || 500 : 500,
                   maxInterval: configurations.autoReconnectOptions ?
                       configurations.autoReconnectOptions.maxInterval || 2000 : 2000
-              },
-              logger: configurations.loggerOptions && configurations.loggerOptions.logger ?
-                  configurations.loggerOptions.logger :
-                  new Logger(configurations.loggerOptions ? configurations.loggerOptions.level || LogLevel.ALL : LogLevel.ALL)
+              }
           };
           if (!this.options.url) {
-              return this.options.logger.error('url must be provided');
+              throw new Error('url must be provided');
           }
-          this.emitter = new EventEmitter(this.options.logger);
+          this.emitter = new EventEmitter();
           this.channels = new Channels(this);
           this.reconnectAttempts = this.options.autoReconnectOptions.attempts;
           if (this.options.autoConnect) {
@@ -284,7 +224,7 @@ var ClusterWSClient = (function () {
       ClusterWSClient.prototype.connect = function () {
           var _this = this;
           if (this.isCreated) {
-              return this.options.logger.error('Connect event has been called multiple times');
+              throw new Error('Connect event has been called multiple times');
           }
           this.isCreated = true;
           this.socket = new Socket(this.options.url);
@@ -330,8 +270,8 @@ var ClusterWSClient = (function () {
               if (_this.emitter.exist('error')) {
                   return _this.emitter.emit('error', error);
               }
-              _this.options.logger.error(error);
               _this.close();
+              throw new Error('Connect event has been called multiple times');
           };
       };
       ClusterWSClient.prototype.on = function (event, listener) {

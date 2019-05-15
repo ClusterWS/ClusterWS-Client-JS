@@ -2,14 +2,6 @@
 export type Message = any;
 export type Listener = (...args: any[]) => void;
 
-export enum LogLevel {
-  ALL = 0,
-  DEBUG = 1,
-  INFO = 2,
-  WARN = 3,
-  ERROR = 4
-}
-
 export type Options = {
   url: string;
   autoConnect: boolean;
@@ -20,8 +12,6 @@ export type Options = {
     minInterval: number;
     maxInterval: number;
   }
-  // TODO: make logger proper type
-  logger: any;
 };
 
 export type Configurations = {
@@ -33,10 +23,5 @@ export type Configurations = {
     attempts?: number;
     minInterval?: number;
     maxInterval?: number;
-  }
-  loggerOptions?: {
-    level?: LogLevel;
-    // TODO: make logger proper type
-    logger?: any;
   }
 };
