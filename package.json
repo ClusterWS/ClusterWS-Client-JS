@@ -1,12 +1,13 @@
 {
   "name": "@clusterws/client-js",
-  "version": "3.3.0",
-  "description": "JavaScript Client for ClusterWS - lightweight, fast and powerful framework for building scalable WebSockets applications in Node.js.",
+  "version": "4.0.0-alpha.1",
+  "description": "Official JavaScript Client for ClusterWS",
   "main": "index.js",
   "types": "index.d.ts",
   "author": "Dmitrii Goriunov",
   "scripts": {
-    "build": "ts-builder -c ./tsbuild.json"
+    "build": "ts-builder -c ./tsbuild.json",
+    "release": "npm run build && cd dist && npm publish --tag alpha --access public"
   },
   "license": "MIT",
   "repository": {
