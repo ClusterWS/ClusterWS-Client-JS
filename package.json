@@ -1,6 +1,6 @@
 {
   "name": "@clusterws/client-js",
-  "version": "4.0.0-alpha.1",
+  "version": "4.0.0-alpha.2",
   "description": "Official JavaScript Client for ClusterWS",
   "main": "index.js",
   "types": "index.d.ts",

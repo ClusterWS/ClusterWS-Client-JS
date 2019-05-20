@@ -1,7 +1,7 @@
-import ClusterWSClient from '../index';
+import ClusterWS from '../index';
 import { Message } from '../utils/types';
 
-export function decode(socket: ClusterWSClient, data: Message): void {
+export function decode(socket: ClusterWS, data: Message): void {
   // handle all the stuff
   const [msgType, param, message]: [string, string, Message] = data;
 
@@ -33,7 +33,6 @@ export function decode(socket: ClusterWSClient, data: Message): void {
       (socket as any).autoPing = message.autoPing;
       (socket as any).pingInterval = message.pingInterval;
       (socket as any).resetPing();
-      console.log(socket);
     }
   }
 }

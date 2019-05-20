@@ -36,8 +36,7 @@ function decode(t, e) {
                 t.channels.channelSetStatus(p, i[p]);
             }
         }
-        "c" === s && (t.autoPing = i.autoPing, t.pingInterval = i.pingInterval, t.resetPing(), 
-        console.log(t));
+        "c" === s && (t.autoPing = i.autoPing, t.pingInterval = i.pingInterval, t.resetPing());
     }
 }
 
@@ -107,7 +106,7 @@ var Channel = function() {
     }, t.prototype.removeAllChannels = function() {
         this.channels = {};
     }, t;
-}(), Socket = window.MozWebSocket || window.WebSocket, PONG = new Uint8Array([ "A".charCodeAt(0) ]).buffer, ClusterWSClient = function() {
+}(), Socket = window.MozWebSocket || window.WebSocket, PONG = new Uint8Array([ "A".charCodeAt(0) ]).buffer, ClusterWS = function() {
     function t(t) {
         if (this.reconnectAttempts = 0, this.options = {
             url: t.url,
@@ -208,7 +207,7 @@ var Channel = function() {
             var s = function(t) {
                 return 57 === new Uint8Array(t)[0] ? (n.resetPing(), n.socket.send(PONG), n.emitter.emit("ping")) : e();
             };
-            if (t instanceof Blob) {
+            if (!(t instanceof ArrayBuffer)) {
                 var i = new FileReader();
                 return i.onload = function(t) {
                     return s(t.srcElement.result);
@@ -225,4 +224,4 @@ var Channel = function() {
     }, t;
 }();
 
-module.exports = ClusterWSClient; module.exports.default = ClusterWSClient;
+module.exports = ClusterWS; module.exports.default = ClusterWS;

@@ -1,4 +1,4 @@
-let socket = new ClusterWSClient({
+let socket = new ClusterWS({
   url: "ws://localhost:3001",
   autoReconnect: true,
   autoReconnectOptions: {
@@ -8,6 +8,7 @@ let socket = new ClusterWSClient({
   }
 });
 
+// socket.binaryType = 'arraybuffer';
 socket.on('open', () => {
   console.log('Socket has been open');
 });

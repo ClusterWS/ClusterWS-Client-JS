@@ -1,4 +1,4 @@
-import ClusterWSClient from '../index';
+import ClusterWS from '../index';
 import { Message, Listener } from '../utils/types';
 
 // TODO: channel logic can be improved for better performance
@@ -10,7 +10,7 @@ export class Channel {
   private events: any = {};
   private watchers: any[] = [];
 
-  constructor(private client: ClusterWSClient, public name: string) {
+  constructor(private client: ClusterWS, public name: string) {
     if (this.client.readyState === this.client.OPEN) {
       this.client.send('subscribe', [this.name], 'system');
     }
@@ -62,7 +62,7 @@ export class Channel {
 export class Channels {
   private channels: { [key: string]: Channel } = {};
 
-  constructor(private client: ClusterWSClient) { }
+  constructor(private client: ClusterWS) { }
 
   public subscribe(channelName: string): Channel {
     if (!this.channels[channelName]) {

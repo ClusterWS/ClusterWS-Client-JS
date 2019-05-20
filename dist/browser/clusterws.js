@@ -1,4 +1,4 @@
-var ClusterWSClient = (function () {
+var ClusterWS = (function () {
   'use strict';
 
   function isFunction(fn) {
@@ -62,7 +62,6 @@ var ClusterWSClient = (function () {
               socket.autoPing = message.autoPing;
               socket.pingInterval = message.pingInterval;
               socket.resetPing();
-              console.log(socket);
           }
       }
   }
@@ -179,8 +178,8 @@ var ClusterWSClient = (function () {
 
   var Socket = window.MozWebSocket || window.WebSocket;
   var PONG = new Uint8Array(['A'.charCodeAt(0)]).buffer;
-  var ClusterWSClient = (function () {
-      function ClusterWSClient(configurations) {
+  var ClusterWS = (function () {
+      function ClusterWS(configurations) {
           this.reconnectAttempts = 0;
           this.options = {
               url: configurations.url,
@@ -206,28 +205,28 @@ var ClusterWSClient = (function () {
               this.connect();
           }
       }
-      Object.defineProperty(ClusterWSClient.prototype, "OPEN", {
+      Object.defineProperty(ClusterWS.prototype, "OPEN", {
           get: function () {
               return this.socket.OPEN;
           },
           enumerable: true,
           configurable: true
       });
-      Object.defineProperty(ClusterWSClient.prototype, "CLOSED", {
+      Object.defineProperty(ClusterWS.prototype, "CLOSED", {
           get: function () {
               return this.socket.CLOSED;
           },
           enumerable: true,
           configurable: true
       });
-      Object.defineProperty(ClusterWSClient.prototype, "readyState", {
+      Object.defineProperty(ClusterWS.prototype, "readyState", {
           get: function () {
               return this.socket ? this.socket.readyState : 0;
           },
           enumerable: true,
           configurable: true
       });
-      Object.defineProperty(ClusterWSClient.prototype, "binaryType", {
+      Object.defineProperty(ClusterWS.prototype, "binaryType", {
           get: function () {
               return this.socket.binaryType;
           },
@@ -237,7 +236,7 @@ var ClusterWSClient = (function () {
           enumerable: true,
           configurable: true
       });
-      ClusterWSClient.prototype.connect = function () {
+      ClusterWS.prototype.connect = function () {
           var _this = this;
           if (this.isCreated) {
               throw new Error('Connect event has been called multiple times');
@@ -290,26 +289,26 @@ var ClusterWSClient = (function () {
               throw new Error('Connect event has been called multiple times');
           };
       };
-      ClusterWSClient.prototype.on = function (event, listener) {
+      ClusterWS.prototype.on = function (event, listener) {
           this.emitter.on(event, listener);
       };
-      ClusterWSClient.prototype.send = function (event, message, eventType) {
+      ClusterWS.prototype.send = function (event, message, eventType) {
           if (eventType === void 0) { eventType = 'emit'; }
           if (message === undefined) {
               return this.socket.send(event);
           }
           return this.socket.send(encode(event, message, eventType));
       };
-      ClusterWSClient.prototype.close = function (code, reason) {
+      ClusterWS.prototype.close = function (code, reason) {
           this.socket.close(code || 1000, reason);
       };
-      ClusterWSClient.prototype.subscribe = function (channelName) {
+      ClusterWS.prototype.subscribe = function (channelName) {
           return this.channels.subscribe(channelName);
       };
-      ClusterWSClient.prototype.getChannelByName = function (channelName) {
+      ClusterWS.prototype.getChannelByName = function (channelName) {
           return this.channels.getChannelByName(channelName);
       };
-      ClusterWSClient.prototype.processMessage = function (message) {
+      ClusterWS.prototype.processMessage = function (message) {
           try {
               if (message instanceof Array) {
                   return decode(this, message);
@@ -338,7 +337,7 @@ var ClusterWSClient = (function () {
               throw err;
           }
       };
-      ClusterWSClient.prototype.parsePing = function (message, next) {
+      ClusterWS.prototype.parsePing = function (message, next) {
           var _this = this;
           if (message.size === 1 || message.byteLength === 1) {
               var parser_1 = function (possiblePingMessage) {
@@ -349,7 +348,7 @@ var ClusterWSClient = (function () {
                   }
                   return next();
               };
-              if (message instanceof Blob) {
+              if (!(message instanceof ArrayBuffer)) {
                   var reader = new FileReader();
                   reader.onload = function (event) { return parser_1(event.srcElement.result); };
                   return reader.readAsArrayBuffer(message);
@@ -358,7 +357,7 @@ var ClusterWSClient = (function () {
           }
           return next();
       };
-      ClusterWSClient.prototype.resetPing = function () {
+      ClusterWS.prototype.resetPing = function () {
           var _this = this;
           clearTimeout(this.pingTimeout);
           if (this.pingInterval && this.autoPing) {
@@ -367,9 +366,9 @@ var ClusterWSClient = (function () {
               }, this.pingInterval + 500);
           }
       };
-      return ClusterWSClient;
+      return ClusterWS;
   }());
 
-  return ClusterWSClient;
+  return ClusterWS;
 
 }());

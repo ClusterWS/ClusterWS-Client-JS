@@ -8,7 +8,7 @@
       "output": {
         "format": "cjs",
         "file": "index.js",
-        "name": "ClusterWSClient"
+        "name": "ClusterWS"
       },
       "uglify": {
         "mangle": true,
@@ -44,7 +44,7 @@
       "output": {
         "format": "iife",
         "file": "clusterws.min.js",
-        "name": "ClusterWSClient"
+        "name": "ClusterWS"
       },
       "uglify": {
         "mangle": true
@@ -55,7 +55,7 @@
       "output": {
         "format": "iife",
         "file": "clusterws.js",
-        "name": "ClusterWSClient"
+        "name": "ClusterWS"
       }
     }
   ],

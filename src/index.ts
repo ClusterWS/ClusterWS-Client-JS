@@ -10,7 +10,7 @@ const PONG: any = new Uint8Array(['A'.charCodeAt(0)]).buffer;
 // TODO:
 // - implement d.ts file
 
-export default class ClusterWSClient {
+export default class ClusterWS {
   private socket: WebSocket;
   private emitter: EventEmitter;
   private options: Options;
@@ -145,7 +145,7 @@ export default class ClusterWSClient {
     this.emitter.on(event, listener);
   }
 
-  // TODO: add overload to this function
+  // TODO: add overload to this function in d.ts file
   public send(event: string, message: Message, eventType: string = 'emit'): void {
     // we swap to default websocket send if no event and message provided correctly
     if (message === undefined) {
@@ -218,7 +218,7 @@ export default class ClusterWSClient {
         return next();
       };
 
-      if (message instanceof Blob) {
+      if (!(message instanceof ArrayBuffer)) {
         // transform blob to arrayBuffer
         const reader: FileReader = new FileReader();
         reader.onload = (event: any): void => parser(event.srcElement.result);
